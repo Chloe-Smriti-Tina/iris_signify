@@ -12,11 +12,13 @@ const canvasElement = document.getElementById("output_canvas");
 const canvasCtx = canvasElement.getContext("2d");
 const enableWebcamButton = document.getElementById("enableWebcamButton");
 const accuracyBar = document.getElementById("accuracy-bar");
+const targetGesture = "Closed_Fist"; // Hardcoded to test the letter "A"
 
 let gestureRecognizer;
 let runningMode = "VIDEO";
 let webcamRunning = false;
 let lastVideoTime = -1;
+let signHoldProgress = 0; // Tracks the "fill" of the bar
 
 // ============================================================================
 // 2. INITIALIZE MEDIAPIPE 
@@ -138,32 +140,42 @@ async function predictWebcam() {
     // UPDATE THE UI 
     // ========================================================================
     if (results && results.gestures.length > 0) {
-        // Grab the best guess from the AI (e.g., "Closed_Fist", "Open_Palm")
         const categoryName = results.gestures[0][0].categoryName;
-        const categoryScore = parseFloat(results.gestures[0][0].score * 100).toFixed(0);
 
-        // --- GAME LOGIC ---
-        // Let's say the target letter is "A" (which looks like a Closed Fist in the default model)
-        const targetGesture = "Closed_Fist"; // Person B: You will dynamically change this later based on the lesson!
-
+        // If they are making the correct sign, fill the bar quickly
         if (categoryName === targetGesture) {
-            // Success! Update the progress bar
-            accuracyBar.style.width = `${categoryScore}%`;
-            accuracyBar.innerText = `${categoryScore}% Match`;
-            accuracyBar.classList.replace("bg-danger", "bg-success");
-            
-            // Trigger confetti or a "Ding!" sound here if score > 80!
+            signHoldProgress += 4; // Fills in ~25 frames (about 1 second)
         } else {
-            // Wrong sign
-            accuracyBar.style.width = `10%`;
-            accuracyBar.innerText = `Keep Trying... (Detected: ${categoryName})`;
-            accuracyBar.classList.replace("bg-success", "bg-danger");
+            // If they make the wrong sign, drain it slowly
+            signHoldProgress -= 2; 
         }
     } else {
-        // No hands detected
-        accuracyBar.style.width = `0%`;
-        accuracyBar.innerText = `Waiting for hands...`;
+        // If no hands are detected at all, drain it faster
+        signHoldProgress -= 5;
+    }
+
+    // Clamp the progress between 0 and 100 so it doesn't break the UI
+    signHoldProgress = Math.max(0, Math.min(100, signHoldProgress));
+
+    // Update the visual width of the Bootstrap progress bar
+    accuracyBar.style.width = `${signHoldProgress}%`;
+
+    // Change colors based on how full the bar is
+    if (signHoldProgress >= 100) {
+        accuracyBar.classList.replace("bg-warning", "bg-success");
+        accuracyBar.classList.replace("bg-danger", "bg-success");
+        accuracyBar.innerText = "SUCCESS! 🎉";
+        
+        // HACKATHON PRO TIP: Call a function here to move to the next letter!
+        
+    } else if (signHoldProgress > 0) {
+        accuracyBar.classList.replace("bg-danger", "bg-warning");
+        accuracyBar.classList.replace("bg-success", "bg-warning");
+        accuracyBar.innerText = `Holding... ${Math.floor(signHoldProgress)}%`;
+    } else {
+        accuracyBar.classList.replace("bg-warning", "bg-danger");
         accuracyBar.classList.replace("bg-success", "bg-danger");
+        accuracyBar.innerText = "Waiting for correct sign...";
     }
 
     canvasCtx.restore();
