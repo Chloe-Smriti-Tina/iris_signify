@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile – Signify</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-icons.css" rel="stylesheet">
+  <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root {
+      --ibm-blue:    #648FFF;
+      --ibm-purple:  #785EF0;
+      --ibm-magenta: #DC267F;
+      --ibm-orange:  #FE6100;
+      --ibm-yellow:  #FFB000;
+      --bg:          #0f0f1a;
+      --card-bg:     #16213e;
+      --card-border: rgba(100, 143, 255, 0.15);
+      --text:        #ffffff;
+      --text-muted:  #8a9bc4;
+    }
+
+    body {
+      background: var(--bg);
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .profile-page {
+      padding: 100px 0 60px;
+    }
+
+    /* ── Card ── */
+    .profile-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    /* ── Avatar initial circle ── */
+    .avatar-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 52px;
+      font-weight: 700;
+      color: #fff;
+      border: 3px solid rgba(255,255,255,0.15);
+      /* background set by JS */
+    }
+
+    /* ── Name / email / joined ── */
+    .profile-name {
+      color: var(--text);
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-email {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin: 0 0 10px;
+    }
+
+    .badge-joined {
+      display: inline-block;
+      background: rgba(100, 143, 255, 0.12);
+      border: 1px solid rgba(100, 143, 255, 0.3);
+      border-radius: 20px;
+      color: var(--ibm-blue);
+      font-size: 12px;
+      padding: 4px 14px;
+    }
+
+    /* ── Stats ── */
+    .stats-section {
+      margin-top: 36px;
+    }
+
+    .stat-icon {
+        color: #FE6100; 
+        font-size: 32px; 
+    }
+
+    .stats-label {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 22px 10px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--ibm-blue);
+    }
+
+    .stat-icon {
+      font-size: 22px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .stat-value {
+      color: var(--ibm-blue);
+      font-size: 26px;
+      font-weight: 700;
+      display: block;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── Not logged in ── */
+    .not-logged-in {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .not-logged-in i {
+      font-size: 52px;
+      color: var(--ibm-blue);
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .not-logged-in h3 {
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .not-logged-in p {
+      color: var(--text-muted);
+    }
+
+    .btn-signin {
+      background: var(--ibm-blue);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 12px 28px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-signin:hover { opacity: 0.85; }
+
+    /* ── Loading ── */
+    .loading-wrap {
+      text-align: center;
+      padding: 100px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a href="index.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
+      <div class="d-flex align-items-center d-lg-none">
+        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+      </div>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-lg-5">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
+          <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="profile.html">Profile</a></li>
+        </ul>
+        <div class="d-lg-flex align-items-center d-none ms-auto">
+          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="profile-page">
+    <div class="container">
+
+      <!-- Loading -->
+      <div id="loadingState" class="loading-wrap">
+        <div class="spinner-border" style="color:var(--ibm-blue);" role="status"></div>
+      </div>
+
+      <!-- Not logged in -->
+      <div id="notLoggedIn" style="display:none;">
+        <div class="not-logged-in">
+          <i class="bi-person-lock"></i>
+          <h3>You're not signed in</h3>
+          <p>Sign in to view your profile and stats.</p>
+          <button class="btn-signin" onclick="document.getElementById('authModal').style.display='flex'">Sign In</button>
+        </div>
+      </div>
+
+      <!-- Profile content -->
+      <div id="profileContent" style="display:none;">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-7 col-12">
+            <div class="profile-card">
+
+              <!-- Avatar -->
+              <div class="avatar-circle" id="avatarCircle"></div>
+
+              <!-- Info -->
+              <h2 class="profile-name" id="profileName">—</h2>
+              <p class="profile-email" id="profileEmail">—</p>
+              <span class="badge-joined" id="profileJoined"></span>
+
+              <!-- Stats -->
+              <div class="stats-section">
+                <p class="stats-label">All-time stats</p>
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <span class="stat-icon material-icons">schedule</span>
+                    <span class="stat-value" id="statTime">0</span>
+                    <span class="stat-label">Hours</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-icon material-icons">check_circle</span>
+                    <span class="stat-value" id="statChallenges">0</span>
+                    <span class="stat-label">Challenges</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-icon material-icons">gps_fixed</span>
+                    <span class="stat-value" id="statAccuracy">0%</span>
+                    <span class="stat-label">Accuracy</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 col-12">
+          <div class="copyright-text-wrap">
+            <p class="mb-0">
+              <span class="copyright-text">Copyright © 2026 <a href="#">Signify</a>. All rights reserved.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.sticky.js"></script>
+  <script src="js/custom.js"></script>
+  <script type="module" src="js/firebase-auth.js"></script>
+  <script type="module" src="js/profile.js"></script>
+
+</body>
+</html>

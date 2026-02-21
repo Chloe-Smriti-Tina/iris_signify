@@ -96,6 +96,11 @@ document.body.insertAdjacentHTML("beforeend", `
       <!-- Sign Up Form -->
       <div id="formSignUp" style="display:none;">
         <h3 style="color:#fff;margin-bottom:24px;font-size:22px;">Create account</h3>
+        <input id="suName" type="text" placeholder="Display name" style="
+            width:100%;padding:13px 16px;margin-bottom:14px;
+            background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+            border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+        ">
         <input id="suEmail" type="email" placeholder="Email address" style="
           width:100%;padding:13px 16px;margin-bottom:14px;
           background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
@@ -243,11 +248,18 @@ window.handleSignIn = async function() {
 };
 
 window.handleSignUp = async function() {
+  const name = document.getElementById("suName").value.trim();
   const email = document.getElementById("suEmail").value.trim();
   const password = document.getElementById("suPassword").value;
   const password2 = document.getElementById("suPassword2").value;
   const errEl = document.getElementById("suError");
   errEl.style.display = "none";
+
+  if (!name) {
+    errEl.textContent = "Please enter a display name.";
+    errEl.style.display = "block";
+    return;
+    }
 
   if (password !== password2) {
     errEl.textContent = "Passwords don't match.";
@@ -259,6 +271,7 @@ window.handleSignUp = async function() {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await setDoc(doc(db, "users", cred.user.uid), {
       email: cred.user.email,
+      displayName: name,
       createdAt: new Date(),
       allTime: { totalTimeSpent: 0, challengesCompleted: 0, accuracy: 0 }
     });
