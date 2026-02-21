@@ -3,123 +3,128 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Signify - Learn ASL</title>
 
-        <meta name="description" content="">
-        <meta name="author" content="TemplateMo">
-
-        <title>First Portfolio Bootstrap 5 Theme</title>
-
-        <!-- CSS FILES -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
         <link href="css/bootstrap.min.css" rel="stylesheet">
-
         <link href="css/bootstrap-icons.css" rel="stylesheet">
-
-        <link href="css/magnific-popup.css" rel="stylesheet">
-
         <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
-        
-<!--
 
-TemplateMo 578 First Portfolio
-
-https://templatemo.com/tm-578-first-portfolio
-
--->
+        <style>
+            :root {
+                --primary-color: #6d8bfa; /* Matches your uploaded logo */
+                --secondary-color: #5371e0;
+            }
+            .navbar-brand {
+                color: var(--primary-color) !important;
+                font-weight: 700;
+                font-size: 2rem;
+            }
+            .custom-btn {
+                background: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+            .custom-btn:hover {
+                background: var(--secondary-color);
+                border-color: var(--secondary-color);
+            }
+            /* MediaPipe Container Setup */
+            .video-wrapper {
+                position: relative;
+                width: 100%;
+                max-width: 640px;
+                margin: 0 auto;
+                border: 4px solid var(--primary-color);
+                border-radius: 15px;
+                overflow: hidden;
+                background-color: #000;
+            }
+            #webcam, #output_canvas {
+                width: 100%;
+                height: auto;
+                display: block;
+                /* Mirror the camera feed so it feels natural to the user */
+                transform: scaleX(-1); 
+            }
+            #output_canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 10;
+            }
+        </style>
     </head>
     
     <body>
-    <nav class="navbar navbar-expand-lg">
+        <nav class="navbar navbar-expand-lg">
             <div class="container">
-
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <a href="index.html" class="navbar-brand mx-auto mx-lg-0">First</a>
+                <a href="index.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
 
                 <div class="d-flex align-items-center d-lg-none">
-                    <i class="navbar-icon bi-telephone-plus me-3"></i>
-                    <a class="custom-btn btn" href="#section_5">
-                        120-240-9600
-                    </a>
+                    <i class="navbar-icon bi-camera-video me-3"></i>
+                    <a class="custom-btn btn text-white" href="learn.html">Start</a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-lg-5">
-                        <li class="nav-item">
-                            <a class="nav-link click-scroll" href="#section_1">Home</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link click-scroll" href="#section_2">About</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link click-scroll" href="#section_3">Services</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link click-scroll" href="#section_4">Projects</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link click-scroll" href="#section_5">Contact</a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="learn.html">Learn</a></li>
+                        <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
                     </ul>
 
                     <div class="d-lg-flex align-items-center d-none ms-auto">
-                        <i class="navbar-icon bi-telephone-plus me-3"></i>
-                        <a class="custom-btn btn" href="#section_5">
-                            120-240-9600
-                        </a>
+                        <i class="navbar-icon bi-camera-video me-3 text-primary"></i>
+                        <a class="custom-btn btn text-white" href="learn.html">Start Learning</a>
                     </div>
                 </div>
-
             </div>
         </nav>
 
-    <main class="container" style="margin-top: 100px;">
-        <h2>Let's Learn ASL</h2>
-        
-        <div id="camera-container" class="bg-dark text-white text-center p-5 rounded">
-            <p>Camera feed loading...</p>
-            <video id="webcam" autoplay playsinline></video>
-        </div>
-    </main>
-
-
-    <footer class="site-footer">
+        <main class="section-padding" style="margin-top: 50px; min-height: 70vh;">
             <div class="container">
-                <div class="row">
-
-                    <div class="col-lg-12 col-12">
-                        <div class="copyright-text-wrap">
-                            <p class="mb-0">
-                                <span class="copyright-text">Copyright © 2036 <a href="#">First Portfolio</a> Company. All rights reserved.</span>
-                                Design: 
-                                <a rel="sponsored" href="https://templatemo.com" target="_blank">TemplateMo</a>
-                            </p>
+                <div class="row align-items-center">
+                    
+                    <div class="col-lg-5 col-12 mb-5 mb-lg-0 text-center text-lg-start">
+                        <h2 class="mb-3">Sign the letter: <span class="text-primary" style="font-size: 3rem;">"A"</span></h2>
+                        <p class="lead">Make a fist with your thumb resting against the side of your index finger.</p>
+                        
+                        <div class="progress mt-4 mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="accuracy-bar">0% Match</div>
                         </div>
+
+                        <button id="enableWebcamButton" class="custom-btn btn text-white mt-3 w-100">
+                            <i class="bi bi-webcam me-2"></i> Enable Camera
+                        </button>
+                    </div>
+
+                    <div class="col-lg-7 col-12 text-center">
+                        <div class="video-wrapper shadow-lg">
+                            <video id="webcam" autoplay playsinline></video>
+                            <canvas id="output_canvas"></canvas>
+                        </div>
+                        <p class="mt-3 text-muted small"><i class="bi bi-shield-check"></i> Processing happens on your device. No video is recorded or sent to the cloud.</p>
                     </div>
 
                 </div>
             </div>
+        </main>
+
+        <footer class="site-footer bg-light pb-4 pt-4 mt-auto">
+            <div class="container text-center">
+                <p class="mb-0 text-muted">Built for the 2026 HackED Hackathon</p>
+            </div>
         </footer>
 
-        <!-- JAVASCRIPT FILES -->
         <script src="js/jquery.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
-        <script src="js/jquery.sticky.js"></script>
-        <script src="js/click-scroll.js"></script>
-        <script src="js/jquery.magnific-popup.min.js"></script>
-        <script src="js/magnific-popup-options.js"></script>
-        <script src="js/custom.js"></script>
+        <script type="module" src="js/sign-engine.js"></script>
 
     </body>
 </html>
