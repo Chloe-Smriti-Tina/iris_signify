@@ -23,33 +23,37 @@
       --border:    #e2e8f0;
       --success:   #22c55e;
       --success-bg:#f0fdf4;
+      --warn:      #f59e0b;
     }
     * { box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; margin: 0; }
 
-    .navbar { background: #fff; border-bottom: 1px solid var(--border); }
+    /* ── Navbar — solid, sticky, matches profile.html ── */
+    .navbar { background: #fff !important; border-bottom: 2px solid var(--border); box-shadow: 0 2px 12px rgba(15,23,42,0.06); }
     .navbar-brand { color: var(--primary) !important; font-weight: 700; font-size: 1.8rem; }
-    .back-link { color: var(--muted); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 5px; }
-    .back-link:hover { color: var(--primary); }
+    .back-link { color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
+    .back-link:hover { color: var(--primary); border-color: var(--primary); background: #eff3ff; }
 
-    /* Two-column layout */
-    .learn-layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 57px); }
+    .learn-layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 61px); }
 
     /* Sidebar */
-    .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px 18px; overflow-y: auto; max-height: calc(100vh - 57px); position: sticky; top: 57px; }
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px 18px; overflow-y: auto; max-height: calc(100vh - 61px); position: sticky; top: 61px; }
     .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
     .mini-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
     .mini-stat .val { font-size: 1.1rem; font-weight: 900; color: var(--primary); display: block; }
     .mini-stat .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* Letter grid (populated by sign-engine.js) */
+    /* Letter grid */
     .letter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
     .letter-btn { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--muted); cursor:pointer; transition:all 0.15s; position:relative; }
     .letter-btn:hover { border-color:var(--primary); color:var(--primary); background:#eff3ff; }
     .letter-btn.active { background:var(--primary); border-color:var(--primary); color:#fff; }
     .letter-btn.done { background:var(--success-bg); border-color:#86efac; color:#16a34a; }
     .letter-btn.done::after { content:'✓'; position:absolute; top:1px; right:3px; font-size:8px; color:#16a34a; }
+    /* Skipped = orange dot */
+    .letter-btn.skipped { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+    .letter-btn.skipped::after { content:'↩'; position:absolute; top:1px; right:3px; font-size:8px; color:#f59e0b; }
 
     /* Main */
     .main-content { padding: 28px 32px; }
@@ -59,7 +63,7 @@
     .prog-track { height:8px; background:var(--border); border-radius:10px; overflow:hidden; }
     .prog-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--primary),var(--primary-d)); transition:width 0.5s ease; }
 
-    /* Letter hero card */
+    /* Letter hero */
     .letter-hero-card { background:var(--surface); border:2px solid var(--border); border-radius:20px; padding:28px; margin-bottom:24px; display:grid; grid-template-columns:140px 1fr; gap:28px; align-items:center; }
     .asl-image-box { background:var(--bg); border:2px solid var(--border); border-radius:14px; overflow:hidden; aspect-ratio:1; display:flex; align-items:center; justify-content:center; position:relative; }
     .asl-image-box img { width:100%; height:100%; object-fit:contain; padding:6px; }
@@ -69,16 +73,15 @@
     .letter-info .desc { color:var(--muted); line-height:1.6; margin-bottom:12px; }
     .tip-chip { display:inline-flex; align-items:center; gap:6px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:6px 12px; font-size:12px; color:#92400e; }
 
-    /* Camera + panel grid */
+    /* Camera + panel */
     .content-grid { display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start; }
     .video-wrapper { position:relative; border-radius:16px; overflow:hidden; border:2px solid var(--border); background:#000; aspect-ratio:4/3; }
     .video-wrapper video, .video-wrapper canvas { width:100%; height:100%; object-fit:cover; display:block; transform:scaleX(-1); }
-    .video-wrapper canvas { position:absolute; top:0; left:0; z-index:10; }
+    .video-wrapper canvas { position:absolute; top:0; left:0; z-index:10; pointer-events:none; }
     .cam-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:20; background:rgba(15,23,42,0.6); backdrop-filter:blur(3px); }
     .cam-overlay i { font-size:3rem; color:var(--primary); margin-bottom:12px; }
     .cam-overlay p { color:#cbd5e1; text-align:center; max-width:200px; font-size:14px; margin:0; }
 
-    /* Right panel */
     .right-panel { display:flex; flex-direction:column; gap:14px; }
     .panel-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; }
     .panel-card h5 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:14px; }
@@ -88,26 +91,42 @@
     .hold-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--text); pointer-events:none; }
     .detect-row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); }
     .detect-row strong { color:var(--text); }
+
     .cam-btn { width:100%; padding:12px; border-radius:10px; border:none; background:var(--primary); color:#fff; font-weight:700; font-size:14px; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
     .cam-btn:hover { background:var(--primary-d); }
     .cam-btn:disabled { background:var(--border); color:var(--muted); cursor:not-allowed; }
+
     .nav-btns { display:flex; gap:8px; }
     .nav-btn { flex:1; padding:9px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-weight:600; font-size:13px; transition:all 0.15s; }
     .nav-btn:hover { border-color:var(--primary); color:var(--primary); background:#eff3ff; }
 
-    /* Success overlay */
+    /* ── Success overlay ── */
     .success-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); backdrop-filter:blur(6px); z-index:999; justify-content:center; align-items:center; }
     .success-overlay.visible { display:flex; }
-    .success-card { background:var(--surface); border:2px solid #86efac; border-radius:24px; padding:48px; text-align:center; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(34,197,94,0.15); animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    .success-card { background:var(--surface); border:2px solid #86efac; border-radius:24px; padding:40px 48px; text-align:center; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(34,197,94,0.15); animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
     @keyframes popIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
     .success-card .s-emoji { font-size:4rem; display:block; margin-bottom:12px; }
     .success-card h3 { font-size:1.8rem; font-weight:900; color:var(--text); margin-bottom:8px; }
     .success-card .xp-tag { display:inline-block; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:6px 16px; font-size:1.3rem; font-weight:900; color:#92400e; margin-bottom:14px; }
-    .success-card p { color:var(--muted); margin-bottom:24px; }
-    .next-btn { background:var(--success); border:none; color:#fff; font-weight:700; font-size:16px; padding:13px 32px; border-radius:12px; cursor:pointer; }
+    .success-card p { color:var(--muted); margin-bottom:20px; }
+    .next-btn { background:var(--success); border:none; color:#fff; font-weight:700; font-size:16px; padding:13px 32px; border-radius:12px; cursor:pointer; width:100%; margin-bottom:10px; }
     .next-btn:hover { opacity:0.85; }
+    .practice-btn { background:transparent; border:1px solid var(--border); color:var(--muted); font-weight:600; font-size:14px; padding:10px 24px; border-radius:12px; cursor:pointer; width:100%; transition:all 0.15s; }
+    .practice-btn:hover { border-color:var(--primary); color:var(--primary); background:#eff3ff; }
 
-    /* XP pop (referenced via inline style in engine) */
+    /* ── Retry overlay ── */
+    .retry-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); backdrop-filter:blur(6px); z-index:999; justify-content:center; align-items:center; }
+    .retry-overlay.visible { display:flex; }
+    .retry-card { background:var(--surface); border:2px solid #fde68a; border-radius:24px; padding:40px 48px; text-align:center; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(245,158,11,0.15); animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    .retry-card .r-emoji { font-size:4rem; display:block; margin-bottom:12px; }
+    .retry-card h3 { font-size:1.8rem; font-weight:900; color:var(--text); margin-bottom:8px; }
+    .retry-card p { color:var(--muted); margin-bottom:24px; line-height:1.6; }
+    .retry-btn { background:var(--primary); border:none; color:#fff; font-weight:700; font-size:16px; padding:13px 32px; border-radius:12px; cursor:pointer; width:100%; margin-bottom:10px; }
+    .retry-btn:hover { background:var(--primary-d); }
+    .skip-btn { background:transparent; border:1px solid #fde68a; color:#92400e; font-weight:600; font-size:14px; padding:10px 24px; border-radius:12px; cursor:pointer; width:100%; transition:all 0.15s; }
+    .skip-btn:hover { background:#fffbeb; }
+
+    /* XP pop */
     @keyframes xpPop { 0%{transform:translateX(-50%) translateY(0) scale(1);opacity:1} 100%{transform:translateX(-50%) translateY(-70px) scale(1.5);opacity:0} }
 
     @media (max-width:1100px) { .content-grid { grid-template-columns:1fr; } }
@@ -121,10 +140,11 @@
 </head>
 <body>
 
+  <!-- Navbar: solid, sticky, profile.html style -->
   <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container-fluid px-4" style="gap:16px;">
+    <div class="container-fluid px-4" style="gap:16px; min-height:60px;">
       <a href="home.html" class="navbar-brand" style="margin-right:0;">Signify</a>
-      <a href="learn.html" class="back-link"><i class="bi bi-arrow-left"></i> Modules</a>
+      <a href="learn.html" class="back-link ms-2"><i class="bi bi-arrow-left"></i> Modules</a>
       <div class="ms-auto d-none d-lg-flex align-items-center">
         <i class="bi bi-person-circle profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--muted);"></i>
       </div>
@@ -142,6 +162,16 @@
       </div>
       <div class="sidebar-label" style="margin-top:8px;">All Letters</div>
       <div class="letter-grid" id="letterGrid"></div>
+
+      <!-- Legend -->
+      <div style="margin-top:16px;font-size:11px;color:var(--muted);line-height:2;">
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;">
+          <span style="width:10px;height:10px;border-radius:3px;background:#22c55e;flex-shrink:0;"></span> Done
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <span style="width:10px;height:10px;border-radius:3px;background:#fde68a;flex-shrink:0;"></span> Skipped
+        </span>
+      </div>
     </aside>
 
     <main class="main-content">
@@ -153,6 +183,7 @@
         <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
       </div>
 
+      <!-- Letter hero card -->
       <div class="letter-hero-card">
         <div class="asl-image-box">
           <img id="aslImage" src="" alt="ASL reference"
@@ -167,10 +198,12 @@
         </div>
       </div>
 
+      <!-- Camera + right panel -->
       <div class="content-grid">
         <div>
           <div class="video-wrapper">
             <video id="webcam" autoplay playsinline muted></video>
+            <!-- Canvas still present but engine draws nothing on it -->
             <canvas id="output_canvas"></canvas>
             <div class="cam-overlay" id="camOverlay">
               <i class="bi bi-webcam"></i>
@@ -195,19 +228,20 @@
             </div>
           </div>
 
+          <!-- Camera button — triggers browser permission dialog -->
           <button class="cam-btn" id="camBtn" disabled>
             <i class="bi bi-hourglass-split"></i> Loading AI…
           </button>
 
           <div class="nav-btns">
             <button class="nav-btn" onclick="goLetter(-1)"><i class="bi bi-chevron-left"></i> Prev</button>
-            <button class="nav-btn" onclick="goLetter(1)">Skip <i class="bi bi-chevron-right"></i></button>
+            <button class="nav-btn" onclick="goLetter(1)">Next <i class="bi bi-chevron-right"></i></button>
           </div>
 
           <div class="panel-card" style="background:#eff3ff;border-color:#c7d4fd;">
             <h5 style="color:var(--primary);">Accessibility</h5>
             <p style="font-size:12px;color:#374151;margin:0;">
-              IBM colorblind-safe palette · Text + icons (not colour alone) · Keyboard navigable · On-device processing only
+              IBM colorblind-safe palette · Text + icons, not colour alone · Keyboard navigable · On-device processing
             </p>
           </div>
         </div>
@@ -215,7 +249,7 @@
     </main>
   </div>
 
-  <!-- Success overlay (content filled by sign-engine.js) -->
+  <!-- ── Success overlay ── -->
   <div class="success-overlay" id="successOverlay">
     <div class="success-card">
       <span class="s-emoji">🎉</span>
@@ -223,16 +257,33 @@
       <span class="xp-tag" id="xpEarned">+50 XP</span>
       <p id="successSub">Keep it up!</p>
       <button class="next-btn" onclick="dismissSuccess()">Next Letter →</button>
+      <button class="practice-btn" onclick="retryForPractice()">
+        <i class="bi bi-arrow-counterclockwise"></i> Retry (Practice Only — no XP)
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Retry / Try Again overlay ── -->
+  <div class="retry-overlay" id="retryOverlay">
+    <div class="retry-card">
+      <span class="r-emoji">🤔</span>
+      <h3 id="retryTitle">Not quite!</h3>
+      <p id="retrySubtitle">Take another look at the reference image on the left and try again. You've got this!</p>
+      <button class="retry-btn" onclick="retryLetter()">
+        <i class="bi bi-arrow-counterclockwise"></i> Try Again
+      </button>
+      <button class="skip-btn" onclick="skipLetter()">
+        ↩ Skip for Now (no XP, come back later)
+      </button>
     </div>
   </div>
 
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.sticky.js"></script>
+  <script src="js/custom.js"></script>
 
-  <!--
-    Firebase module: populates window.SIGNIFY_CONFIG before sign-engine boots.
-    The engine reads this config on DOMContentLoaded.
-  -->
+  <!-- Firebase: sets window.SIGNIFY_CONFIG -->
   <script type="module">
     import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -252,11 +303,9 @@
     let currentUser  = null;
     let sessionStart = Date.now();
 
-    // Config object that sign-engine.js reads
     window.SIGNIFY_CONFIG = {
       completedSet: new Set(),
       streak: 0,
-
       onSuccess: async (letter, sessionXP) => {
         if (!currentUser) return;
         const secs = Math.round((Date.now() - sessionStart) / 1000);
@@ -265,7 +314,6 @@
         const NtoZ = [...'NOPQRSTUVWXYZ'].filter(l => done.has(l)).length;
         const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const nextLetter = alpha[Math.min(alpha.indexOf(letter) + 1, 25)];
-
         await updateDoc(doc(db, "users", currentUser.uid), {
           xp: increment(50),
           "allTime.challengesCompleted": increment(1),
@@ -276,7 +324,7 @@
           progressNtoZ: Math.round((NtoZ / 13) * 100),
           lastSeen: serverTimestamp()
         });
-        sessionStart = Date.now(); // reset per letter
+        sessionStart = Date.now();
       }
     };
 
@@ -289,14 +337,11 @@
       window.SIGNIFY_CONFIG.streak = data.streak || 0;
       const alphaMap = data.alphabet || {};
       Object.keys(alphaMap).forEach(l => { if (alphaMap[l]) window.SIGNIFY_CONFIG.completedSet.add(l); });
-      // Tell the engine to re-render with fresh data if it's already booted
       if (window.__signEngineReady) window.__signEngineRerender();
     });
   </script>
 
-  <!-- All alphabet game logic -->
   <script type="module" src="js/sign-engine.js"></script>
-  <!-- Auth modal/dropdown -->
   <script type="module" src="js/firebase-auth.js"></script>
 
 </body>

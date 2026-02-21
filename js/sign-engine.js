@@ -1,23 +1,16 @@
 /**
- * sign-engine.js  –  Signify Alphabet Learning Engine
- * =====================================================
- * All alphabet game logic lives here. The HTML page is a thin
- * shell that provides DOM IDs and sets window.SIGNIFY_CONFIG.
- *
- * window.SIGNIFY_CONFIG (set by the page before this script loads):
- *   completedSet  Set<string>   – letters already mastered (from Firebase)
- *   streak        number        – user's current streak
- *   onSuccess(letter, sessionXP) – async callback, fired when letter confirmed
+ * sign-engine.js  –  Signify Alphabet Learning Engine v2
  */
 
 import {
     GestureRecognizer,
-    FilesetResolver,
-    DrawingUtils
+    FilesetResolver
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
-// ── Letter data ──────────────────────────────────────────────
-// gesture: MediaPipe categoryName, or null (auto-advance timer used instead)
+// ── Letter data ──
+// gesture: exact MediaPipe categoryName that counts as correct, or null
+// For null-gesture letters the bar fills only while a hand is visible.
+// The user still has to actively show their hand — idle frames don't count.
 export const LETTERS = [
     { letter:"A", gesture:"Closed_Fist",
       desc:"Make a fist with your thumb resting against the side of your index finger. Keep all four fingers curled tightly.",
@@ -99,28 +92,33 @@ export const LETTERS = [
       tip:"The movement IS the letter Z — keep it crisp." },
 ];
 
-const XP_PER_LETTER = 50;
-const HOLD_FRAMES   = 28;   // frames to hold correct sign (~1 sec @ 30fps)
-const AUTO_ADV_SECS = 8;    // seconds before auto-advancing null-gesture letters
+// ── Constants ────
+const XP_PER_LETTER     = 50;
+const HOLD_FRAMES       = 40;   
+const HAND_HOLD_SECS    = 10;   // seconds hand must be present for null-gesture letters
+const CONFIDENCE_THRESH = 0.75; // min confidence for a correct gesture match
 
-// ── State ────────────────────────────────────────────────────
-const cfg        = window.SIGNIFY_CONFIG || {};
-let completedSet = cfg.completedSet instanceof Set ? cfg.completedSet : new Set();
-let currentIndex = 0;
-let holdProgress = 0;
-let autoTimer    = 0;
-let successLocked = false;
-let gestureRec   = null;
+// ── State ───
+const cfg         = window.SIGNIFY_CONFIG || {};
+let completedSet  = cfg.completedSet instanceof Set ? cfg.completedSet : new Set();
+let skippedSet    = new Set(); // letters the user chose to skip
+let currentIndex  = 0;
+let holdProgress  = 0;
+let handTimer     = 0;    // accumulated seconds hand is visible (null-gesture letters)
+let phaseLocked   = false; // true once success OR retry panel shown
+let gestureRec    = null;
 let webcamRunning = false;
 let lastVideoTime = -1;
-let sessionXP    = 0;
+let sessionXP     = 0;
 let totalAttempts = 0;
 let totalHits     = 0;
+let isRetryMode   = false; // true when practising again after XP already earned
 
-// DOM refs — populated in boot
-let video, canvas, ctx, camBtn, camOverlay, holdBar, holdLabel, detLbl, confLbl;
+// DOM refs
+let video, canvas, ctx, camBtn, camOverlay,
+    holdBar, holdLabel, detLbl, confLbl;
 
-// ── DOM grab ─────────────────────────────────────────────────
+// ── DOM ────
 function grabDom() {
     video      = document.getElementById("webcam");
     canvas     = document.getElementById("output_canvas");
@@ -133,140 +131,212 @@ function grabDom() {
     confLbl    = document.getElementById("confLbl");
 }
 
-// ── Render current letter ────────────────────────────────────
-function renderLetter() {
+// ── Render letter ────
+function renderLetter(retryMode = false) {
+    isRetryMode = retryMode;
     const l = LETTERS[currentIndex];
 
     const hl = document.getElementById("letterHighlight");
     if (hl) hl.textContent = `"${l.letter}"`;
-
     const desc = document.getElementById("letterDesc");
     if (desc) desc.textContent = l.desc;
-
     const tip = document.getElementById("letterTip");
     if (tip) tip.innerHTML = `<i class="bi bi-hand-index-thumb"></i> ${l.tip}`;
 
-    // ASL reference image — Lifeprint.com (public ASL educational resource)
+    // ASL reference image
     const img = document.getElementById("aslImage");
     const fb  = document.getElementById("aslFallback");
     if (img) {
         img.style.display = "block";
         if (fb) fb.style.display = "none";
-        img.alt = `ASL sign for the letter ${l.letter}`;
+        img.alt = `ASL sign for letter ${l.letter}`;
         img.src = `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${l.letter.toLowerCase()}.gif`;
     }
 
-    // Overall progress
+    // Progress bar
     const pct = Math.round((completedSet.size / 26) * 100);
     const pf  = document.getElementById("progFill");
     if (pf) pf.style.width = pct + "%";
     const pc  = document.getElementById("progressCount");
     if (pc) pc.textContent = `${completedSet.size} / 26`;
 
-    holdProgress  = 0;
-    autoTimer     = 0;
-    successLocked = false;
+    // Reset hold
+    holdProgress = 0;
+    handTimer    = 0;
+    phaseLocked  = false;
     updateHoldBar();
     buildGrid();
     updateSidebar();
+
+    // Hide both overlays
+    hideOverlay("successOverlay");
+    hideOverlay("retryOverlay");
 }
 
-// ── Sidebar letter grid ──────────────────────────────────────
+// ── Grid ─────
 function buildGrid() {
     const grid = document.getElementById("letterGrid");
     if (!grid) return;
     grid.innerHTML = "";
     LETTERS.forEach((l, i) => {
         const btn = document.createElement("button");
-        btn.id          = `lb-${l.letter}`;
+        btn.id = `lb-${l.letter}`;
         btn.textContent = l.letter;
         btn.setAttribute("aria-label", `Go to letter ${l.letter}`);
-        btn.className   = "letter-btn" +
-            (i === currentIndex        ? " active" : "") +
-            (completedSet.has(l.letter) ? " done"   : "");
-        btn.onclick = () => { currentIndex = i; renderLetter(); };
+        let cls = "letter-btn";
+        if (i === currentIndex)           cls += " active";
+        else if (completedSet.has(l.letter)) cls += " done";
+        else if (skippedSet.has(l.letter))   cls += " skipped";
+        btn.className = cls;
+        btn.onclick   = () => { currentIndex = i; renderLetter(); };
         grid.appendChild(btn);
     });
 }
 
-// ── Sidebar stats ────────────────────────────────────────────
+// ── Sidebar ──────
 function updateSidebar() {
-    const xpEl = document.getElementById("sb-xp");
-    if (xpEl) xpEl.textContent = sessionXP;
+    const xpEl   = document.getElementById("sb-xp");
+    if (xpEl)    xpEl.textContent = sessionXP;
     const doneEl = document.getElementById("sb-done");
-    if (doneEl) doneEl.textContent = `${completedSet.size}/26`;
-    const accEl = document.getElementById("sb-acc");
-    if (accEl) accEl.textContent = totalAttempts > 0
+    if (doneEl)  doneEl.textContent = `${completedSet.size}/26`;
+    const accEl  = document.getElementById("sb-acc");
+    if (accEl)   accEl.textContent = totalAttempts > 0
         ? Math.round((totalHits / totalAttempts) * 100) + "%" : "—";
-    const strEl = document.getElementById("sb-streak");
-    if (strEl) strEl.textContent = cfg.streak || 0;
+    const strEl  = document.getElementById("sb-streak");
+    if (strEl)   strEl.textContent = cfg.streak || 0;
 }
 
-// ── Hold bar ─────────────────────────────────────────────────
+// ── Hold bar ─────
 function updateHoldBar() {
     if (!holdBar || !holdLabel) return;
     const l   = LETTERS[currentIndex];
     const pct = Math.min(100, holdProgress);
     holdBar.style.width = pct + "%";
 
+    if (phaseLocked) return; 
+
     if (pct >= 100) {
         holdBar.classList.add("success");
         holdLabel.textContent = "✓ Perfect!";
     } else if (l.gesture === null) {
         holdBar.classList.remove("success");
-        const rem = Math.max(0, AUTO_ADV_SECS - Math.floor(autoTimer));
-        holdLabel.textContent = rem > 0 ? `Practice for ${rem}s…` : "Moving on!";
+        // Only show progress while hand is in frame
+        holdLabel.textContent = pct > 5
+            ? `Holding sign… ${Math.floor(pct)}%`
+            : "Show your hand to start the timer";
     } else {
         holdBar.classList.remove("success");
-        holdLabel.textContent = pct > 8 ? `Holding… ${Math.floor(pct)}%` : "Make the sign!";
+        holdLabel.textContent = pct > 5
+            ? `Holding… ${Math.floor(pct)}%`
+            : "Make the sign!";
     }
 }
 
-// ── Public navigation (called by onclick in HTML) ────────────
+// ── Overlay helpers ─────
+function showOverlay(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("visible");
+}
+function hideOverlay(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("visible");
+}
+
+// ── Success ──────────────────────────────────────────────────
+function showSuccess(letter) {
+    if (phaseLocked) return;
+    phaseLocked = true;
+
+    const alreadyDone = completedSet.has(letter);
+    if (!alreadyDone) {
+        completedSet.add(letter);
+        sessionXP += XP_PER_LETTER;
+    }
+
+    const title = document.getElementById("successTitle");
+    if (title) title.textContent = alreadyDone
+        ? `Letter ${letter} — Great practice! 💪`
+        : `Letter ${letter} Mastered! 🔥`;
+
+    const xpTag = document.getElementById("xpEarned");
+    if (xpTag) {
+        xpTag.textContent = alreadyDone ? "Practice ✓" : `+${XP_PER_LETTER} XP`;
+        xpTag.style.background = alreadyDone ? "#f0fdf4" : "#fffbeb";
+        xpTag.style.color      = alreadyDone ? "#16a34a"  : "#92400e";
+        xpTag.style.borderColor= alreadyDone ? "#86efac"  : "#fde68a";
+    }
+
+    const subs = ["Keep it up!", "Excellent form!", "Your hands are speaking! 🤝", "That's ASL!"];
+    const sub  = document.getElementById("successSub");
+    if (sub) sub.textContent = subs[Math.floor(Math.random() * subs.length)];
+
+    showOverlay("successOverlay");
+
+    // XP pop (only on first completion)
+    if (!alreadyDone) {
+        const pop = document.createElement("div");
+        pop.style.cssText = "position:fixed;left:50%;top:42%;transform:translateX(-50%);font-size:1.6rem;font-weight:900;color:#f59e0b;pointer-events:none;z-index:9999;animation:xpPop 1.1s ease-out forwards;text-shadow:0 2px 12px rgba(245,158,11,.4);";
+        pop.textContent   = `+${XP_PER_LETTER} XP`;
+        document.body.appendChild(pop);
+        setTimeout(() => pop.remove(), 1300);
+
+        if (typeof cfg.onSuccess === "function") cfg.onSuccess(letter, sessionXP);
+    }
+
+    updateSidebar();
+    buildGrid();
+}
+
+// ── Retry panel ──────
+function showRetryPanel(letter) {
+    if (phaseLocked) return;
+    phaseLocked = true;
+
+    const rt = document.getElementById("retryTitle");
+    if (rt) rt.textContent = `Not quite, ${letter}!`;
+    const rs = document.getElementById("retrySubtitle");
+    if (rs) rs.textContent = "Take another look at the reference image and try again.";
+
+    showOverlay("retryOverlay");
+}
+
+// ── Navigation (onclick in HTML) ──────
 window.goLetter = function(delta) {
     currentIndex = Math.max(0, Math.min(25, currentIndex + delta));
     renderLetter();
 };
 
-// ── Success ──────────────────────────────────────────────────
-function showSuccess(letter) {
-    if (successLocked) return;
-    successLocked = true;
-    completedSet.add(letter);
-    sessionXP += XP_PER_LETTER;
-
-    const title = document.getElementById("successTitle");
-    if (title) title.textContent = `Letter ${letter} Mastered! 🔥`;
-    const xpTag = document.getElementById("xpEarned");
-    if (xpTag) xpTag.textContent = `+${XP_PER_LETTER} XP`;
-    const subs = ["Keep it up!", "Excellent form!", "Your hands are speaking! 🤝", "That's ASL!"];
-    const sub  = document.getElementById("successSub");
-    if (sub) sub.textContent = subs[Math.floor(Math.random() * subs.length)];
-
-    const overlay = document.getElementById("successOverlay");
-    if (overlay) overlay.classList.add("visible");
-
-    // Floating XP pop
-    const pop = document.createElement("div");
-    pop.style.cssText = "position:fixed;left:50%;top:42%;transform:translateX(-50%);font-size:1.6rem;font-weight:900;color:#f59e0b;pointer-events:none;z-index:9999;animation:xpPop 1.1s ease-out forwards;text-shadow:0 2px 12px rgba(245,158,11,.4);";
-    pop.textContent   = `+${XP_PER_LETTER} XP`;
-    document.body.appendChild(pop);
-    setTimeout(() => pop.remove(), 1300);
-
-    if (typeof cfg.onSuccess === "function") cfg.onSuccess(letter, sessionXP);
-    updateSidebar();
-    buildGrid();
-}
-
-// Called by "Next Letter" button in HTML
+// Called by "Next Letter" button on success overlay
 window.dismissSuccess = function() {
-    const overlay = document.getElementById("successOverlay");
-    if (overlay) overlay.classList.remove("visible");
+    hideOverlay("successOverlay");
     if (currentIndex < 25) { currentIndex++; renderLetter(); }
     else if (holdLabel) holdLabel.textContent = "🏆 All 26 letters complete!";
 };
 
-// ── MediaPipe init ───────────────────────────────────────────
+// Called by "Try Again" button on retry overlay
+window.retryLetter = function() {
+    hideOverlay("retryOverlay");
+    renderLetter(false); // not retry mode, fresh attempt
+};
+
+// Called by "Skip for Now" button on retry overlay
+window.skipLetter = function() {
+    const letter = LETTERS[currentIndex].letter;
+    skippedSet.add(letter);
+    hideOverlay("retryOverlay");
+    // Advance to next non-completed, non-skipped letter, or next in sequence
+    const next = LETTERS.findIndex((l, i) => i > currentIndex && !completedSet.has(l.letter));
+    currentIndex = next >= 0 ? next : Math.min(currentIndex + 1, 25);
+    renderLetter();
+};
+
+// Called by "Retry (Practice)" button on success overlay
+window.retryForPractice = function() {
+    hideOverlay("successOverlay");
+    renderLetter(true); // retry mode, no XP
+};
+
+// ── MediaPipe ────
 async function initRecognizer() {
     const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
@@ -279,15 +349,12 @@ async function initRecognizer() {
         runningMode: "VIDEO",
         numHands: 1
     });
-
-    // Only enable the button AFTER the model is loaded.
-    // Clicking the button is what triggers the browser camera permission dialog.
     camBtn.disabled = false;
     camBtn.innerHTML = '<i class="bi bi-webcam"></i> Enable Camera';
     camBtn.addEventListener("click", toggleCam);
 }
 
-// ── Camera toggle ────────────────────────────────────────────
+// ── Camera ────
 function toggleCam() {
     if (webcamRunning) {
         webcamRunning = false;
@@ -300,8 +367,6 @@ function toggleCam() {
     } else {
         webcamRunning = true;
         camBtn.innerHTML = '<i class="bi bi-webcam-fill"></i> Disable Camera';
-
-        // getUserMedia fires the browser permission prompt
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 video.srcObject = stream;
@@ -318,11 +383,10 @@ function toggleCam() {
     }
 }
 
-// ── Game loop ────────────────────────────────────────────────
+// ── Game loop ──────
 function gameLoop() {
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
-
     if (!webcamRunning) return;
 
     const now = performance.now();
@@ -332,72 +396,81 @@ function gameLoop() {
         results = gestureRec.recognizeForVideo(video, now);
     }
 
-    ctx.save();
+    // Clear canvas but draw NOTHING — skeleton removed per request
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const du = new DrawingUtils(ctx);
 
-    if (results?.landmarks) {
-        for (const lm of results.landmarks) {
-            du.drawConnectors(lm, GestureRecognizer.HAND_CONNECTIONS, { color: "#6d8bfa", lineWidth: 4 });
-            du.drawLandmarks(lm, { color: "#ffffff", lineWidth: 2 });
-        }
+    // If phase is locked (success/retry panel showing), just keep the loop ticking
+    if (phaseLocked) {
+        if (webcamRunning) requestAnimationFrame(gameLoop);
+        return;
     }
 
-    const l = LETTERS[currentIndex];
+    const l           = LETTERS[currentIndex];
+    const handPresent = results?.landmarks?.length > 0;
+    let   detectedCat = "—";
+    let   detectedConf = "—";
 
-    if (results?.gestures?.length > 0) {
-        const cat   = results.gestures[0][0].categoryName;
-        const score = results.gestures[0][0].score;
-        if (detLbl)  detLbl.textContent  = cat;
-        if (confLbl) confLbl.textContent = Math.round(score * 100) + "%";
+    if (handPresent && results.gestures?.length > 0) {
+        detectedCat  = results.gestures[0][0].categoryName;
+        detectedConf = Math.round(results.gestures[0][0].score * 100) + "%";
         totalAttempts++;
+    }
 
-        if (l.gesture && cat === l.gesture && score > 0.7) {
-            holdProgress += (100 / HOLD_FRAMES);
-            totalHits++;
-        } else if (l.gesture) {
-            holdProgress = Math.max(0, holdProgress - 2);
+    if (detLbl)  detLbl.textContent  = detectedCat;
+    if (confLbl) confLbl.textContent = detectedConf;
+
+    // ── Gesture-based letters (A, G, S, Y, …) ───────────────
+    if (l.gesture !== null) {
+        if (handPresent && results.gestures?.length > 0) {
+            const cat   = results.gestures[0][0].categoryName;
+            const score = results.gestures[0][0].score;
+            if (cat === l.gesture && score >= CONFIDENCE_THRESH) {
+                holdProgress += (100 / HOLD_FRAMES);
+                totalHits++;
+            } else {
+                // Wrong gesture — drain slowly
+                holdProgress = Math.max(0, holdProgress - 3);
+            }
+        } else {
+            // No hand — drain faster
+            holdProgress = Math.max(0, holdProgress - 6);
         }
-    } else {
-        if (detLbl)  detLbl.textContent  = "—";
-        if (confLbl) confLbl.textContent = "—";
-        if (l.gesture) holdProgress = Math.max(0, holdProgress - 4);
     }
 
-    if (l.gesture === null) {
-        autoTimer    += 1 / 60;
-        holdProgress  = (autoTimer / AUTO_ADV_SECS) * 100;
+    // ── Null-gesture letters (B, C, D, …) ───────────────────
+    // Timer ONLY advances while a hand is actually in frame.
+    else {
+        if (handPresent) {
+            handTimer    += 1 / 60; // ~60fps, accumulate seconds
+            holdProgress  = Math.min(100, (handTimer / HAND_HOLD_SECS) * 100);
+        }
+        // No hand = timer pauses, progress stays where it is 
     }
 
-    holdProgress = Math.min(100, holdProgress);
+    holdProgress = Math.min(100, Math.max(0, holdProgress));
     updateHoldBar();
-    if (holdProgress >= 100 && !successLocked) showSuccess(l.letter);
 
-    ctx.restore();
+    if (holdProgress >= 100 && !phaseLocked) {
+        showSuccess(l.letter);
+    }
+
     if (webcamRunning) requestAnimationFrame(gameLoop);
 }
 
-// ── Boot ─────────────────────────────────────────────────────
+// ── Boot ──────
 document.addEventListener("DOMContentLoaded", () => {
     grabDom();
-
-    // Sync completedSet from config (may already be populated by Firebase)
     if (cfg.completedSet instanceof Set) completedSet = cfg.completedSet;
 
-    // Jump to first incomplete letter
     const first = LETTERS.findIndex(l => !completedSet.has(l.letter));
     if (first >= 0) currentIndex = first;
 
     renderLetter();
 
-    // Show loading state — button is disabled until model finishes loading
     camBtn.disabled = true;
     camBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading AI…';
-
     initRecognizer();
 
-    // Expose a re-render hook so Firebase auth (which loads async) can
-    // call this after it populates completedSet post-login
     window.__signEngineRerender = () => {
         completedSet = cfg.completedSet;
         const f = LETTERS.findIndex(l => !completedSet.has(l.letter));
