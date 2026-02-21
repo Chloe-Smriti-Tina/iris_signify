@@ -15,31 +15,29 @@
 
   <style>
     :root {
-      --ibm-blue:    #648FFF;
-      --ibm-purple:  #785EF0;
-      --ibm-magenta: #DC267F;
-      --ibm-orange:  #FE6100;
-      --ibm-yellow:  #FFB000;
-      --bg:          #0f0f1a;
-      --card-bg:     #16213e;
-      --card-border: rgba(100, 143, 255, 0.15);
-      --text:        #ffffff;
-      --text-muted:  #8a9bc4;
+      --signify-blue:       #648FFF;
+      --signify-dark:       #1e293b;
+      --signify-accent:     #FE6100;
+      --signify-light:      #f8fafc;
+      --text-high-contrast: #0f172a;
+      --text-muted:         #64748b;
+      --card-bg:            #ffffff;
+      --card-border:        #e2e8f0;
     }
 
     body {
-      background: var(--bg);
+      background: var(--signify-light);
       min-height: 100vh;
       font-family: 'DM Sans', sans-serif;
+      color: var(--text-high-contrast);
     }
 
     .leaderboard-page {
       padding: 100px 0 60px;
     }
 
-    /* ── Page title ── */
     .page-title {
-      color: var(--text);
+      color: var(--text-high-contrast);
       font-size: 32px;
       font-weight: 700;
       margin-bottom: 6px;
@@ -61,8 +59,8 @@
     }
 
     .stat-tab {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
       border-radius: 10px;
       color: var(--text-muted);
       font-size: 13px;
@@ -76,23 +74,23 @@
     }
 
     .stat-tab:hover {
-      border-color: var(--ibm-blue);
-      color: var(--ibm-blue);
+      border-color: var(--signify-blue);
+      color: var(--signify-blue);
     }
 
     .stat-tab.active {
-      background: rgba(100, 143, 255, 0.15);
-      border-color: var(--ibm-blue);
-      color: var(--ibm-blue);
+      background: #eff6ff;
+      border-color: var(--signify-blue);
+      color: var(--signify-blue);
     }
 
     /* ── Leaderboard card ── */
     .leaderboard-card {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
+      border: 2px solid var(--card-border);
+      border-radius: 15px;
       overflow: hidden;
-      letter-spacing: 0.5px;
+      box-shadow: 0 4px 24px rgba(100, 143, 255, 0.08);
     }
 
     /* ── Table ── */
@@ -102,7 +100,7 @@
     }
 
     .lb-table thead tr {
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 2px solid var(--card-border);
     }
 
     .lb-table thead th {
@@ -115,7 +113,7 @@
     }
 
     .lb-table tbody tr {
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid var(--card-border);
       transition: background 0.15s;
     }
 
@@ -124,22 +122,22 @@
     }
 
     .lb-table tbody tr:hover {
-      background: rgba(255,255,255,0.03);
+      background: var(--signify-light);
     }
 
     /* Current user row */
     .lb-table tbody tr.is-current-user {
-      background: rgba(100, 143, 255, 0.1);
-      border-left: 3px solid var(--ibm-blue);
+      background: #eff6ff;
+      border-left: 3px solid var(--signify-blue);
     }
 
     .lb-table tbody tr.is-current-user:hover {
-      background: rgba(100, 143, 255, 0.15);
+      background: #dbeafe;
     }
 
     .lb-table tbody td {
       padding: 14px 20px;
-      color: var(--text);
+      color: var(--text-high-contrast);
       font-size: 14px;
     }
 
@@ -151,9 +149,9 @@
       font-size: 14px;
     }
 
-    .rank-1 { color: var(--ibm-yellow); }
-    .rank-2 { color: #c0c0c0; }
-    .rank-3 { color: #cd7f32; }
+    .rank-1 { color: #f59e0b; }
+    .rank-2 { color: #94a3b8; }
+    .rank-3 { color: #b45309; }
 
     /* Avatar circle in table */
     .table-avatar {
@@ -177,10 +175,10 @@
 
     .you-badge {
       display: inline-block;
-      background: rgba(100, 143, 255, 0.2);
-      border: 1px solid var(--ibm-blue);
+      background: #eff6ff;
+      border: 1px solid var(--signify-blue);
       border-radius: 6px;
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
       font-size: 10px;
       font-weight: 700;
       padding: 2px 7px;
@@ -190,18 +188,18 @@
 
     .stat-val-col {
       font-weight: 700;
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
       text-align: right;
     }
 
-    /* Divider between top 50 and current user if below 50 */
+    /* Divider */
     .lb-divider td {
       padding: 8px 20px;
       text-align: center;
       color: var(--text-muted);
       font-size: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid var(--card-border) !important;
+      background: var(--signify-light);
       letter-spacing: 1px;
     }
 
@@ -213,13 +211,13 @@
     }
 
     .loading-wrap .spinner-border {
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
     }
 
     /* ── Not logged in notice ── */
     .login-notice {
-      background: rgba(100, 143, 255, 0.08);
-      border: 1px solid rgba(100, 143, 255, 0.2);
+      background: #eff6ff;
+      border: 1px solid rgba(100, 143, 255, 0.3);
       border-radius: 12px;
       padding: 14px 20px;
       color: var(--text-muted);
@@ -229,7 +227,7 @@
     }
 
     .login-notice a {
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
       cursor: pointer;
       text-decoration: underline;
     }
@@ -238,14 +236,14 @@
 
 <body>
 
-  <nav class="navbar navbar-expand-lg">
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
     <div class="container">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
       <div class="d-flex align-items-center d-lg-none">
-        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
       </div>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-lg-5">
@@ -255,7 +253,7 @@
           <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
         </ul>
         <div class="d-lg-flex align-items-center d-none ms-auto">
-          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
         </div>
       </div>
     </div>
@@ -267,14 +265,12 @@
       <h1 class="page-title">Leaderboard</h1>
       <p class="page-subtitle">Top 50 users across all stats</p>
 
-      <!-- Not logged in notice -->
       <div class="login-notice" id="loginNotice">
         <i class="bi-info-circle me-2"></i>
         <a onclick="document.getElementById('authModal').style.display='flex'">Sign in</a>
         to see your ranking highlighted.
       </div>
 
-      <!-- Tabs -->
       <div class="stat-tabs">
         <button class="stat-tab active" onclick="switchTab('challenges', this)">
           <span class="material-icons" style="font-size:16px;">check_circle</span>
@@ -290,7 +286,6 @@
         </button>
       </div>
 
-      <!-- Leaderboard card -->
       <div class="leaderboard-card">
         <div id="loadingState" class="loading-wrap">
           <div class="spinner-border" role="status"></div>
