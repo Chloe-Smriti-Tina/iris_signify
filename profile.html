@@ -15,22 +15,40 @@
 
   <style>
     :root {
-      --ibm-blue:    #648FFF;
-      --ibm-purple:  #785EF0;
-      --ibm-magenta: #DC267F;
-      --ibm-orange:  #FE6100;
-      --ibm-yellow:  #FFB000;
-      --bg:          #0f0f1a;
-      --card-bg:     #16213e;
-      --card-border: rgba(100, 143, 255, 0.15);
-      --text:        #ffffff;
-      --text-muted:  #8a9bc4;
+      --signify-blue:  #648FFF;
+      --signify-dark:  #1e293b;
+      --signify-accent: #FE6100;
+      --signify-light: #f8fafc;
+      --text-high-contrast: #0f172a;
+      --text-muted:    #64748b;
+      --card-bg:       #ffffff;
+      --card-border:   #e2e8f0;
     }
 
     body {
-      background: var(--bg);
+      background: var(--signify-light);
       min-height: 100vh;
       font-family: 'DM Sans', sans-serif;
+      color: var(--text-high-contrast);
+    }
+
+    .navbar-brand {
+      color: var(--signify-blue) !important;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
+    .custom-btn {
+      background: var(--signify-blue);
+      border-color: var(--signify-blue);
+      color: white;
+      font-weight: bold;
+    }
+
+    .custom-btn:hover {
+      background: var(--signify-dark);
+      border-color: var(--signify-dark);
+      color: white;
     }
 
     .profile-page {
@@ -40,10 +58,16 @@
     /* ── Card ── */
     .profile-card {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
+      border: 2px solid var(--card-border);
+      border-radius: 15px;
       padding: 48px 40px;
       text-align: center;
+      box-shadow: 0 4px 24px rgba(109, 139, 250, 0.08);
+      transition: border-color 0.2s;
+    }
+
+    .profile-card:hover {
+      border-color: var(--signify-blue);
     }
 
     /* ── Avatar initial circle ── */
@@ -58,13 +82,13 @@
       font-size: 52px;
       font-weight: 700;
       color: #fff;
-      border: 3px solid rgba(255,255,255,0.15);
+      border: 3px solid rgba(109, 139, 250, 0.2);
       /* background set by JS */
     }
 
     /* ── Name / email / joined ── */
     .profile-name {
-      color: var(--text);
+      color: var(--text-high-contrast);
       font-size: 26px;
       font-weight: 700;
       margin: 0 0 4px;
@@ -79,10 +103,10 @@
 
     .badge-joined {
       display: inline-block;
-      background: rgba(100, 143, 255, 0.12);
-      border: 1px solid rgba(100, 143, 255, 0.3);
+      background: #eff6ff;
+      border: 1px solid rgba(109, 139, 250, 0.3);
       border-radius: 20px;
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
       font-size: 12px;
       padding: 4px 14px;
     }
@@ -90,11 +114,6 @@
     /* ── Stats ── */
     .stats-section {
       margin-top: 36px;
-    }
-
-    .stat-icon {
-        color: var(--ibm-orange); 
-        font-size: 32px; 
     }
 
     .stats-label {
@@ -114,26 +133,29 @@
     }
 
     .stat-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
+      background: var(--signify-light);
+      border: 2px solid var(--card-border);
       border-radius: 14px;
       padding: 22px 10px;
       text-align: center;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, transform 0.2s;
     }
 
     .stat-card:hover {
-      border-color: var(--ibm-blue);
+      border-color: var(--signify-blue);
+      transform: translateY(-3px);
     }
 
     .stat-icon {
       font-size: 22px;
       margin-bottom: 8px;
       display: block;
+      color: var(--signify-accent);
     }
 
+
     .stat-value {
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
       font-size: 26px;
       font-weight: 700;
       display: block;
@@ -157,13 +179,13 @@
 
     .not-logged-in i {
       font-size: 52px;
-      color: var(--ibm-blue);
+      color: var(--signify-blue);
       display: block;
       margin-bottom: 16px;
     }
 
     .not-logged-in h3 {
-      color: var(--text);
+      color: var(--text-high-contrast);
       margin-bottom: 8px;
     }
 
@@ -172,7 +194,7 @@
     }
 
     .btn-signin {
-      background: var(--ibm-blue);
+      background: var(--signify-blue);
       border: none;
       border-radius: 8px;
       color: #fff;
@@ -181,10 +203,12 @@
       padding: 12px 28px;
       cursor: pointer;
       margin-top: 8px;
-      transition: opacity 0.2s;
+      transition: background 0.2s, opacity 0.2s;
     }
 
-    .btn-signin:hover { opacity: 0.85; }
+    .btn-signin:hover {
+      background: var(--signify-dark);
+    }
 
     /* ── Loading ── */
     .loading-wrap {
@@ -197,14 +221,14 @@
 
 <body>
 
-  <nav class="navbar navbar-expand-lg">
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
     <div class="container">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
       <div class="d-flex align-items-center d-lg-none">
-        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
       </div>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-lg-5">
@@ -214,7 +238,7 @@
           <li class="nav-item"><a class="nav-link active" href="profile.html">Profile</a></li>
         </ul>
         <div class="d-lg-flex align-items-center d-none ms-auto">
-          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
         </div>
       </div>
     </div>
@@ -225,7 +249,7 @@
 
       <!-- Loading -->
       <div id="loadingState" class="loading-wrap">
-        <div class="spinner-border" style="color:var(--ibm-blue);" role="status"></div>
+        <div class="spinner-border" style="color:var(--signify-blue);" role="status"></div>
       </div>
 
       <!-- Not logged in -->
@@ -256,7 +280,7 @@
               <div class="stats-section">
                 <p class="stats-label">All-time stats</p>
                 <div class="stats-grid">
-                    <div class="stat-card">
+                  <div class="stat-card">
                     <span class="stat-icon material-icons">whatshot</span>
                     <span class="stat-value" id="statLongestStreak">0</span>
                     <span class="stat-label">Longest Streak</span>
@@ -270,7 +294,7 @@
                     <span class="stat-icon material-icons">emoji_events</span>
                     <span class="stat-value" id="statNumBadges">0</span>
                     <span class="stat-label">Badges</span>
-                  </div>                  
+                  </div>
                   <div class="stat-card">
                     <span class="stat-icon material-icons">schedule</span>
                     <span class="stat-value" id="statTime">0</span>
