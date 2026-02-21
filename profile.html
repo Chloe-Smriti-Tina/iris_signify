@@ -15,14 +15,14 @@
 
   <style>
     :root {
-      --signify-blue:  #648FFF;
-      --signify-dark:  #1e293b;
-      --signify-accent: #FE6100;
-      --signify-light: #f8fafc;
+      --signify-blue:       #648FFF;
+      --signify-dark:       #1e293b;
+      --signify-accent:     #FE6100;
+      --signify-light:      #f8fafc;
       --text-high-contrast: #0f172a;
-      --text-muted:    #64748b;
-      --card-bg:       #ffffff;
-      --card-border:   #e2e8f0;
+      --text-muted:         #64748b;
+      --card-bg:            #ffffff;
+      --card-border:        #e2e8f0;
     }
 
     body {
@@ -44,7 +44,6 @@
       color: white;
       font-weight: bold;
     }
-
     .custom-btn:hover {
       background: var(--signify-dark);
       border-color: var(--signify-dark);
@@ -55,22 +54,80 @@
       padding: 100px 0 60px;
     }
 
-    /* ── Card ── */
+    /* ── Side-by-side layout ── */
+    .profile-layout {
+      display: flex;
+      align-items: stretch;
+      gap: 20px;
+    }
+
+    .profile-col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .badge-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 0;
+    }
+
+    /* ── Profile card ── */
     .profile-card {
       background: var(--card-bg);
       border: 2px solid var(--card-border);
       border-radius: 15px;
       padding: 48px 40px;
       text-align: center;
-      box-shadow: 0 4px 24px rgba(109, 139, 250, 0.08);
+      box-shadow: 0 4px 24px rgba(100, 143, 255, 0.08);
+      transition: border-color 0.2s;
+      height: 100%;
+    }
+    .profile-card:hover { border-color: var(--signify-blue); }
+
+    /* ── Side badge cards ── */
+    .side-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 15px;
+      padding: 22px 22px 18px;
+      box-shadow: 0 4px 24px rgba(100, 143, 255, 0.08);
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       transition: border-color 0.2s;
     }
+    .side-card:hover { border-color: var(--signify-blue); }
 
-    .profile-card:hover {
-      border-color: var(--signify-blue);
+    .side-card-title {
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
     }
 
-    /* ── Avatar initial circle ── */
+    /* Scrollable inner area */
+    .side-card-body {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(100, 143, 255, 0.3) transparent;
+    }
+    .side-card-body::-webkit-scrollbar { width: 4px; }
+    .side-card-body::-webkit-scrollbar-track { background: transparent; }
+    .side-card-body::-webkit-scrollbar-thumb { background: rgba(100,143,255,0.3); border-radius: 99px; }
+
+    /* ── Avatar ── */
     .avatar-circle {
       width: 120px;
       height: 120px;
@@ -82,11 +139,9 @@
       font-size: 52px;
       font-weight: 700;
       color: #fff;
-      border: 3px solid rgba(109, 139, 250, 0.2);
-      /* background set by JS */
+      border: 3px solid rgba(100, 143, 255, 0.2);
     }
 
-    /* ── Name / email / joined ── */
     .profile-name {
       color: var(--text-high-contrast);
       font-size: 26px;
@@ -94,17 +149,15 @@
       margin: 0 0 4px;
       letter-spacing: 0.5px;
     }
-
     .profile-email {
       color: var(--text-muted);
       font-size: 14px;
       margin: 0 0 10px;
     }
-
     .badge-joined {
       display: inline-block;
       background: #eff6ff;
-      border: 1px solid rgba(109, 139, 250, 0.3);
+      border: 1px solid rgba(100, 143, 255, 0.3);
       border-radius: 20px;
       color: var(--signify-blue);
       font-size: 12px;
@@ -112,10 +165,7 @@
     }
 
     /* ── Stats ── */
-    .stats-section {
-      margin-top: 36px;
-    }
-
+    .stats-section { margin-top: 36px; }
     .stats-label {
       color: var(--text-muted);
       font-size: 11px;
@@ -125,13 +175,11 @@
       margin-bottom: 14px;
       text-align: left;
     }
-
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
     }
-
     .stat-card {
       background: var(--signify-light);
       border: 2px solid var(--card-border);
@@ -140,20 +188,16 @@
       text-align: center;
       transition: border-color 0.2s, transform 0.2s;
     }
-
     .stat-card:hover {
       border-color: var(--signify-blue);
       transform: translateY(-3px);
     }
-
     .stat-icon {
       font-size: 22px;
       margin-bottom: 8px;
       display: block;
       color: var(--signify-accent);
     }
-
-
     .stat-value {
       color: var(--signify-blue);
       font-size: 26px;
@@ -162,7 +206,6 @@
       line-height: 1;
       margin-bottom: 6px;
     }
-
     .stat-label {
       color: var(--text-muted);
       font-size: 11px;
@@ -171,27 +214,126 @@
       letter-spacing: 1px;
     }
 
+    /* ── Earned badge tiles ── */
+    .earned-badge-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--signify-light);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .earned-badge-item:last-child { margin-bottom: 0; }
+    .earned-badge-item:hover {
+      border-color: var(--signify-blue);
+      transform: translateY(-2px);
+    }
+    .earned-badge-icon {
+      font-size: 24px;
+      width: 42px;
+      height: 42px;
+      background: #eff6ff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .earned-badge-info { min-width: 0; }
+    .earned-badge-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-high-contrast);
+      margin: 0 0 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .earned-badge-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Progress badge rows ── */
+    .progress-badge-item { margin-bottom: 16px; }
+    .progress-badge-item:last-child { margin-bottom: 0; }
+    .progress-badge-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+    .progress-badge-icon {
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      background: var(--signify-light);
+      border: 2px solid var(--card-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .progress-badge-label { flex: 1; min-width: 0; }
+    .progress-badge-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-high-contrast);
+      margin: 0;
+    }
+    .progress-badge-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .progress-badge-pct {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--signify-blue);
+      white-space: nowrap;
+    }
+    .progress-bar-track {
+      height: 6px;
+      background: var(--card-border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--signify-blue), #a5b4fc);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 24px 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .empty-msg span { font-size: 30px; display: block; margin-bottom: 8px; opacity: 0.4; }
+
     /* ── Not logged in ── */
     .not-logged-in {
       text-align: center;
       padding: 80px 20px;
     }
-
     .not-logged-in i {
       font-size: 52px;
       color: var(--signify-blue);
       display: block;
       margin-bottom: 16px;
     }
-
-    .not-logged-in h3 {
-      color: var(--text-high-contrast);
-      margin-bottom: 8px;
-    }
-
-    .not-logged-in p {
-      color: var(--text-muted);
-    }
+    .not-logged-in h3 { color: var(--text-high-contrast); margin-bottom: 8px; }
+    .not-logged-in p  { color: var(--text-muted); }
 
     .btn-signin {
       background: var(--signify-blue);
@@ -203,18 +345,21 @@
       padding: 12px 28px;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.2s, opacity 0.2s;
+      transition: background 0.2s;
     }
+    .btn-signin:hover { background: var(--signify-dark); }
 
-    .btn-signin:hover {
-      background: var(--signify-dark);
-    }
-
-    /* ── Loading ── */
     .loading-wrap {
       text-align: center;
       padding: 100px;
       color: var(--text-muted);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .profile-layout { flex-direction: column; }
+      .profile-col { flex: none; width: 100%; }
+      .side-card { min-height: 260px; flex: none; }
     }
   </style>
 </head>
@@ -264,19 +409,16 @@
 
       <!-- Profile content -->
       <div id="profileContent" style="display:none;">
-        <div class="row justify-content-center">
-          <div class="col-lg-5 col-md-7 col-12">
+        <div class="profile-layout">
+
+          <!-- LEFT: profile card -->
+          <div class="profile-col">
             <div class="profile-card">
-
-              <!-- Avatar -->
               <div class="avatar-circle" id="avatarCircle"></div>
-
-              <!-- Info -->
               <h2 class="profile-name" id="profileName">—</h2>
               <p class="profile-email" id="profileEmail">—</p>
               <span class="badge-joined" id="profileJoined"></span>
 
-              <!-- Stats -->
               <div class="stats-section">
                 <p class="stats-label">All-time stats</p>
                 <div class="stats-grid">
@@ -312,8 +454,29 @@
                   </div>
                 </div>
               </div>
-
             </div>
+          </div>
+
+          <!-- RIGHT: two stacked badge cards -->
+          <div class="badge-col">
+
+            <div class="side-card">
+              <p class="side-card-title">
+                🏆 Badges Earned
+                <span id="earnedBadgeCount" style="color:var(--signify-blue);font-size:12px;letter-spacing:0;text-transform:none;font-weight:700;margin-left:4px;"></span>
+              </p>
+              <div class="side-card-body" id="earnedBadgesList">
+                <div class="empty-msg"><span>🏅</span>Loading...</div>
+              </div>
+            </div>
+
+            <div class="side-card">
+              <p class="side-card-title">🎯 Badge Progress</p>
+              <div class="side-card-body" id="badgeProgressList">
+                <div class="empty-msg"><span>📊</span>Loading...</div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -340,6 +503,71 @@
   <script src="js/jquery.sticky.js"></script>
   <script src="js/custom.js"></script>
   <script type="module" src="js/firebase-auth.js"></script>
+
+  <!--
+    Call window.renderBadgePanels(allBadges, earnedBadgeIds, userAllTime) from profile.js
+
+    allBadges      – all docs from /badges collection: { id, name, description, icon, stat, threshold }
+    earnedBadgeIds – array of badge id strings from users/{uid}/badges sub-collection
+    userAllTime    – user.allTime map: { challengesCompleted, longestStreak, totalTimeSpent, accuracy }
+  -->
+  <script type="module">
+    window.renderBadgePanels = function(allBadges, earnedBadgeIds, userStats) {
+      const earnedSet = new Set(earnedBadgeIds);
+      const earned    = allBadges.filter(b => earnedSet.has(b.id));
+      const notEarned = allBadges.filter(b => !earnedSet.has(b.id));
+
+      /* Earned */
+      const earnedEl = document.getElementById('earnedBadgesList');
+      document.getElementById('earnedBadgeCount').textContent = earned.length ? `(${earned.length})` : '';
+
+      earnedEl.innerHTML = earned.length === 0
+        ? `<div class="empty-msg"><span>🏅</span>No badges yet — complete challenges to unlock your first!</div>`
+        : earned.map(b => `
+            <div class="earned-badge-item">
+              <div class="earned-badge-icon">${b.icon}</div>
+              <div class="earned-badge-info">
+                <p class="earned-badge-name">${b.name}</p>
+                <p class="earned-badge-desc">${b.description}</p>
+              </div>
+            </div>`).join('');
+
+      /* Progress */
+      const progressEl = document.getElementById('badgeProgressList');
+
+      if (notEarned.length === 0) {
+        progressEl.innerHTML = `<div class="empty-msg"><span>🎉</span>You've earned every badge!</div>`;
+        return;
+      }
+
+      const statMap = {
+        challengesCompleted: userStats.challengesCompleted || 0,
+        longestStreak:       userStats.longestStreak       || 0,
+        totalTimeSpent:      userStats.totalTimeSpent       || 0,
+        accuracy:            userStats.accuracy             || 0,
+      };
+
+      progressEl.innerHTML = notEarned.map(b => {
+        const current = statMap[b.stat] ?? 0;
+        const pct     = Math.min(100, Math.round((current / b.threshold) * 100));
+        return `
+          <div class="progress-badge-item">
+            <div class="progress-badge-header">
+              <div class="progress-badge-icon">${b.icon}</div>
+              <div class="progress-badge-label">
+                <p class="progress-badge-name">${b.name}</p>
+                <p class="progress-badge-desc">${b.description}</p>
+              </div>
+              <span class="progress-badge-pct">${current} / ${b.threshold}</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+      }).join('');
+    };
+  </script>
+
   <script type="module" src="js/profile.js"></script>
 
 </body>
