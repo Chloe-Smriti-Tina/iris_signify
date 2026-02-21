@@ -15,71 +15,88 @@
 
     <style>
         :root {
-            --primary-color: #6d8bfa;
-            /* Matches your uploaded logo */
-            --secondary-color: #5371e0;
+            --primary:   #6d8bfa;
+            --primary-d: #5371e0;
+            --text:      #0f172a;
+            --muted:     #64748b;
+            --bg:        #f8fafc;
+            --surface:   #ffffff;
+            --border:    #e2e8f0;
         }
 
-        .navbar-brand {
-            color: var(--primary-color) !important;
-            font-weight: 700;
-            font-size: 2rem;
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    .navbar-brand { color: var(--primary) !important; font-weight: 700; font-size: 2rem; }
+    .custom-btn { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
+    .custom-btn:hover { background: var(--primary-d); border-color: var(--primary-d); color: white; }
 
-        .custom-btn {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-        }
+    .learn-hero { padding: 90px 0 50px; text-align: center; }
+    .learn-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: var(--text); margin-bottom: 12px; letter-spacing: -1px; }
+    .learn-hero h1 span { color: var(--primary); }
+    .learn-hero p { color: var(--muted); font-size: 1.1rem; max-width: 480px; margin: 0 auto; }
 
-        .custom-btn:hover {
-            background: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
+    .module-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .module-card:hover { transform: translateY(-4px); text-decoration: none; }
+    .module-card.alpha:hover { border-color: var(--primary); box-shadow: 0 12px 40px rgba(109,139,250,0.15); }
+    .module-card.words:hover { border-color: #f59e0b; box-shadow: 0 12px 40px rgba(245,158,11,0.15); }
 
-        /* MediaPipe Container Setup */
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 640px;
-            margin: 0 auto;
-            border: 4px solid var(--primary-color);
-            border-radius: 15px;
-            overflow: hidden;
-            background-color: #000;
-        }
+    .card-accent { height: 5px; width: 100%; }
+    .alpha .card-accent { background: linear-gradient(90deg, var(--primary), var(--primary-d)); }
+    .words .card-accent { background: linear-gradient(90deg, #f59e0b, #ef4444); }
 
-        #webcam,
-        #output_canvas {
-            width: 100%;
-            height: auto;
-            display: block;
-            /* Mirror the camera feed so it feels natural to the user */
-            transform: scaleX(-1);
-        }
+    .card-body-custom { padding: 32px; flex: 1; }
 
-        #output_canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 10;
-        }
+    .card-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .badge-alpha { background: #eff3ff; color: var(--primary); border: 1px solid #c7d4fd; }
+    .badge-words { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
 
-        /* Words section uses its own ids but same styling */
-        #webcam_words,
-        #output_canvas_words {
-            width: 100%;
-            height: auto;
-            display: block;
-            transform: scaleX(-1);
-        }
+    .card-icon { font-size: 3rem; display: block; margin-bottom: 16px; line-height: 1; }
+    .module-card h2 { font-size: 1.75rem; font-weight: 900; color: var(--text); margin-bottom: 10px; letter-spacing: -0.5px; }
+    .module-card p { color: var(--muted); line-height: 1.65; margin-bottom: 24px; }
 
-        #output_canvas_words {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 10;
-        }
-    </style>
+    .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+    .pill { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
+    .pill-alpha { background: #eff3ff; color: var(--primary); border: 1px solid #c7d4fd; }
+    .pill-words { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .pill-locked { background: #f1f5f9; color: var(--muted); border: 1px solid var(--border); }
+
+    .card-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 15px; padding: 12px 24px;
+      border-radius: 12px; border: none; transition: all 0.2s; text-decoration: none;
+    }
+    .cta-alpha { background: var(--primary); color: #fff; }
+    .cta-alpha:hover { background: var(--primary-d); color: #fff; }
+    .cta-words { background: #f59e0b; color: #fff; }
+    .cta-words:hover { background: #d97706; color: #fff; }
+
+    .card-stats { display: flex; gap: 20px; padding: 18px 32px; border-top: 1px solid var(--border); background: var(--bg); }
+    .stat-item .val { font-size: 1.1rem; font-weight: 900; color: var(--text); }
+    .stat-item .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+
+    .tip-banner {
+      background: #eff3ff; border: 1px solid #c7d4fd; border-radius: 14px;
+      padding: 16px 22px; margin-bottom: 40px; display: flex; align-items: center; gap: 14px;
+    }
+    .tip-banner i { font-size: 1.4rem; color: var(--primary); flex-shrink: 0; }
+    .tip-banner p { margin: 0; color: #374151; font-size: 14px; }
+
+    .modules-section { padding-bottom: 80px; }
+    footer { border-top: 1px solid var(--border); padding: 24px 0; text-align: center; color: var(--muted); font-size: 13px; }
+  </style>
 </head>
 
 <body>
@@ -113,44 +130,54 @@
         </div>
     </nav>
 
+    <section class="learn-hero">
+    <div class="container">
+      <h1>Choose Your <span>Learning Path</span></h1>
+      <p>Real-time AI feedback as you sign. Start with the alphabet, then level up to full words.</p>
+    </div>
+  </section>
+
+  <section class="modules-section">
+    <div class="container">
+
+      <div class="tip-banner">
+        <i class="bi bi-lightbulb-fill"></i>
+        <p><strong>Recommended:</strong> Start with the Alphabet module to build your foundation. Every letter mastered earns XP toward the global leaderboard!</p>
+      </div>
+
     <!-- ===================== -->
-    <!-- Alphabet Learning (UNCHANGED) -->
+    <!-- Alphabet Learning -->
     <!-- ===================== -->
-    <main class="section-padding" style="margin-top: 50px; min-height: 70vh;">
-        <div class="container">
-            <div class="row align-items-center">
+    <div class="row g-4">
 
-                <div class="col-lg-5 col-12 mb-5 mb-lg-0 text-center text-lg-start">
-                    <h2 class="mb-3">Sign the letter: <span class="text-primary" style="font-size: 3rem;">"A"</span>
-                    </h2>
-                    <p class="lead">Make a fist with your thumb resting against the side of your index finger.</p>
-
-                    <div class="progress mt-4 mb-3" style="height: 25px;">
-                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                            role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
-                            aria-valuemax="100" id="accuracy-bar">0% Match</div>
-                    </div>
-
-                    <button id="enableWebcamButton" class="custom-btn btn text-white mt-3 w-100">
-                        <i class="bi bi-webcam me-2"></i> Enable Camera
-                    </button>
-                </div>
-
-                <div class="col-lg-7 col-12 text-center">
-                    <div class="video-wrapper shadow-lg">
-                        <video id="webcam" autoplay playsinline></video>
-                        <canvas id="output_canvas"></canvas>
-                    </div>
-                    <p class="mt-3 text-muted small"><i class="bi bi-shield-check"></i> Processing happens on your
-                        device. No video is recorded or sent to the cloud.</p>
-                </div>
-
+        <!-- Alphabet -->
+        <div class="col-lg-7 col-12">
+          <a href="learn-alphabet.html" class="module-card alpha">
+            <div class="card-accent"></div>
+            <div class="card-body-custom">
+              <span class="card-badge badge-alpha"><i class="bi bi-alphabet"></i> Foundation</span>
+              <span class="card-icon">🤙</span>
+              <h2>Learn the Alphabet</h2>
+              <p>Master all 26 ASL handshapes from A to Z. The AI camera watches your hand in real time and only advances when you nail it — no clicking, just signing.</p>
+              <div class="pill-row">
+                <span class="pill pill-alpha">A</span><span class="pill pill-alpha">B</span>
+                <span class="pill pill-alpha">C</span><span class="pill pill-alpha">D</span>
+                <span class="pill pill-alpha">E</span><span class="pill pill-alpha">F</span>
+                <span class="pill pill-alpha">G</span><span class="pill pill-alpha">H</span>
+                <span class="pill pill-locked">I – Z →</span>
+              </div>
+              <span class="card-cta cta-alpha">Start Alphabet <i class="bi bi-arrow-right"></i></span>
             </div>
+            <div class="card-stats">
+              <div class="stat-item"><div class="val">26</div><div class="lbl">Letters</div></div>
+              <div class="stat-item"><div class="val">~15 min</div><div class="lbl">To complete</div></div>
+              <div class="stat-item"><div class="val">+50 XP</div><div class="lbl">Per letter</div></div>
+            </div>
+          </a>
         </div>
-    </main>
-
+        
     <!-- ===================== -->
-    <!-- Words Learning (NEW separate part) -->
+    <!-- Words Learning (UNCHANGED NEW separate part) -->
     <!-- ===================== -->
     <section class="section-padding" style="padding-top: 0; min-height: 70vh;">
         <div class="container">

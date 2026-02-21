@@ -1,187 +1,408 @@
+/**
+ * sign-engine.js  –  Signify Alphabet Learning Engine
+ * =====================================================
+ * All alphabet game logic lives here. The HTML page is a thin
+ * shell that provides DOM IDs and sets window.SIGNIFY_CONFIG.
+ *
+ * window.SIGNIFY_CONFIG (set by the page before this script loads):
+ *   completedSet  Set<string>   – letters already mastered (from Firebase)
+ *   streak        number        – user's current streak
+ *   onSuccess(letter, sessionXP) – async callback, fired when letter confirmed
+ */
+
 import {
     GestureRecognizer,
     FilesetResolver,
     DrawingUtils
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
-// ============================================================================
-// 1. DOM ELEMENTS & STATE
-// ============================================================================
-const video = document.getElementById("webcam");
-const canvasElement = document.getElementById("output_canvas");
-const canvasCtx = canvasElement.getContext("2d");
-const enableWebcamButton = document.getElementById("enableWebcamButton");
-const accuracyBar = document.getElementById("accuracy-bar");
-const targetGesture = "Closed_Fist"; // Hardcoded to test the letter "A"
+// ── Letter data ──────────────────────────────────────────────
+// gesture: MediaPipe categoryName, or null (auto-advance timer used instead)
+export const LETTERS = [
+    { letter:"A", gesture:"Closed_Fist",
+      desc:"Make a fist with your thumb resting against the side of your index finger. Keep all four fingers curled tightly.",
+      tip:"Fist facing forward — thumb to the side, not on top." },
+    { letter:"B", gesture:null,
+      desc:"Hold all four fingers together pointing straight up. Fold your thumb flat across the palm.",
+      tip:"Think of holding a flat book upright." },
+    { letter:"C", gesture:null,
+      desc:"Curve all fingers and thumb into the shape of the letter C, like gripping a can from the side.",
+      tip:"Your hand should make a half-circle opening." },
+    { letter:"D", gesture:null,
+      desc:"Point your index finger up. Bring the middle, ring, and pinky fingers down to touch the tip of your thumb, forming a circle.",
+      tip:"The loop is the round part of the letter D." },
+    { letter:"E", gesture:null,
+      desc:"Curl all four fingers downward like bent claws. Tuck your thumb underneath the curled fingers.",
+      tip:"Fingertips should nearly touch the thumb." },
+    { letter:"F", gesture:null,
+      desc:"Connect your index finger and thumb in a circle. Hold the other three fingers upright and spread.",
+      tip:"Similar to the OK hand sign, but held sideways." },
+    { letter:"G", gesture:"Pointing_Up",
+      desc:"Point your index finger out to the side. Hold your thumb parallel to it, pointing the same direction.",
+      tip:"Like a sideways finger gun." },
+    { letter:"H", gesture:null,
+      desc:"Point both your index and middle fingers out to the side together, side by side and flat.",
+      tip:"Two fingers horizontal — like a sideways peace sign." },
+    { letter:"I", gesture:null,
+      desc:"Raise only your pinky finger. Curl all other fingers into a fist.",
+      tip:"Like a pinky promise." },
+    { letter:"J", gesture:null,
+      desc:"Start with the I handshape (pinky up), then trace a J shape in the air with your pinky.",
+      tip:"The movement draws the letter — don't forget the curve!" },
+    { letter:"K", gesture:null,
+      desc:"Extend your index and middle fingers up in a V shape. Place your thumb between them, pointing out.",
+      tip:"Like a peace sign, but with the thumb extended between the fingers." },
+    { letter:"L", gesture:null,
+      desc:"Point your index finger straight up. Extend your thumb out to the side. Keep other fingers curled.",
+      tip:"Your hand literally makes the shape of the letter L." },
+    { letter:"M", gesture:null,
+      desc:"Tuck three fingers (index, middle, ring) over the top of your thumb. Keep your pinky curled in.",
+      tip:"Three fingers on top = M." },
+    { letter:"N", gesture:null,
+      desc:"Tuck your index and middle fingers over the top of your thumb. Keep other fingers curled.",
+      tip:"Two fingers on top = N." },
+    { letter:"O", gesture:null,
+      desc:"Bring all your fingertips and thumb together to form the letter O, like holding a small ball.",
+      tip:"The gap in the circle should be visible." },
+    { letter:"P", gesture:null,
+      desc:"Make the K handshape but point your whole hand downward.",
+      tip:"K flipped to point down." },
+    { letter:"Q", gesture:null,
+      desc:"Make the G handshape but point it downward instead.",
+      tip:"G flipped to point down." },
+    { letter:"R", gesture:null,
+      desc:"Cross your index finger over your middle finger. Keep other fingers curled.",
+      tip:"Think of crossing your fingers for luck." },
+    { letter:"S", gesture:"Closed_Fist",
+      desc:"Make a fist with your thumb placed across the front of your fingers (not to the side like A).",
+      tip:"Very similar to A — the thumb position is the only difference." },
+    { letter:"T", gesture:null,
+      desc:"Make a fist and poke your thumb up between your index and middle finger so the tip peeks out.",
+      tip:"The thumb tip shows through the fist." },
+    { letter:"U", gesture:null,
+      desc:"Hold your index and middle fingers together, pointing straight up. Keep other fingers and thumb curled.",
+      tip:"Two fingers together pointing up." },
+    { letter:"V", gesture:null,
+      desc:"Hold your index and middle fingers apart in a V shape pointing up. Keep other fingers curled.",
+      tip:"The classic peace sign!" },
+    { letter:"W", gesture:null,
+      desc:"Hold your index, middle, and ring fingers up and spread apart to form a W. Keep pinky and thumb folded.",
+      tip:"Three fingers spread = W." },
+    { letter:"X", gesture:null,
+      desc:"Extend your index finger and curl it into a hook shape. Keep all other fingers curled.",
+      tip:"Like a beckoning 'come here' motion — but held still." },
+    { letter:"Y", gesture:"Thumb_Up",
+      desc:"Extend your thumb and pinky finger outward. Keep your index, middle, and ring fingers curled.",
+      tip:"Imagine a Y-shape made by your thumb and pinky." },
+    { letter:"Z", gesture:null,
+      desc:"Point your index finger and draw the letter Z in the air: horizontal right, diagonal down-left, horizontal right.",
+      tip:"The movement IS the letter Z — keep it crisp." },
+];
 
-let gestureRecognizer;
-let runningMode = "VIDEO";
+const XP_PER_LETTER = 50;
+const HOLD_FRAMES   = 28;   // frames to hold correct sign (~1 sec @ 30fps)
+const AUTO_ADV_SECS = 8;    // seconds before auto-advancing null-gesture letters
+
+// ── State ────────────────────────────────────────────────────
+const cfg        = window.SIGNIFY_CONFIG || {};
+let completedSet = cfg.completedSet instanceof Set ? cfg.completedSet : new Set();
+let currentIndex = 0;
+let holdProgress = 0;
+let autoTimer    = 0;
+let successLocked = false;
+let gestureRec   = null;
 let webcamRunning = false;
 let lastVideoTime = -1;
-let signHoldProgress = 0; // Tracks the "fill" of the bar
+let sessionXP    = 0;
+let totalAttempts = 0;
+let totalHits     = 0;
 
-// ============================================================================
-// 2. INITIALIZE MEDIAPIPE 
-// ============================================================================
-const createGestureRecognizer = async () => {
-    // 1. Load the WebAssembly backend for MediaPipe
+// DOM refs — populated in boot
+let video, canvas, ctx, camBtn, camOverlay, holdBar, holdLabel, detLbl, confLbl;
+
+// ── DOM grab ─────────────────────────────────────────────────
+function grabDom() {
+    video      = document.getElementById("webcam");
+    canvas     = document.getElementById("output_canvas");
+    ctx        = canvas.getContext("2d");
+    camBtn     = document.getElementById("camBtn");
+    camOverlay = document.getElementById("camOverlay");
+    holdBar    = document.getElementById("holdBar");
+    holdLabel  = document.getElementById("holdLabel");
+    detLbl     = document.getElementById("detectedLbl");
+    confLbl    = document.getElementById("confLbl");
+}
+
+// ── Render current letter ────────────────────────────────────
+function renderLetter() {
+    const l = LETTERS[currentIndex];
+
+    const hl = document.getElementById("letterHighlight");
+    if (hl) hl.textContent = `"${l.letter}"`;
+
+    const desc = document.getElementById("letterDesc");
+    if (desc) desc.textContent = l.desc;
+
+    const tip = document.getElementById("letterTip");
+    if (tip) tip.innerHTML = `<i class="bi bi-hand-index-thumb"></i> ${l.tip}`;
+
+    // ASL reference image — Lifeprint.com (public ASL educational resource)
+    const img = document.getElementById("aslImage");
+    const fb  = document.getElementById("aslFallback");
+    if (img) {
+        img.style.display = "block";
+        if (fb) fb.style.display = "none";
+        img.alt = `ASL sign for the letter ${l.letter}`;
+        img.src = `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${l.letter.toLowerCase()}.gif`;
+    }
+
+    // Overall progress
+    const pct = Math.round((completedSet.size / 26) * 100);
+    const pf  = document.getElementById("progFill");
+    if (pf) pf.style.width = pct + "%";
+    const pc  = document.getElementById("progressCount");
+    if (pc) pc.textContent = `${completedSet.size} / 26`;
+
+    holdProgress  = 0;
+    autoTimer     = 0;
+    successLocked = false;
+    updateHoldBar();
+    buildGrid();
+    updateSidebar();
+}
+
+// ── Sidebar letter grid ──────────────────────────────────────
+function buildGrid() {
+    const grid = document.getElementById("letterGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    LETTERS.forEach((l, i) => {
+        const btn = document.createElement("button");
+        btn.id          = `lb-${l.letter}`;
+        btn.textContent = l.letter;
+        btn.setAttribute("aria-label", `Go to letter ${l.letter}`);
+        btn.className   = "letter-btn" +
+            (i === currentIndex        ? " active" : "") +
+            (completedSet.has(l.letter) ? " done"   : "");
+        btn.onclick = () => { currentIndex = i; renderLetter(); };
+        grid.appendChild(btn);
+    });
+}
+
+// ── Sidebar stats ────────────────────────────────────────────
+function updateSidebar() {
+    const xpEl = document.getElementById("sb-xp");
+    if (xpEl) xpEl.textContent = sessionXP;
+    const doneEl = document.getElementById("sb-done");
+    if (doneEl) doneEl.textContent = `${completedSet.size}/26`;
+    const accEl = document.getElementById("sb-acc");
+    if (accEl) accEl.textContent = totalAttempts > 0
+        ? Math.round((totalHits / totalAttempts) * 100) + "%" : "—";
+    const strEl = document.getElementById("sb-streak");
+    if (strEl) strEl.textContent = cfg.streak || 0;
+}
+
+// ── Hold bar ─────────────────────────────────────────────────
+function updateHoldBar() {
+    if (!holdBar || !holdLabel) return;
+    const l   = LETTERS[currentIndex];
+    const pct = Math.min(100, holdProgress);
+    holdBar.style.width = pct + "%";
+
+    if (pct >= 100) {
+        holdBar.classList.add("success");
+        holdLabel.textContent = "✓ Perfect!";
+    } else if (l.gesture === null) {
+        holdBar.classList.remove("success");
+        const rem = Math.max(0, AUTO_ADV_SECS - Math.floor(autoTimer));
+        holdLabel.textContent = rem > 0 ? `Practice for ${rem}s…` : "Moving on!";
+    } else {
+        holdBar.classList.remove("success");
+        holdLabel.textContent = pct > 8 ? `Holding… ${Math.floor(pct)}%` : "Make the sign!";
+    }
+}
+
+// ── Public navigation (called by onclick in HTML) ────────────
+window.goLetter = function(delta) {
+    currentIndex = Math.max(0, Math.min(25, currentIndex + delta));
+    renderLetter();
+};
+
+// ── Success ──────────────────────────────────────────────────
+function showSuccess(letter) {
+    if (successLocked) return;
+    successLocked = true;
+    completedSet.add(letter);
+    sessionXP += XP_PER_LETTER;
+
+    const title = document.getElementById("successTitle");
+    if (title) title.textContent = `Letter ${letter} Mastered! 🔥`;
+    const xpTag = document.getElementById("xpEarned");
+    if (xpTag) xpTag.textContent = `+${XP_PER_LETTER} XP`;
+    const subs = ["Keep it up!", "Excellent form!", "Your hands are speaking! 🤝", "That's ASL!"];
+    const sub  = document.getElementById("successSub");
+    if (sub) sub.textContent = subs[Math.floor(Math.random() * subs.length)];
+
+    const overlay = document.getElementById("successOverlay");
+    if (overlay) overlay.classList.add("visible");
+
+    // Floating XP pop
+    const pop = document.createElement("div");
+    pop.style.cssText = "position:fixed;left:50%;top:42%;transform:translateX(-50%);font-size:1.6rem;font-weight:900;color:#f59e0b;pointer-events:none;z-index:9999;animation:xpPop 1.1s ease-out forwards;text-shadow:0 2px 12px rgba(245,158,11,.4);";
+    pop.textContent   = `+${XP_PER_LETTER} XP`;
+    document.body.appendChild(pop);
+    setTimeout(() => pop.remove(), 1300);
+
+    if (typeof cfg.onSuccess === "function") cfg.onSuccess(letter, sessionXP);
+    updateSidebar();
+    buildGrid();
+}
+
+// Called by "Next Letter" button in HTML
+window.dismissSuccess = function() {
+    const overlay = document.getElementById("successOverlay");
+    if (overlay) overlay.classList.remove("visible");
+    if (currentIndex < 25) { currentIndex++; renderLetter(); }
+    else if (holdLabel) holdLabel.textContent = "🏆 All 26 letters complete!";
+};
+
+// ── MediaPipe init ───────────────────────────────────────────
+async function initRecognizer() {
     const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
     );
-    
-    // 2. Create the Recognizer
-    // PERSON A: Right now, this uses Google's default gesture model (Thumbs Up, Open Palm, etc.)
-    // Once you train your ASL model, replace the modelAssetPath with: "models/classroom_gestures.task"
-    gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
+    gestureRec = await GestureRecognizer.createFromOptions(vision, {
         baseOptions: {
-            modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
-            delegate: "GPU" // Uses the device's GPU for faster processing!
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+            delegate: "GPU"
         },
-        runningMode: runningMode,
-        numHands: 2 // Detect both hands if needed
+        runningMode: "VIDEO",
+        numHands: 1
     });
 
-    // Enable the button only AFTER the model has finished loading
-    enableWebcamButton.innerText = "Enable Camera";
-    enableWebcamButton.classList.remove("disabled");
-    enableWebcamButton.addEventListener("click", enableCam);
-};
+    // Only enable the button AFTER the model is loaded.
+    // Clicking the button is what triggers the browser camera permission dialog.
+    camBtn.disabled = false;
+    camBtn.innerHTML = '<i class="bi bi-webcam"></i> Enable Camera';
+    camBtn.addEventListener("click", toggleCam);
+}
 
-// Start the loading process immediately
-enableWebcamButton.innerText = "Loading AI Engine...";
-enableWebcamButton.classList.add("disabled");
-createGestureRecognizer();
-
-// ============================================================================
-// 3. WEBCAM LOGIC
-// ============================================================================
-function enableCam(event) {
-    if (!gestureRecognizer) {
-        alert("Please wait for the AI model to load.");
-        return;
-    }
-
-    if (webcamRunning === true) {
-        // --- TURN OFF THE CAMERA ---
+// ── Camera toggle ────────────────────────────────────────────
+function toggleCam() {
+    if (webcamRunning) {
         webcamRunning = false;
-        enableWebcamButton.innerText = "Enable Camera";
-
-        // 1. Grab the active stream from the video element
+        camBtn.innerHTML = '<i class="bi bi-webcam"></i> Enable Camera';
         const stream = video.srcObject;
-        if (stream) {
-            // 2. Loop through all media tracks (video/audio) and stop them
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
-        }
-        
-        // 3. Disconnect the stream from the video element
+        if (stream) stream.getTracks().forEach(t => t.stop());
         video.srcObject = null;
-        
-        // 4. Clear the drawing canvas so the skeleton disappears
-        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        camOverlay.style.display = "flex";
     } else {
-        // --- TURN ON THE CAMERA ---
         webcamRunning = true;
-        enableWebcamButton.innerText = "Disable Camera";
+        camBtn.innerHTML = '<i class="bi bi-webcam-fill"></i> Disable Camera';
 
-        // Request access to the webcam
-        const constraints = { video: true };
-        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-            video.srcObject = stream;
-            video.addEventListener("loadeddata", predictWebcam);
-        });
+        // getUserMedia fires the browser permission prompt
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                camOverlay.style.display = "none";
+                video.addEventListener("loadeddata", gameLoop, { once: true });
+            })
+            .catch(err => {
+                webcamRunning = false;
+                camBtn.innerHTML = '<i class="bi bi-webcam"></i> Enable Camera';
+                const p = camOverlay.querySelector("p");
+                if (p) p.textContent = "Camera access denied — please allow camera and try again.";
+                console.error("getUserMedia error:", err);
+            });
     }
 }
 
-// ============================================================================
-// 4. THE MAIN GAME LOOP 
-// ============================================================================
-async function predictWebcam() {
-    const webcamElement = document.getElementById("webcam");
-    
-    // Ensure the canvas matches the video dimensions exactly
-    canvasElement.style.width = video.videoWidth;;
-    canvasElement.style.height = video.videoHeight;
-    canvasElement.width = video.videoWidth;
-    canvasElement.height = video.videoHeight;
+// ── Game loop ────────────────────────────────────────────────
+function gameLoop() {
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-    // Run the gesture recognizer if the video frame has updated
-    let startTimeMs = performance.now();
+    if (!webcamRunning) return;
+
+    const now = performance.now();
     let results;
     if (lastVideoTime !== video.currentTime) {
         lastVideoTime = video.currentTime;
-        results = gestureRecognizer.recognizeForVideo(video, startTimeMs);
+        results = gestureRec.recognizeForVideo(video, now);
     }
 
-    // Clear the previous frame's drawings
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    const drawingUtils = new DrawingUtils(canvasCtx);
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const du = new DrawingUtils(ctx);
 
-    // If hands are detected...
-    if (results && results.landmarks) {
-        for (const landmarks of results.landmarks) {
-            // Draw the skeleton (This creates the cool "hacker/tech" vibe for judges)
-            drawingUtils.drawConnectors(
-                landmarks,
-                GestureRecognizer.HAND_CONNECTIONS,
-                { color: "#5371e0", lineWidth: 5 } // Matches your Signify blue!
-            );
-            drawingUtils.drawLandmarks(landmarks, {
-                color: "#ffffff",
-                lineWidth: 2
-            });
+    if (results?.landmarks) {
+        for (const lm of results.landmarks) {
+            du.drawConnectors(lm, GestureRecognizer.HAND_CONNECTIONS, { color: "#6d8bfa", lineWidth: 4 });
+            du.drawLandmarks(lm, { color: "#ffffff", lineWidth: 2 });
         }
     }
 
-    // ========================================================================
-    // UPDATE THE UI 
-    // ========================================================================
-    if (results && results.gestures.length > 0) {
-        const categoryName = results.gestures[0][0].categoryName;
+    const l = LETTERS[currentIndex];
 
-        // If they are making the correct sign, fill the bar quickly
-        if (categoryName === targetGesture) {
-            signHoldProgress += 4; // Fills in ~25 frames (about 1 second)
-        } else {
-            // If they make the wrong sign, drain it slowly
-            signHoldProgress -= 2; 
+    if (results?.gestures?.length > 0) {
+        const cat   = results.gestures[0][0].categoryName;
+        const score = results.gestures[0][0].score;
+        if (detLbl)  detLbl.textContent  = cat;
+        if (confLbl) confLbl.textContent = Math.round(score * 100) + "%";
+        totalAttempts++;
+
+        if (l.gesture && cat === l.gesture && score > 0.7) {
+            holdProgress += (100 / HOLD_FRAMES);
+            totalHits++;
+        } else if (l.gesture) {
+            holdProgress = Math.max(0, holdProgress - 2);
         }
     } else {
-        // If no hands are detected at all, drain it faster
-        signHoldProgress -= 5;
+        if (detLbl)  detLbl.textContent  = "—";
+        if (confLbl) confLbl.textContent = "—";
+        if (l.gesture) holdProgress = Math.max(0, holdProgress - 4);
     }
 
-    // Clamp the progress between 0 and 100 so it doesn't break the UI
-    signHoldProgress = Math.max(0, Math.min(100, signHoldProgress));
-
-    // Update the visual width of the Bootstrap progress bar
-    accuracyBar.style.width = `${signHoldProgress}%`;
-
-    // Change colors based on how full the bar is
-    if (signHoldProgress >= 100) {
-        accuracyBar.classList.replace("bg-warning", "bg-success");
-        accuracyBar.classList.replace("bg-danger", "bg-success");
-        accuracyBar.innerText = "SUCCESS! 🎉";
-        
-        // HACKATHON PRO TIP: Call a function here to move to the next letter!
-        
-    } else if (signHoldProgress > 0) {
-        accuracyBar.classList.replace("bg-danger", "bg-warning");
-        accuracyBar.classList.replace("bg-success", "bg-warning");
-        accuracyBar.innerText = `Holding... ${Math.floor(signHoldProgress)}%`;
-    } else {
-        accuracyBar.classList.replace("bg-warning", "bg-danger");
-        accuracyBar.classList.replace("bg-success", "bg-danger");
-        accuracyBar.innerText = "Waiting for correct sign...";
+    if (l.gesture === null) {
+        autoTimer    += 1 / 60;
+        holdProgress  = (autoTimer / AUTO_ADV_SECS) * 100;
     }
 
-    canvasCtx.restore();
+    holdProgress = Math.min(100, holdProgress);
+    updateHoldBar();
+    if (holdProgress >= 100 && !successLocked) showSuccess(l.letter);
 
-    // Keep the loop running as long as the webcam is on
-    if (webcamRunning === true) {
-        window.requestAnimationFrame(predictWebcam);
-    }
+    ctx.restore();
+    if (webcamRunning) requestAnimationFrame(gameLoop);
 }
+
+// ── Boot ─────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    grabDom();
+
+    // Sync completedSet from config (may already be populated by Firebase)
+    if (cfg.completedSet instanceof Set) completedSet = cfg.completedSet;
+
+    // Jump to first incomplete letter
+    const first = LETTERS.findIndex(l => !completedSet.has(l.letter));
+    if (first >= 0) currentIndex = first;
+
+    renderLetter();
+
+    // Show loading state — button is disabled until model finishes loading
+    camBtn.disabled = true;
+    camBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading AI…';
+
+    initRecognizer();
+
+    // Expose a re-render hook so Firebase auth (which loads async) can
+    // call this after it populates completedSet post-login
+    window.__signEngineRerender = () => {
+        completedSet = cfg.completedSet;
+        const f = LETTERS.findIndex(l => !completedSet.has(l.letter));
+        if (f >= 0) currentIndex = f;
+        renderLetter();
+    };
+    window.__signEngineReady = true;
+});
