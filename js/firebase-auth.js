@@ -278,11 +278,8 @@ window.handleSignUp = async function() {
       email: cred.user.email,
       displayName: name,
       createdAt: new Date(),
-      streak: 0,
-      xp: 0,
-      progressAtoM: 0,
-      progressNtoZ: 0,
-      nextLetter: "A"
+      allTime: { totalTimeSpent: 0, challengesCompleted: 0, accuracy: 0, longestStreak: 0 },
+        currentStreak: { startDate: null, recentDate: null, count: 0 }
     });
     closeModal();
   } catch (err) {

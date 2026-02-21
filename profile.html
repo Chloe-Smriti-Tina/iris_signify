@@ -93,7 +93,7 @@
     }
 
     .stat-icon {
-        color: #FE6100; 
+        color: var(--ibm-orange); 
         font-size: 32px; 
     }
 
@@ -202,13 +202,13 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a href="index.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
+      <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
       <div class="d-flex align-items-center d-lg-none">
         <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
       </div>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-lg-5">
-          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
           <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
           <li class="nav-item"><a class="nav-link active" href="profile.html">Profile</a></li>
@@ -256,6 +256,21 @@
               <div class="stats-section">
                 <p class="stats-label">All-time stats</p>
                 <div class="stats-grid">
+                    <div class="stat-card">
+                    <span class="stat-icon material-icons">whatshot</span>
+                    <span class="stat-value" id="statLongestStreak">0</span>
+                    <span class="stat-label">Longest Streak</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-icon material-icons">whatshot</span>
+                    <span class="stat-value" id="statCurrentStreak">0</span>
+                    <span class="stat-label">Current Streak</span>
+                  </div>
+                  <div class="stat-card">
+                    <span class="stat-icon material-icons">emoji_events</span>
+                    <span class="stat-value" id="statNumBadges">0</span>
+                    <span class="stat-label">Badges</span>
+                  </div>                  
                   <div class="stat-card">
                     <span class="stat-icon material-icons">schedule</span>
                     <span class="stat-value" id="statTime">0</span>

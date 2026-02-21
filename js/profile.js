@@ -43,6 +43,9 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  // Hide not logged in, show content
+  document.getElementById("notLoggedIn").style.display = "none";  
+
   document.getElementById("profileContent").style.display = "block";
 
   // Fetch Firestore document
