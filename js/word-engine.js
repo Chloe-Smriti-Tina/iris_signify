@@ -4,41 +4,56 @@
 //  NO model files needed — everything loads automatically!
 // ============================================================
 
+// ── REQUIRED: Update your learn.html scripts section ─────────
+// Replace your existing scripts at the bottom of <body> with:
+//
+//  <script src="https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js"></script>
+//  <script src="https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js"></script>
+//  <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js"></script>
+//  <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js"></script>
+//  <script src="https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js"></script>
+//  <script type="module" src="js/sign-engine.js"></script>
+//  <script src="js/word-engine.js"></script>   ← NOT type="module"
+//
+// ─────────────────────────────────────────────────────────────
+
 // ── Gesture Definitions ──────────────────────────────────────
 
 function makeHelloGesture() {
-    // Open hand, all fingers extended
-    const hello = new fp.GestureDescription('Hello');
-    for (const finger of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
-        hello.addCurl(finger, fp.FingerCurl.NoCurl, 1.0);
+    // Open hand, all fingers extended, pointing STRAIGHT UP
+    const hello = new fp.GestureDescription('Thank You');
+    for (const f of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
+        hello.addCurl(f, fp.FingerCurl.NoCurl, 1.0);
     }
-    hello.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 0.9);
-    hello.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 0.9);
+    hello.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
+    hello.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
+    hello.addDirection(fp.Finger.Ring, fp.FingerDirection.VerticalUp, 1.0);
+    hello.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
     return hello;
 }
 
 function makeThankYouGesture() {
-    // Flat hand angled diagonally, all fingers extended
-    const thankYou = new fp.GestureDescription('Thank You');
-    for (const finger of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
-        thankYou.addCurl(finger, fp.FingerCurl.NoCurl, 1.0);
+    // Flat hand, all fingers extended, pointing DIAGONALLY outward
+    const thankYou = new fp.GestureDescription('Hello');
+    for (const f of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
+        thankYou.addCurl(f, fp.FingerCurl.NoCurl, 1.0);
     }
+    thankYou.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 1.0);
     thankYou.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpRight, 1.0);
-    thankYou.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 0.9);
+    thankYou.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 1.0);
     thankYou.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpRight, 1.0);
-    thankYou.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 0.9);
+    thankYou.addDirection(fp.Finger.Ring, fp.FingerDirection.DiagonalUpLeft, 0.9);
+    thankYou.addDirection(fp.Finger.Ring, fp.FingerDirection.DiagonalUpRight, 0.9);
     return thankYou;
 }
 
 function makeILoveYouGesture() {
-    // Thumb + index + pinky extended, middle + ring curled
+    // Thumb + index + pinky extended, middle + ring fully curled
     const ily = new fp.GestureDescription('I Love You');
     ily.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
     ily.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
     ily.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl, 1.0);
-    ily.addCurl(fp.Finger.Middle, fp.FingerCurl.HalfCurl, 0.7);
     ily.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
-    ily.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl, 0.7);
     ily.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
     ily.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
     ily.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
@@ -46,7 +61,7 @@ function makeILoveYouGesture() {
 }
 
 function makeYesGesture() {
-    // Thumbs up — fist with thumb pointing up
+    // Thumbs up — only thumb up, all others fully curled
     const yes = new fp.GestureDescription('Yes');
     yes.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
     yes.addCurl(fp.Finger.Index, fp.FingerCurl.FullCurl, 1.0);
@@ -54,51 +69,37 @@ function makeYesGesture() {
     yes.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
     yes.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0);
     yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.VerticalUp, 1.0);
-    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpLeft, 0.8);
-    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpRight, 0.8);
+    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpLeft, 0.7);
+    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpRight, 0.7);
     return yes;
 }
 
 function makeNoGesture() {
-    // Index + middle extended (peace/scissors), others curled
+    // Peace sign — index + middle only, others curled
     const no = new fp.GestureDescription('No');
-    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.8);
-    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 0.6);
+    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0);
+    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.5);
     no.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
     no.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
     no.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
-    no.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl, 0.7);
+    no.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl, 0.5);
     no.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0);
-    no.addCurl(fp.Finger.Pinky, fp.FingerCurl.HalfCurl, 0.7);
+    no.addCurl(fp.Finger.Pinky, fp.FingerCurl.HalfCurl, 0.5);
     no.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
     no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
     return no;
 }
 
-function makePleaseGesture() {
-    const please = new fp.GestureDescription('Please');
-    please.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Ring, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
-    please.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalLeft, 1.0);
-    please.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalRight, 0.9);
-    return please;
-}
-
 // ── Config ────────────────────────────────────────────────────
 const WORD_INSTRUCTIONS = {
-    'Hello': 'Open your hand flat and face your palm outward — all five fingers extended.',
-    'Thank You': 'Touch your chin with flat fingers, then move your hand forward/outward.',
-    'I Love You': 'Extend your thumb, index finger, and pinky — keep middle and ring fingers folded.',
-    'Yes': 'Make a thumbs up — fist closed with thumb pointing straight up.',
-    'No': 'Extend your index and middle fingers like a peace sign, others curled.',
-    'Please': 'Flat open hand, rub palm in a circular motion on your chest.',
+    'Hello': 'Raise your open hand, all five fingers pointing straight up like a salute.',
+    'Thank You': 'Flat open hand, fingers angled outward/forward (not straight up).',
+    'I Love You': 'Extend your thumb, index finger, and pinky — middle and ring fingers curled.',
+    'Yes': 'Thumbs up — fist closed with only your thumb pointing straight up.',
+    'No': 'Peace sign — index and middle fingers up, others curled.',
 };
-const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No', 'Please'];
-const MIN_SCORE = 5.0;  // gesture confidence threshold out of 10
-const MATCH_NEEDED = 20;   // consecutive matching frames before advancing
+const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
+const MATCH_NEEDED = 15;
 
 // ── DOM refs ──────────────────────────────────────────────────
 const video = document.getElementById('webcam_words');
@@ -129,7 +130,6 @@ async function loadModels() {
             makeILoveYouGesture(),
             makeYesGesture(),
             makeNoGesture(),
-            makePleaseGesture(),
         ]);
         console.log('[word-engine] Ready ✓');
         enableBtn.textContent = '🎥 Enable Camera (Words)';
@@ -161,17 +161,16 @@ async function startWebcam() {
 
 // ── Draw skeleton ─────────────────────────────────────────────
 const FINGER_PATHS = [
-    [0, 1, 2, 3, 4],    // thumb
-    [0, 5, 6, 7, 8],    // index
-    [0, 9, 10, 11, 12], // middle
-    [0, 13, 14, 15, 16],// ring
-    [0, 17, 18, 19, 20],// pinky
+    [0, 1, 2, 3, 4],
+    [0, 5, 6, 7, 8],
+    [0, 9, 10, 11, 12],
+    [0, 13, 14, 15, 16],
+    [0, 17, 18, 19, 20],
 ];
 
 function drawHand(predictions, color) {
     if (!predictions.length) return;
     const lm = predictions[0].landmarks;
-
     ctx.strokeStyle = color;
     ctx.lineWidth = 2.5;
     for (const path of FINGER_PATHS) {
@@ -199,12 +198,17 @@ async function detectLoop() {
     const predictions = await handposeModel.estimateHands(video);
 
     if (predictions.length > 0) {
-        const est = gestureEstimator.estimate(predictions[0].landmarks, MIN_SCORE);
+        // Use low threshold (4.0) so we always get scores back, then evaluate them ourselves
+        const est = gestureEstimator.estimate(predictions[0].landmarks, 4.0);
 
         if (est.gestures.length > 0) {
-            const best = est.gestures.reduce((a, b) => a.score > b.score ? a : b);
+            const sorted = [...est.gestures].sort((a, b) => b.score - a.score);
+            // Always log so we can see what's happening
+            console.log(sorted.map(g => `${g.name}:${g.score.toFixed(1)}`).join(' | '), '→ target:', currentWord);
+
+            const best = sorted[0];
             const label = best.name;
-            const pct = Math.min(100, Math.round((best.score / 7.0) * 100));
+            const pct = Math.min(100, Math.round((best.score / 8.0) * 100));
             const isMatch = label === currentWord;
 
             drawHand(predictions, isMatch ? '#22c55e' : '#6d8bfa');
@@ -218,23 +222,24 @@ async function detectLoop() {
 
             if (isMatch) {
                 matchFrames++;
-                console.log('Match frames:', matchFrames, '/', MATCH_NEEDED);
+                console.log(`✅ ${matchFrames}/${MATCH_NEEDED} frames matched`);
                 if (matchFrames >= MATCH_NEEDED) {
                     advanceWord();
                     matchFrames = 0;
                 }
             } else {
-                matchFrames = Math.max(0, matchFrames - 1); // forgives brief dips
+                matchFrames = Math.max(0, matchFrames - 1); // forgive brief dips
             }
 
         } else {
             drawHand(predictions, '#6d8bfa');
+            console.log('No gesture matched at all');
             detectedEl.textContent = '🤔 Keep trying';
             confidenceEl.textContent = '—';
             progressBar.style.width = '5%';
             progressBar.textContent = 'Hand detected…';
             progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-info';
-            matchFrames = 0;
+            matchFrames = Math.max(0, matchFrames - 1);
         }
     } else {
         detectedEl.textContent = '—';
@@ -250,18 +255,26 @@ async function detectLoop() {
 
 // ── Advance word ──────────────────────────────────────────────
 function advanceWord() {
-    const idx = WORDS.indexOf(currentWord);
-    currentWord = WORDS[(idx + 1) % WORDS.length];
-    targetWordEl.textContent = `"${currentWord}"`;
-    instructEl.textContent = WORD_INSTRUCTIONS[currentWord];
+    const nextWord = WORDS[(WORDS.indexOf(currentWord) + 1) % WORDS.length];
+    console.log('🎉 Advanced to:', nextWord);
+
+    streaming = false;
+    matchFrames = 0;
+
     progressBar.style.width = '100%';
-    progressBar.textContent = '✓ Great job! Next word…';
+    progressBar.textContent = '✓ Great job!';
     progressBar.className = 'progress-bar bg-success';
+
     setTimeout(() => {
+        currentWord = nextWord;
+        targetWordEl.textContent = `"${currentWord}"`;
+        instructEl.textContent = WORD_INSTRUCTIONS[currentWord];
         progressBar.style.width = '0%';
         progressBar.textContent = '0% Match';
         progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
-    }, 1200);
+        streaming = true;
+        detectLoop();
+    }, 2000);
 }
 
 // ── Button ────────────────────────────────────────────────────
