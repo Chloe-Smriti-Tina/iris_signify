@@ -273,7 +273,8 @@ window.handleSignUp = async function() {
       email: cred.user.email,
       displayName: name,
       createdAt: new Date(),
-      allTime: { totalTimeSpent: 0, challengesCompleted: 0, accuracy: 0 }
+      allTime: { totalTimeSpent: 0, challengesCompleted: 0, accuracy: 0, longestStreak: 0 },
+        currentStreak: { startDate: null, recentDate: null, count: 0 }
     });
     closeModal();
   } catch (err) {
