@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -21,8 +21,7 @@ const firebaseConfig = {
   appId: "1:150947241043:web:f2fbb25737e9b7a02c7aa6"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig); const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ── Build default alphabet subcollection entries ─────────────
@@ -127,7 +126,7 @@ document.body.insertAdjacentHTML("beforeend", `
 
 // ── Tab switching ────────────────────────────────────────────
 
-window.switchTab = function(tab) {
+window.switchTab = function (tab) {
   const isSignIn = tab === "signin";
   document.getElementById("formSignIn").style.display = isSignIn ? "block" : "none";
   document.getElementById("formSignUp").style.display = isSignIn ? "none" : "block";
@@ -143,7 +142,7 @@ function openModal() { document.getElementById("authModal").style.display = "fle
 function closeModal() { document.getElementById("authModal").style.display = "none"; }
 
 document.getElementById("authModalClose").addEventListener("click", closeModal);
-document.getElementById("authModal").addEventListener("click", function(e) {
+document.getElementById("authModal").addEventListener("click", function (e) {
   if (e.target === this) closeModal();
 });
 
@@ -164,14 +163,14 @@ function handleIconClick(e) {
   }
 
   const rect = e.target.getBoundingClientRect();
-  dropdown.style.top  = (rect.bottom + 8) + "px";
+  dropdown.style.top = (rect.bottom + 8) + "px";
   dropdown.style.left = (rect.left - 100) + "px";
   document.getElementById("dropdownEmail").textContent = user.email;
   dropdown.style.display = "block";
   dropdownOpen = true;
 }
 
-document.addEventListener("click", function(e) {
+document.addEventListener("click", function (e) {
   const dropdown = document.getElementById("profileDropdown");
   if (dropdownOpen && !dropdown.contains(e.target) && !e.target.classList.contains("profile-icon-btn")) {
     dropdown.style.display = "none";
@@ -181,7 +180,7 @@ document.addEventListener("click", function(e) {
 
 // ── Auth handlers ────────────────────────────────────────────
 
-window.handleSignIn = async function() {
+window.handleSignIn = async function () {
   const email = document.getElementById("siEmail").value.trim();
   const password = document.getElementById("siPassword").value;
   const errEl = document.getElementById("siError");
@@ -195,7 +194,7 @@ window.handleSignIn = async function() {
   }
 };
 
-window.handleSignUp = async function() {
+window.handleSignUp = async function () {
   const name = document.getElementById("suName").value.trim();
   const email = document.getElementById("suEmail").value.trim();
   const password = document.getElementById("suPassword").value;
@@ -216,7 +215,7 @@ window.handleSignUp = async function() {
   }
 };
 
-window.handleSignOut = async function() {
+window.handleSignOut = async function () {
   await signOut(auth);
   document.getElementById("profileDropdown").style.display = "none";
   dropdownOpen = false;
@@ -234,13 +233,13 @@ onAuthStateChanged(auth, (user) => {
 
 function friendlyError(code) {
   const map = {
-    "auth/invalid-email":        "Please enter a valid email address.",
-    "auth/user-not-found":       "No account found with that email.",
-    "auth/wrong-password":       "Incorrect password.",
+    "auth/invalid-email": "Please enter a valid email address.",
+    "auth/user-not-found": "No account found with that email.",
+    "auth/wrong-password": "Incorrect password.",
     "auth/email-already-in-use": "An account with this email already exists.",
-    "auth/weak-password":        "Password should be at least 6 characters.",
-    "auth/too-many-requests":    "Too many attempts. Please try again later.",
-    "auth/invalid-credential":   "Invalid email or password."
+    "auth/weak-password": "Password should be at least 6 characters.",
+    "auth/too-many-requests": "Too many attempts. Please try again later.",
+    "auth/invalid-credential": "Invalid email or password."
   };
   return map[code] || "Something went wrong. Please try again.";
 }
