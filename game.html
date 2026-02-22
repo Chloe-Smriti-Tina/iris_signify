@@ -946,10 +946,9 @@
         const db = getDatabase(app);
         const fs = getFirestore(app);
 
-        const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
+        const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes'];
         // Best of 5: 3 words + 2 letters = 5 rounds
         const TOTAL_ROUNDS = 5;
-        const WIN_SCORE = 3; // first to 3 wins
         const ROUND_DELAY = 5000;
         const CIRCUMFERENCE = 2 * Math.PI * 27;
 
@@ -961,6 +960,7 @@
         let peerConnection = null, localStream = null, webrtcReady = false;
         let cdInterval = null;
         let scheduledNextRoundAt = null;
+        let roomUnsubscribe = null;
 
         const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
@@ -972,9 +972,11 @@
             window.__answerSent = false; window.__answerReceived = false;
             window.__addedCandidates = new Set();
             window.__localRoundHandled = false;
-            window.__handledForRound = -1; // tracks which round we handled
+            window.__handledRoundKey = null;
+            window.__gameWinner = null;
             scheduledNextRoundAt = null;
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+            if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
             webrtcReady = false;
             if (localStream) { localStream.getTracks().forEach(function (t) { t.stop(); }); localStream = null; }
@@ -1024,7 +1026,7 @@
             await set(ref(db, 'rooms/' + roomCode), {
                 host: { uid: currentUser.uid, name: currentUser.displayName || 'Player 1' },
                 guest: null, rounds: rounds, scores: { host: 0, guest: 0 },
-                currentRound: 0, status: 'waiting', roundWinner: null, nextRoundAt: null,
+                currentRound: 0, status: 'waiting', roundWinner: null, roundTarget: null, roundDisplayNum: 0, nextRoundAt: null,
                 webrtc: { offer: null, answer: null, hostCandidates: [], guestCandidates: [] }
             });
             document.getElementById('displayRoomCode').textContent = roomCode;
@@ -1054,7 +1056,7 @@
         });
 
         function listenRoom() {
-            onValue(ref(db, 'rooms/' + roomCode), function (snap) {
+            roomUnsubscribe = onValue(ref(db, 'rooms/' + roomCode), function (snap) {
                 if (!snap.exists()) { showScreen('lobbyScreen'); return; }
                 var room = snap.val();
 
@@ -1085,21 +1087,17 @@
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
 
-                // KEY FIX: Track by round number, not just a boolean flag.
-                // This prevents stale flags from blocking rounds 2+.
-                if (room.roundWinner && window.__handledForRound !== currentRound) {
+                // Handle round result.
+                // roundWinner, roundTarget and roundDisplayNum are all written together in one
+                // atomic update by the winner's game loop — no separate write to coalesce away.
+                // rwKey uses roundDisplayNum (1-5) which is unique per round and stable.
+                var rwKey = room.roundWinner ? (String(room.roundDisplayNum) + ':' + room.roundWinner) : null;
+                if (rwKey && window.__handledRoundKey !== rwKey) {
+                    window.__handledRoundKey = rwKey;
                     var iAmWinner = room.roundWinner === myRole;
-                    if (iAmWinner && window.__localRoundHandled) {
-                        // Winner already showed popup locally — host just needs to write scores
-                        window.__handledForRound = currentRound;
-                        if (isHost) writeRoundToFirebase(room.roundWinner);
-                    } else if (!window.__localRoundHandled) {
-                        // Loser sees popup from Firebase, OR rare safety net for winner
-                        window.__handledForRound = currentRound;
-                        window.__localRoundHandled = true;
-                        showRoundPopup(iAmWinner, room);
-                        if (isHost) writeRoundToFirebase(room.roundWinner);
-                    }
+                    // Show popup for both players — data comes entirely from the snapshot,
+                    // never from local currentRound which may already be stale.
+                    showRoundPopup(iAmWinner, room.roundDisplayNum, room.roundTarget || '');
                 }
 
                 // Countdown synced from Firebase
@@ -1110,6 +1108,7 @@
 
                 if (room.status === 'finished' && !window.__gameOver) {
                     window.__gameOver = true;
+                    window.__gameWinner = room.gameWinner;
                     if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
                     setTimeout(function () { showGameOver(room.gameWinner === myRole); }, 1500);
                 }
@@ -1118,17 +1117,16 @@
             });
         }
 
-        // Show the round result popup immediately (called locally for winner, from Firebase for loser)
-        function showRoundPopup(iWon, room) {
+        // roundNum and target are passed explicitly — never reads currentRound/rounds[] globally.
+        function showRoundPopup(iWon, roundNum, target) {
             roundLocked = true; roundActive = false;
             document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
             document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
-            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 5 complete';
+            document.getElementById('roundResultSub').textContent = 'Round ' + roundNum + ' of 5 complete';
             document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
             document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
             document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
 
-            var target = rounds[currentRound] ? rounds[currentRound].target : '';
             var imgSrc = getSignImageUrl(target);
             var imgBox = document.getElementById('signImageBox');
             if (imgSrc) { imgBox.style.display = 'block'; document.getElementById('signImage').src = imgSrc; document.getElementById('signImageLabel').textContent = target; }
@@ -1137,23 +1135,33 @@
             document.getElementById('roundResult').classList.add('visible');
         }
 
-        // Only host writes score update to Firebase (called once per round)
-        // Always fetches fresh scores from Firebase to avoid stale local variable bugs
-        async function writeRoundToFirebase(winnerRole) {
+        // Computes the full Firebase update for a round result.
+        // Called by the winner's game loop — ONE atomic write contains everything
+        // both players need (roundWinner, roundTarget, roundDisplayNum, scores,
+        // currentRound, nextRoundAt) so Firebase cannot coalesce away roundWinner.
+        async function commitRoundResult(winnerRole, winTarget, winRound) {
             var snap = await get(ref(db, 'rooms/' + roomCode));
             if (!snap.exists()) return;
             var r = snap.val();
-            // Only write if roundWinner is still set (prevent double-write)
-            if (!r.roundWinner) return;
-            var hs = winnerRole === 'host' ? (r.scores.host || 0) + 1 : (r.scores.host || 0);
-            var gs = winnerRole === 'guest' ? (r.scores.guest || 0) + 1 : (r.scores.guest || 0);
-            var nextRound = (r.currentRound || 0) + 1;
-            var isOver = hs >= WIN_SCORE || gs >= WIN_SCORE || nextRound >= TOTAL_ROUNDS;
-            var nra = isOver ? null : Date.now() + ROUND_DELAY;
-            var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null, nextRoundAt: nra };
-            if (isOver) { updateData.status = 'finished'; updateData.gameWinner = hs > gs ? 'host' : 'guest'; }
+            var hs = (r.scores ? r.scores.host || 0 : 0) + (winnerRole === 'host' ? 1 : 0);
+            var gs = (r.scores ? r.scores.guest || 0 : 0) + (winnerRole === 'guest' ? 1 : 0);
+            var nextRound = winRound; // winRound is already the 0-based index of the NEXT round
+            var isOver = hs >= 3 || gs >= 3 || nextRound >= TOTAL_ROUNDS;
+            var updateData = {
+                roundWinner: winnerRole,
+                roundTarget: winTarget,
+                roundDisplayNum: winRound, // 1-based display number of the round just completed
+                'scores/host': hs,
+                'scores/guest': gs,
+                currentRound: nextRound,
+                nextRoundAt: isOver ? null : Date.now() + ROUND_DELAY
+            };
+            if (isOver) {
+                updateData.status = 'finished';
+                updateData.gameWinner = hs > gs ? 'host' : (gs > hs ? 'guest' : 'draw');
+            }
+            console.log('Round', winRound, '| host:', hs, 'guest:', gs, '| isOver:', isOver);
             await update(ref(db, 'rooms/' + roomCode), updateData);
-            if (!isOver) startCountdown(nra);
         }
 
         function startCountdown(nextRoundAt) {
@@ -1188,7 +1196,7 @@
                 document.getElementById('myScore').textContent = myScore;
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
-                if (currentRound < TOTAL_ROUNDS && myScore < WIN_SCORE && oppScore < WIN_SCORE) startRound();
+                if (currentRound < TOTAL_ROUNDS && myScore < 3 && oppScore < 3) startRound();
             });
         }
 
@@ -1267,9 +1275,9 @@
 
         function startRound() {
             roundLocked = false; roundActive = true;
-            window.__localRoundHandled = false; // reset for new round
-            window.__handledForRound = -1;
-            scheduledNextRoundAt = null;
+            window.__localRoundHandled = false;
+            window.__handledRoundKey = null;
+            scheduledNextRoundAt = null; // reset so next round's nextRoundAt is always accepted
             var r = rounds[currentRound];
             document.getElementById('roundNum').textContent = currentRound + 1;
             document.getElementById('targetDisplay').textContent = r.target;
@@ -1287,10 +1295,11 @@
 
         async function showGameOver(iWon) {
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
-            document.getElementById('gameOverEmoji').textContent = iWon ? '🏆' : '😔';
-            document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
-            document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! Practice more and challenge again.';
-            if (currentUser) {
+            var isDraw = !iWon && window.__gameWinner === 'draw';
+            document.getElementById('gameOverEmoji').textContent = isDraw ? '🤝' : (iWon ? '🏆' : '😔');
+            document.getElementById('gameOverTitle').textContent = isDraw ? "It's a Draw!" : (iWon ? 'You Win!' : 'You Lost');
+            document.getElementById('gameOverSub').textContent = isDraw ? 'Perfectly matched! No XP change.' : (iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! Practice more and challenge again.');
+            if (currentUser && !isDraw) {
                 try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(iWon ? 200 : -50) }); }
                 catch (e) { console.error('XP fail:', e); }
             }
@@ -1364,13 +1373,16 @@
                         if (isMatch && timeReady) {
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
-                                // KEY FIX: Show popup IMMEDIATELY locally, then write to Firebase
+                                // Lock immediately (sync) so no second frame fires
+                                roundLocked = true;
                                 roundActive = false;
-                                window.__localRoundHandled = true;
-                                showRoundPopup(true, { scores: { host: myRole === 'host' ? myScore : oppScore, guest: myRole === 'guest' ? myScore : oppScore } });
-                                await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
-                                // Host writes scores immediately; guest waits for Firebase to confirm winner
-                                if (isHost) writeRoundToFirebase(myRole);
+                                // Capture round info now — currentRound will be mutated by advanceRound later
+                                var winRound = currentRound + 1;   // 1-based display number
+                                var winTarget = rounds[currentRound] ? rounds[currentRound].target : '';
+                                // Single atomic Firebase write: scores + roundWinner + roundTarget + nextRoundAt
+                                // all in one update. This is the ONLY write — no second write clears roundWinner.
+                                // listenRoom on BOTH clients drives the popup from this single event.
+                                await commitRoundResult(myRole, winTarget, winRound);
                             }
                         } else if (!isMatch) {
                             window.__matchFrames = Math.max(0, window.__matchFrames - 1);
