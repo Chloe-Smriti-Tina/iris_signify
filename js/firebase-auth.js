@@ -10,6 +10,7 @@ import {
   getFirestore,
   doc,
   setDoc,
+  getDoc,
   collection,
   query,
   orderBy,
@@ -31,6 +32,40 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// ── Build default alphabet subcollection entries ─────────────
+
+function buildAlphabetDocs() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  return letters.reduce((acc, letter) => {
+    acc[letter] = { learned: false };
+    return acc;
+  }, {});
+}
+
+// ── Create user document on sign-up ─────────────────────────
+
+async function createUserDocument(uid, email, displayName) {
+  const userRef = doc(db, "users", uid);
+
+  await setDoc(userRef, {
+    email,
+    displayName,
+    createdAt: new Date(),
+    streak: 0,
+    longest_streak: 0,
+    total_xp: 0,
+    total_challenges_completed: 0,
+    nextLetter: "A",
+    next_word_learn: "Hello",
+  });
+
+  // Alphabet subcollection — one document per letter
+  const alphabetData = buildAlphabetDocs();
+  for (const [letter, data] of Object.entries(alphabetData)) {
+    await setDoc(doc(db, "users", uid, "alphabet", letter), data);
+  }
+}
 
 // ── Inject modal + dropdown HTML ─────────────────────────────
 
@@ -172,7 +207,7 @@ document.body.insertAdjacentHTML("beforeend", `
 
 // ── Tab switching ────────────────────────────────────────────
 
-window.switchTab = function(tab) {
+window.switchTab = function (tab) {
   const isSignIn = tab === "signin";
   document.getElementById("formSignIn").style.display = isSignIn ? "block" : "none";
   document.getElementById("formSignUp").style.display = isSignIn ? "none" : "block";
@@ -193,7 +228,7 @@ function closeModal() {
 }
 
 document.getElementById("authModalClose").addEventListener("click", closeModal);
-document.getElementById("authModal").addEventListener("click", function(e) {
+document.getElementById("authModal").addEventListener("click", function (e) {
   if (e.target === this) closeModal();
 });
 
@@ -224,7 +259,7 @@ function handleIconClick(e) {
   dropdownOpen = true;
 }
 
-document.addEventListener("click", function(e) {
+document.addEventListener("click", function (e) {
   const dropdown = document.getElementById("profileDropdown");
   if (
     dropdownOpen &&
@@ -238,7 +273,7 @@ document.addEventListener("click", function(e) {
 
 // ── Auth handlers ────────────────────────────────────────────
 
-window.handleSignIn = async function() {
+window.handleSignIn = async function () {
   const email = document.getElementById("siEmail").value.trim();
   const password = document.getElementById("siPassword").value;
   const errEl = document.getElementById("siError");
@@ -252,7 +287,7 @@ window.handleSignIn = async function() {
   }
 };
 
-window.handleSignUp = async function() {
+window.handleSignUp = async function () {
   const name = document.getElementById("suName").value.trim();
   const email = document.getElementById("suEmail").value.trim();
   const password = document.getElementById("suPassword").value;
@@ -264,7 +299,7 @@ window.handleSignUp = async function() {
     errEl.textContent = "Please enter a display name.";
     errEl.style.display = "block";
     return;
-    }
+  }
 
   if (password !== password2) {
     errEl.textContent = "Passwords don't match.";
@@ -274,13 +309,7 @@ window.handleSignUp = async function() {
 
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "users", cred.user.uid), {
-      email: cred.user.email,
-      displayName: name,
-      createdAt: new Date(),
-      allTime: { totalTimeSpent: 0, challengesCompleted: 0, accuracy: 0, longestStreak: 0 },
-        currentStreak: { startDate: null, recentDate: null, count: 0 }
-    });
+    await createUserDocument(cred.user.uid, cred.user.email, name);
     closeModal();
   } catch (err) {
     errEl.textContent = friendlyError(err.code);
@@ -288,7 +317,7 @@ window.handleSignUp = async function() {
   }
 };
 
-window.handleSignOut = async function() {
+window.handleSignOut = async function () {
   await signOut(auth);
   document.getElementById("profileDropdown").style.display = "none";
   dropdownOpen = false;
@@ -332,113 +361,113 @@ onAuthStateChanged(auth, async (user) => {
   const loadingView = document.getElementById('loadingView');
 
   if (returningUserView && newUserView && loadingView) {
-      if (user) {
-          // Hide Onboarding, Show Dashboard Loading
-          newUserView.style.display = 'none';
-          loadingView.style.display = 'block';
+    if (user) {
+      // Hide Onboarding, Show Dashboard Loading
+      newUserView.style.display = 'none';
+      loadingView.style.display = 'block';
 
-          // Fetch and populate data
-          await loadUserData(user);
-          await loadMiniLeaderboard(user.uid);
+      // Fetch and populate data
+      await loadUserData(user);
+      await loadMiniLeaderboard(user.uid);
 
-          // Show Dashboard
-          loadingView.style.display = 'none';
-          returningUserView.style.display = 'block';
-      } else {
-          // Logged out: Show Onboarding
-          returningUserView.style.display = 'none';
-          loadingView.style.display = 'none';
-          newUserView.style.display = 'block';
-      }
+      // Show Dashboard
+      loadingView.style.display = 'none';
+      returningUserView.style.display = 'block';
+    } else {
+      // Logged out: Show Onboarding
+      returningUserView.style.display = 'none';
+      loadingView.style.display = 'none';
+      newUserView.style.display = 'block';
+    }
   }
 });
 
 // ── Dashboard Helper Functions ───────────────────────────────
 async function loadUserData(user) {
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) return;
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) return;
 
-    const data = userSnap.data();
+  const data = userSnap.data();
 
-    // Populate the UI safely (Checking if elements exist first)
-    const greetEl = document.getElementById('dashboard-greeting');
-    if (greetEl) greetEl.innerText = `Welcome back, ${data.displayName || 'Friend'}!`;
-    
-    const streakEl = document.getElementById('stat-streak');
-    if (streakEl) streakEl.innerText = `${data.streak || 0} Days`;
-    
-    const xpEl = document.getElementById('stat-xp');
-    if (xpEl) xpEl.innerText = `${data.xp || 0} XP`;
-    
-    const pAtoMText = document.getElementById('progress-AtoM-text');
-    if (pAtoMText) pAtoMText.innerText = `${data.progressAtoM || 0}%`;
-    
-    const pAtoMBar = document.getElementById('progress-AtoM-bar');
-    if (pAtoMBar) pAtoMBar.style.width = `${data.progressAtoM || 0}%`;
-    
-    const pNtoZText = document.getElementById('progress-NtoZ-text');
-    if (pNtoZText) pNtoZText.innerText = `${data.progressNtoZ || 0}%`;
-    
-    const pNtoZBar = document.getElementById('progress-NtoZ-bar');
-    if (pNtoZBar) pNtoZBar.style.width = `${data.progressNtoZ || 0}%`;
+  // Populate the UI safely (Checking if elements exist first)
+  const greetEl = document.getElementById('dashboard-greeting');
+  if (greetEl) greetEl.innerText = `Welcome back, ${data.displayName || 'Friend'}!`;
 
-    const nextBtn = document.getElementById('next-lesson-btn');
-    if (nextBtn) nextBtn.innerText = `Jump to Letter "${data.nextLetter || 'A'}"`;
+  const streakEl = document.getElementById('stat-streak');
+  if (streakEl) streakEl.innerText = `${data.streak || 0} Days`;
+
+  const xpEl = document.getElementById('stat-xp');
+  if (xpEl) xpEl.innerText = `${data.total_xp || 0} XP`;
+
+  const pAtoMText = document.getElementById('progress-AtoM-text');
+  if (pAtoMText) pAtoMText.innerText = `${data.progressAtoM || 0}%`;
+
+  const pAtoMBar = document.getElementById('progress-AtoM-bar');
+  if (pAtoMBar) pAtoMBar.style.width = `${data.progressAtoM || 0}%`;
+
+  const pNtoZText = document.getElementById('progress-NtoZ-text');
+  if (pNtoZText) pNtoZText.innerText = `${data.progressNtoZ || 0}%`;
+
+  const pNtoZBar = document.getElementById('progress-NtoZ-bar');
+  if (pNtoZBar) pNtoZBar.style.width = `${data.progressNtoZ || 0}%`;
+
+  const nextBtn = document.getElementById('next-lesson-btn');
+  if (nextBtn) nextBtn.innerText = `Jump to Letter "${data.nextLetter || 'A'}"`;
 }
 
 async function loadMiniLeaderboard(currentUid) {
-    const leaderboardEl = document.getElementById('mini-leaderboard');
-    if (!leaderboardEl) return;
-    
-    leaderboardEl.innerHTML = ''; 
+  const leaderboardEl = document.getElementById('mini-leaderboard');
+  if (!leaderboardEl) return;
 
-    // Query top users by XP
-    const q = query(collection(db, "users"), orderBy("xp", "desc"), limit(4));
-    const querySnapshot = await getDocs(q);
+  leaderboardEl.innerHTML = '';
 
-    let rank = 1;
-    let currentUserRanked = false;
+  // Query top users by XP
+  const q = query(collection(db, "users"), orderBy("total_xp", "desc"), limit(4));
+  const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const isMe = doc.id === currentUid;
-        
-        if(isMe) {
-            currentUserRanked = true;
-            const rankEl = document.getElementById('stat-rank');
-            if (rankEl) rankEl.innerText = `Rank #${rank}`;
-        }
+  let rank = 1;
+  let currentUserRanked = false;
 
-        // Medals for top 3
-        let iconHtml = `<i class="bi bi-${rank}-circle-fill text-secondary me-2"></i>`;
-        if (rank === 1) iconHtml = `<i class="bi bi-1-circle-fill text-warning me-2"></i>`;
-        if (rank === 3) iconHtml = `<i class="bi bi-3-circle-fill me-2" style="color: #cd7f32;"></i>`;
-        if (rank > 3) iconHtml = `<span class="me-2 text-muted fw-bold">${rank}.</span>`;
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const isMe = doc.id === currentUid;
 
-        const displayName = data.displayName || data.email.split('@')[0];
-
-        const li = document.createElement('li');
-        li.className = `list-group-item d-flex justify-content-between align-items-center px-0 ${isMe ? 'bg-light rounded mt-2 p-2 border' : ''}`;
-        li.innerHTML = `
-            <span>${iconHtml} ${isMe ? '<strong>' + displayName + ' (You)</strong>' : displayName}</span>
-            <span class="badge rounded-pill" style="background-color: ${isMe ? 'var(--signify-blue)' : 'var(--signify-dark)'};">${data.xp || 0} XP</span>
-        `;
-        leaderboardEl.appendChild(li);
-        rank++;
-    });
-
-    if(!currentUserRanked) {
-        const rankEl = document.getElementById('stat-rank');
-        if (rankEl) rankEl.innerText = `Keep Learning!`;
+    if (isMe) {
+      currentUserRanked = true;
+      const rankEl = document.getElementById('stat-rank');
+      if (rankEl) rankEl.innerText = `Rank #${rank}`;
     }
+
+    // Medals for top 3
+    let iconHtml = `<i class="bi bi-${rank}-circle-fill text-secondary me-2"></i>`;
+    if (rank === 1) iconHtml = `<i class="bi bi-1-circle-fill text-warning me-2"></i>`;
+    if (rank === 3) iconHtml = `<i class="bi bi-3-circle-fill me-2" style="color: #cd7f32;"></i>`;
+    if (rank > 3) iconHtml = `<span class="me-2 text-muted fw-bold">${rank}.</span>`;
+
+    const displayName = data.displayName || data.email.split('@')[0];
+
+    const li = document.createElement('li');
+    li.className = `list-group-item d-flex justify-content-between align-items-center px-0 ${isMe ? 'bg-light rounded mt-2 p-2 border' : ''}`;
+    li.innerHTML = `
+            <span>${iconHtml} ${isMe ? '<strong>' + displayName + ' (You)</strong>' : displayName}</span>
+            <span class="badge rounded-pill" style="background-color: ${isMe ? 'var(--signify-blue)' : 'var(--signify-dark)'};">${data.total_xp || 0} XP</span>
+        `;
+    leaderboardEl.appendChild(li);
+    rank++;
+  });
+
+  if (!currentUserRanked) {
+    const rankEl = document.getElementById('stat-rank');
+    if (rankEl) rankEl.innerText = `Keep Learning!`;
+  }
 }
 
 // Bind click events dynamically on load
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".profile-icon-btn").forEach(icon => {
-        // Remove existing listener to avoid duplicates if re-injected
-        icon.removeEventListener("click", handleIconClick);
-        icon.addEventListener("click", handleIconClick);
-    });
+  document.querySelectorAll(".profile-icon-btn").forEach(icon => {
+    // Remove existing listener to avoid duplicates if re-injected
+    icon.removeEventListener("click", handleIconClick);
+    icon.addEventListener("click", handleIconClick);
+  });
 });
