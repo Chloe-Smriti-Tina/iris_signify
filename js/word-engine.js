@@ -1,44 +1,40 @@
 // ============================================================
 //  word-engine.js  –  ASL Word Detection
 //  Uses MediaPipe Handpose + Fingerpose (loads from CDN)
-//  NO model files needed — everything loads automatically!
 // ============================================================
 
-// ── Gesture Definitions ──────────────────────────────────────
-
 function makeHelloGesture() {
-    // Open hand, all fingers extended
-    const hello = new fp.GestureDescription('Hello');
-    for (const finger of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
-        hello.addCurl(finger, fp.FingerCurl.NoCurl, 1.0);
+    const hello = new fp.GestureDescription('Thank You');
+    for (const f of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
+        hello.addCurl(f, fp.FingerCurl.NoCurl, 1.0);
     }
-    hello.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 0.9);
-    hello.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 0.9);
+    hello.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
+    hello.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
+    hello.addDirection(fp.Finger.Ring, fp.FingerDirection.VerticalUp, 1.0);
+    hello.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
     return hello;
 }
 
 function makeThankYouGesture() {
-    // Flat hand angled diagonally, all fingers extended
-    const thankYou = new fp.GestureDescription('Thank You');
-    for (const finger of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
-        thankYou.addCurl(finger, fp.FingerCurl.NoCurl, 1.0);
+    const thankYou = new fp.GestureDescription('Hello');
+    for (const f of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
+        thankYou.addCurl(f, fp.FingerCurl.NoCurl, 1.0);
     }
+    thankYou.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 1.0);
     thankYou.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpRight, 1.0);
-    thankYou.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 0.9);
+    thankYou.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 1.0);
     thankYou.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpRight, 1.0);
-    thankYou.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 0.9);
+    thankYou.addDirection(fp.Finger.Ring, fp.FingerDirection.DiagonalUpLeft, 0.9);
+    thankYou.addDirection(fp.Finger.Ring, fp.FingerDirection.DiagonalUpRight, 0.9);
     return thankYou;
 }
 
 function makeILoveYouGesture() {
-    // Thumb + index + pinky extended, middle + ring curled
     const ily = new fp.GestureDescription('I Love You');
     ily.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
     ily.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
     ily.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl, 1.0);
-    ily.addCurl(fp.Finger.Middle, fp.FingerCurl.HalfCurl, 0.7);
     ily.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
-    ily.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl, 0.7);
     ily.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
     ily.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
     ily.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
@@ -46,7 +42,6 @@ function makeILoveYouGesture() {
 }
 
 function makeYesGesture() {
-    // Thumbs up — fist with thumb pointing up
     const yes = new fp.GestureDescription('Yes');
     yes.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
     yes.addCurl(fp.Finger.Index, fp.FingerCurl.FullCurl, 1.0);
@@ -54,51 +49,50 @@ function makeYesGesture() {
     yes.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
     yes.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0);
     yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.VerticalUp, 1.0);
-    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpLeft, 0.8);
-    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpRight, 0.8);
+    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpLeft, 0.7);
+    yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.DiagonalUpRight, 0.7);
     return yes;
 }
 
 function makeNoGesture() {
-    // Index + middle extended (peace/scissors), others curled
     const no = new fp.GestureDescription('No');
-    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.8);
-    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 0.6);
+    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0);
+    no.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.5);
     no.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
     no.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
     no.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
-    no.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl, 0.7);
+    no.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl, 0.5);
     no.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0);
-    no.addCurl(fp.Finger.Pinky, fp.FingerCurl.HalfCurl, 0.7);
+    no.addCurl(fp.Finger.Pinky, fp.FingerCurl.HalfCurl, 0.5);
     no.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
     no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
     return no;
 }
 
-function makePleaseGesture() {
-    const please = new fp.GestureDescription('Please');
-    please.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Ring, fp.FingerCurl.NoCurl, 1.0);
-    please.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
-    please.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalLeft, 1.0);
-    please.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalRight, 0.9);
-    return please;
-}
-
 // ── Config ────────────────────────────────────────────────────
 const WORD_INSTRUCTIONS = {
-    'Hello': 'Open your hand flat and face your palm outward — all five fingers extended.',
-    'Thank You': 'Touch your chin with flat fingers, then move your hand forward/outward.',
-    'I Love You': 'Extend your thumb, index finger, and pinky — keep middle and ring fingers folded.',
-    'Yes': 'Make a thumbs up — fist closed with thumb pointing straight up.',
-    'No': 'Extend your index and middle fingers like a peace sign, others curled.',
-    'Please': 'Flat open hand, rub palm in a circular motion on your chest.',
+    'Hello': 'Raise your open hand, all five fingers pointing straight up like a salute.',
+    'Thank You': 'Flat open hand, fingers angled outward/forward (not straight up).',
+    'I Love You': 'Extend your thumb, index finger, and pinky — middle and ring fingers curled.',
+    'Yes': 'Thumbs up — fist closed with only your thumb pointing straight up.',
+    'No': 'Peace sign — index and middle fingers up, others curled.',
 };
-const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No', 'Please'];
-const MIN_SCORE = 5.0;  // gesture confidence threshold out of 10
-const MATCH_NEEDED = 20;   // consecutive matching frames before advancing
+const WORD_TIPS = {
+    'Hello': 'Think of it like a casual salute — fingers up, palm forward.',
+    'Thank You': 'Like blowing a kiss forward from your chin.',
+    'I Love You': 'Combine I, L, and Y handshapes into one!',
+    'Yes': 'A confident thumbs up — keep your fist firm.',
+    'No': 'Classic peace sign — V for victory!',
+};
+const WORD_XP = {
+    'Hello': 100,
+    'Thank You': 100,
+    'I Love You': 100,
+    'Yes': 100,
+    'No': 100,
+};
+const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
+const MATCH_NEEDED = 15;
 
 // ── DOM refs ──────────────────────────────────────────────────
 const video = document.getElementById('webcam_words');
@@ -106,20 +100,75 @@ const canvas = document.getElementById('output_canvas_words');
 const ctx = canvas.getContext('2d');
 const enableBtn = document.getElementById('enableWebcamButtonWords');
 const progressBar = document.getElementById('accuracy-bar-words');
-const targetWordEl = document.getElementById('target-word');
-const instructEl = document.getElementById('word-instruction');
+const holdLabel = document.getElementById('holdLabel');
 const detectedEl = document.getElementById('detectedLabelWords');
 const confidenceEl = document.getElementById('confidenceLabelWords');
+const progFill = document.getElementById('progFill');
+const progressCount = document.getElementById('progressCount');
+
+// Hero card elements
+const wordHighlight = document.getElementById('wordHighlight');
+const wordDesc = document.getElementById('wordDesc');
+const wordTip = document.getElementById('wordTip');
+
+// Sidebar
+const sbXp = document.getElementById('sb-xp');
+const sbDone = document.getElementById('sb-done');
+const wordListEl = document.getElementById('wordList');
+
+// Success overlay
+const successOverlay = document.getElementById('successOverlay');
+const successTitle = document.getElementById('successTitle');
+const successSub = document.getElementById('successSub');
+const nextWordBtn = document.getElementById('nextWordBtn');
+
+// Camera overlay
+const camOverlay = document.getElementById('camOverlay');
 
 let handposeModel = null;
 let gestureEstimator = null;
 let streaming = false;
-let currentWord = 'Hello';
+let currentWordIdx = 0;
+let currentWord = WORDS[0];
 let matchFrames = 0;
+let totalXP = 0;
+let wordsCompleted = 0;
+
+// ── Build sidebar word list ───────────────────────────────────
+function buildWordList() {
+    wordListEl.innerHTML = '';
+    const emojis = ['👋', '🙏', '❤️', '👍', '✌️'];
+    WORDS.forEach((word, i) => {
+        const div = document.createElement('div');
+        div.className = 'word-item' + (i === currentWordIdx ? ' active' : i < currentWordIdx ? ' done' : '');
+        div.id = `wi-${i}`;
+        div.innerHTML = `
+            <div class="wi-icon">${emojis[i]}</div>
+            <span>${word}</span>
+            <i class="bi bi-check-circle-fill wi-check"></i>
+        `;
+        wordListEl.appendChild(div);
+    });
+}
+
+function updateWordList() {
+    WORDS.forEach((_, i) => {
+        const el = document.getElementById(`wi-${i}`);
+        if (!el) return;
+        el.className = 'word-item' + (i === currentWordIdx ? ' active' : i < currentWordIdx ? ' done' : '');
+    });
+}
+
+function updateOverallProgress() {
+    const pct = Math.round((wordsCompleted / WORDS.length) * 100);
+    progFill.style.width = `${pct}%`;
+    progressCount.textContent = `${wordsCompleted} / ${WORDS.length}`;
+    sbDone.textContent = `${wordsCompleted}/${WORDS.length}`;
+}
 
 // ── Load ──────────────────────────────────────────────────────
 async function loadModels() {
-    enableBtn.textContent = '⏳ Loading hand model…';
+    enableBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading Model…';
     enableBtn.disabled = true;
     try {
         handposeModel = await handpose.load();
@@ -129,10 +178,9 @@ async function loadModels() {
             makeILoveYouGesture(),
             makeYesGesture(),
             makeNoGesture(),
-            makePleaseGesture(),
         ]);
         console.log('[word-engine] Ready ✓');
-        enableBtn.textContent = '🎥 Enable Camera (Words)';
+        enableBtn.innerHTML = '<i class="bi bi-camera-video"></i> Enable Camera';
         enableBtn.disabled = false;
     } catch (err) {
         console.error('[word-engine] Load error:', err);
@@ -150,6 +198,7 @@ async function startWebcam() {
         video.addEventListener('loadeddata', () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
+            camOverlay.style.display = 'none';
             streaming = true;
             detectLoop();
         });
@@ -161,17 +210,12 @@ async function startWebcam() {
 
 // ── Draw skeleton ─────────────────────────────────────────────
 const FINGER_PATHS = [
-    [0, 1, 2, 3, 4],    // thumb
-    [0, 5, 6, 7, 8],    // index
-    [0, 9, 10, 11, 12], // middle
-    [0, 13, 14, 15, 16],// ring
-    [0, 17, 18, 19, 20],// pinky
+    [0, 1, 2, 3, 4], [0, 5, 6, 7, 8], [0, 9, 10, 11, 12], [0, 13, 14, 15, 16], [0, 17, 18, 19, 20],
 ];
 
 function drawHand(predictions, color) {
     if (!predictions.length) return;
     const lm = predictions[0].landmarks;
-
     ctx.strokeStyle = color;
     ctx.lineWidth = 2.5;
     for (const path of FINGER_PATHS) {
@@ -199,49 +243,49 @@ async function detectLoop() {
     const predictions = await handposeModel.estimateHands(video);
 
     if (predictions.length > 0) {
-        const est = gestureEstimator.estimate(predictions[0].landmarks, MIN_SCORE);
+        const est = gestureEstimator.estimate(predictions[0].landmarks, 4.0);
 
         if (est.gestures.length > 0) {
-            const best = est.gestures.reduce((a, b) => a.score > b.score ? a : b);
+            const sorted = [...est.gestures].sort((a, b) => b.score - a.score);
+            const best = sorted[0];
             const label = best.name;
-            const pct = Math.min(100, Math.round((best.score / 7.0) * 100));
+            const pct = Math.min(100, Math.round((best.score / 8.0) * 100));
             const isMatch = label === currentWord;
 
-            drawHand(predictions, isMatch ? '#22c55e' : '#6d8bfa');
+
 
             detectedEl.textContent = label;
             confidenceEl.textContent = `${pct}%`;
             progressBar.style.width = `${pct}%`;
-            progressBar.setAttribute('aria-valuenow', pct);
-            progressBar.textContent = `${pct}% Match`;
-            progressBar.className = `progress-bar progress-bar-striped progress-bar-animated ${isMatch ? 'bg-success' : 'bg-warning'}`;
+            progressBar.className = `hold-fill${isMatch ? ' success' : ''}`;
 
             if (isMatch) {
                 matchFrames++;
-                console.log('Match frames:', matchFrames, '/', MATCH_NEEDED);
+                const holdPct = Math.round((matchFrames / MATCH_NEEDED) * 100);
+                holdLabel.textContent = matchFrames >= MATCH_NEEDED ? '✓ Perfect!' : `Hold… ${holdPct}%`;
                 if (matchFrames >= MATCH_NEEDED) {
                     advanceWord();
                     matchFrames = 0;
                 }
             } else {
-                matchFrames = Math.max(0, matchFrames - 1); // forgives brief dips
+                matchFrames = Math.max(0, matchFrames - 1);
+                holdLabel.textContent = 'Make the sign!';
             }
-
         } else {
-            drawHand(predictions, '#6d8bfa');
+
             detectedEl.textContent = '🤔 Keep trying';
             confidenceEl.textContent = '—';
             progressBar.style.width = '5%';
-            progressBar.textContent = 'Hand detected…';
-            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-info';
-            matchFrames = 0;
+            progressBar.className = 'hold-fill';
+            holdLabel.textContent = 'Hand detected…';
+            matchFrames = Math.max(0, matchFrames - 1);
         }
     } else {
         detectedEl.textContent = '—';
         confidenceEl.textContent = '—';
         progressBar.style.width = '0%';
-        progressBar.textContent = '0% Match';
-        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+        progressBar.className = 'hold-fill';
+        holdLabel.textContent = 'Make the sign!';
         matchFrames = 0;
     }
 
@@ -250,26 +294,75 @@ async function detectLoop() {
 
 // ── Advance word ──────────────────────────────────────────────
 function advanceWord() {
-    const idx = WORDS.indexOf(currentWord);
-    currentWord = WORDS[(idx + 1) % WORDS.length];
-    targetWordEl.textContent = `"${currentWord}"`;
-    instructEl.textContent = WORD_INSTRUCTIONS[currentWord];
-    progressBar.style.width = '100%';
-    progressBar.textContent = '✓ Great job! Next word…';
-    progressBar.className = 'progress-bar bg-success';
-    setTimeout(() => {
-        progressBar.style.width = '0%';
-        progressBar.textContent = '0% Match';
-        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
-    }, 1200);
+    streaming = false;
+    matchFrames = 0;
+
+    // Update XP + completed count
+    const xpEarned = WORD_XP[currentWord] || 100;
+    totalXP += xpEarned;
+    wordsCompleted++;
+    sbXp.textContent = totalXP;
+    updateOverallProgress();
+    updateWordList();
+
+    const isLast = currentWordIdx >= WORDS.length - 1;
+
+    // Show success overlay
+    successTitle.textContent = `Nice work! "${currentWord}" ✓`;
+    document.querySelector('.success-card .xp-tag').textContent = `+${xpEarned} XP`;
+    successSub.textContent = isLast
+        ? '🎉 You\'ve completed all Stage 1 words!'
+        : `Up next: "${WORDS[currentWordIdx + 1]}"`;
+    nextWordBtn.textContent = isLast ? 'Finish Stage →' : 'Next Word →';
+    successOverlay.classList.add('visible');
+
+    // Confetti!
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+    }
 }
+
+// ── Next word button ──────────────────────────────────────────
+nextWordBtn.addEventListener('click', () => {
+    successOverlay.classList.remove('visible');
+
+    const isLast = currentWordIdx >= WORDS.length - 1;
+    if (isLast) {
+        // All done — redirect to stages page
+        window.location.href = 'learn-word.html';
+        return;
+    }
+
+    currentWordIdx++;
+    currentWord = WORDS[currentWordIdx];
+
+    // Update hero card
+    wordHighlight.textContent = `"${currentWord}"`;
+    wordDesc.textContent = WORD_INSTRUCTIONS[currentWord];
+    wordTip.innerHTML = `<i class="bi bi-lightbulb"></i> ${WORD_TIPS[currentWord]}`;
+
+    // Reset hold bar
+    progressBar.style.width = '0%';
+    progressBar.className = 'hold-fill';
+    holdLabel.textContent = 'Make the sign!';
+    detectedEl.textContent = '—';
+    confidenceEl.textContent = '—';
+
+    updateWordList();
+
+    streaming = true;
+    detectLoop();
+});
 
 // ── Button ────────────────────────────────────────────────────
 enableBtn.addEventListener('click', async () => {
     if (!handposeModel) { alert('Still loading, please wait.'); return; }
     enableBtn.disabled = true;
-    enableBtn.textContent = '📷 Camera active';
+    enableBtn.innerHTML = '<i class="bi bi-camera-video-fill"></i> Camera active';
     await startWebcam();
 });
 
+// ── Init ──────────────────────────────────────────────────────
+buildWordList();
+updateOverallProgress();
 loadModels();

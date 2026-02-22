@@ -15,88 +15,277 @@
 
     <style>
         :root {
-            --primary:   #6d8bfa;
+            --primary: #6d8bfa;
             --primary-d: #5371e0;
-            --text:      #0f172a;
-            --muted:     #64748b;
-            --bg:        #f8fafc;
-            --surface:   #ffffff;
-            --border:    #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
         }
 
-        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-    .navbar-brand { color: var(--primary) !important; font-weight: 700; font-size: 2rem; }
-    .custom-btn { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
-    .custom-btn:hover { background: var(--primary-d); border-color: var(--primary-d); color: white; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+        }
 
-    .learn-hero { padding: 90px 0 50px; text-align: center; }
-    .learn-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: var(--text); margin-bottom: 12px; letter-spacing: -1px; }
-    .learn-hero h1 span { color: var(--primary); }
-    .learn-hero p { color: var(--muted); font-size: 1.1rem; max-width: 480px; margin: 0 auto; }
+        .navbar-brand {
+            color: var(--primary) !important;
+            font-weight: 700;
+            font-size: 2rem;
+        }
 
-    .module-card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      text-decoration: none;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .module-card:hover { transform: translateY(-4px); text-decoration: none; }
-    .module-card.alpha:hover { border-color: var(--primary); box-shadow: 0 12px 40px rgba(109,139,250,0.15); }
-    .module-card.words:hover { border-color: #f59e0b; box-shadow: 0 12px 40px rgba(245,158,11,0.15); }
+        .custom-btn {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
 
-    .card-accent { height: 5px; width: 100%; }
-    .alpha .card-accent { background: linear-gradient(90deg, var(--primary), var(--primary-d)); }
-    .words .card-accent { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+        .custom-btn:hover {
+            background: var(--primary-d);
+            border-color: var(--primary-d);
+            color: white;
+        }
 
-    .card-body-custom { padding: 32px; flex: 1; }
+        .learn-hero {
+            padding: 90px 0 50px;
+            text-align: center;
+        }
 
-    .card-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-      padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
-    }
-    .badge-alpha { background: #eff3ff; color: var(--primary); border: 1px solid #c7d4fd; }
-    .badge-words { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .learn-hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
 
-    .card-icon { font-size: 3rem; display: block; margin-bottom: 16px; line-height: 1; }
-    .module-card h2 { font-size: 1.75rem; font-weight: 900; color: var(--text); margin-bottom: 10px; letter-spacing: -0.5px; }
-    .module-card p { color: var(--muted); line-height: 1.65; margin-bottom: 24px; }
+        .learn-hero h1 span {
+            color: var(--primary);
+        }
 
-    .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
-    .pill { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
-    .pill-alpha { background: #eff3ff; color: var(--primary); border: 1px solid #c7d4fd; }
-    .pill-words { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-    .pill-locked { background: #f1f5f9; color: var(--muted); border: 1px solid var(--border); }
+        .learn-hero p {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
 
-    .card-cta {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-weight: 700; font-size: 15px; padding: 12px 24px;
-      border-radius: 12px; border: none; transition: all 0.2s; text-decoration: none;
-    }
-    .cta-alpha { background: var(--primary); color: #fff; }
-    .cta-alpha:hover { background: var(--primary-d); color: #fff; }
-    .cta-words { background: #f59e0b; color: #fff; }
-    .cta-words:hover { background: #d97706; color: #fff; }
+        .module-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
 
-    .card-stats { display: flex; gap: 20px; padding: 18px 32px; border-top: 1px solid var(--border); background: var(--bg); }
-    .stat-item .val { font-size: 1.1rem; font-weight: 900; color: var(--text); }
-    .stat-item .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+        .module-card:hover {
+            transform: translateY(-4px);
+            text-decoration: none;
+        }
 
-    .tip-banner {
-      background: #eff3ff; border: 1px solid #c7d4fd; border-radius: 14px;
-      padding: 16px 22px; margin-bottom: 40px; display: flex; align-items: center; gap: 14px;
-    }
-    .tip-banner i { font-size: 1.4rem; color: var(--primary); flex-shrink: 0; }
-    .tip-banner p { margin: 0; color: #374151; font-size: 14px; }
+        .module-card.alpha:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 40px rgba(109, 139, 250, 0.15);
+        }
 
-    .modules-section { padding-bottom: 80px; }
-    footer { border-top: 1px solid var(--border); padding: 24px 0; text-align: center; color: var(--muted); font-size: 13px; }
-  </style>
+        .module-card.words:hover {
+            border-color: #f59e0b;
+            box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+        }
+
+        .card-accent {
+            height: 5px;
+            width: 100%;
+        }
+
+        .alpha .card-accent {
+            background: linear-gradient(90deg, var(--primary), var(--primary-d));
+        }
+
+        .words .card-accent {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+
+        .card-body-custom {
+            padding: 32px;
+            flex: 1;
+        }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .badge-alpha {
+            background: #eff3ff;
+            color: var(--primary);
+            border: 1px solid #c7d4fd;
+        }
+
+        .badge-words {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .module-card h2 {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .module-card p {
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .pill {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        .pill-alpha {
+            background: #eff3ff;
+            color: var(--primary);
+            border: 1px solid #c7d4fd;
+        }
+
+        .pill-words {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .pill-locked {
+            background: #f1f5f9;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .card-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .cta-alpha {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .cta-alpha:hover {
+            background: var(--primary-d);
+            color: #fff;
+        }
+
+        .cta-words {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .cta-words:hover {
+            background: #d97706;
+            color: #fff;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 20px;
+            padding: 18px 32px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .stat-item .val {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .stat-item .lbl {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .tip-banner {
+            background: #eff3ff;
+            border: 1px solid #c7d4fd;
+            border-radius: 14px;
+            padding: 16px 22px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .tip-banner i {
+            font-size: 1.4rem;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .tip-banner p {
+            margin: 0;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .modules-section {
+            padding-bottom: 80px;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 24px 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
@@ -131,114 +320,120 @@
     </nav>
 
     <section class="learn-hero">
-    <div class="container">
-      <h1>Choose Your <span>Learning Path</span></h1>
-      <p>Real-time AI feedback as you sign. Start with the alphabet, then level up to full words.</p>
-    </div>
-  </section>
-
-  <section class="modules-section">
-    <div class="container">
-
-      <div class="tip-banner">
-        <i class="bi bi-lightbulb-fill"></i>
-        <p><strong>Recommended:</strong> Start with the Alphabet module to build your foundation. Every letter mastered earns XP toward the global leaderboard!</p>
-      </div>
-
-    <!-- ===================== -->
-    <!-- Alphabet Learning -->
-    <!-- ===================== -->
-    <div class="row g-4">
-
-        <!-- Alphabet -->
-        <div class="col-lg-7 col-12">
-          <a href="learn-alphabet.html" class="module-card alpha">
-            <div class="card-accent"></div>
-            <div class="card-body-custom">
-              <span class="card-badge badge-alpha"><i class="bi bi-alphabet"></i> Foundation</span>
-              <span class="card-icon">🤙</span>
-              <h2>Learn the Alphabet</h2>
-              <p>Master all 26 ASL handshapes from A to Z. The AI camera watches your hand in real time and only advances when you nail it — no clicking, just signing.</p>
-              <div class="pill-row">
-                <span class="pill pill-alpha">A</span><span class="pill pill-alpha">B</span>
-                <span class="pill pill-alpha">C</span><span class="pill pill-alpha">D</span>
-                <span class="pill pill-alpha">E</span><span class="pill pill-alpha">F</span>
-                <span class="pill pill-alpha">G</span><span class="pill pill-alpha">H</span>
-                <span class="pill pill-locked">I – Z →</span>
-              </div>
-              <span class="card-cta cta-alpha">Start Alphabet <i class="bi bi-arrow-right"></i></span>
-            </div>
-            <div class="card-stats">
-              <div class="stat-item"><div class="val">26</div><div class="lbl">Letters</div></div>
-              <div class="stat-item"><div class="val">~15 min</div><div class="lbl">To complete</div></div>
-              <div class="stat-item"><div class="val">+50 XP</div><div class="lbl">Per letter</div></div>
-            </div>
-          </a>
-        </div>
-        
-    <!-- ===================== -->
-    <!-- Words Learning (UNCHANGED NEW separate part) -->
-    <!-- ===================== -->
-    <section class="section-padding" style="padding-top: 0; min-height: 70vh;">
         <div class="container">
-            <hr class="my-5">
-
-            <div class="row align-items-center">
-
-                <div class="col-lg-5 col-12 mb-5 mb-lg-0 text-center text-lg-start">
-                    <h2 class="mb-3">Sign the word: <span class="text-primary" style="font-size: 3rem;"
-                            id="target-word">"HELLO"</span></h2>
-                    <p class="lead" id="word-instruction">Wave your hand near your forehead, like greeting someone.</p>
-
-                    <div class="progress mt-4 mb-3" style="height: 25px;">
-                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                            role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
-                            aria-valuemax="100" id="accuracy-bar-words">0% Match</div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
-                        <span>Detected: <strong id="detectedLabelWords">—</strong></span>
-                        <span>Confidence: <strong id="confidenceLabelWords">—%</strong></span>
-                    </div>
-
-                    <button id="enableWebcamButtonWords" class="custom-btn btn text-white mt-3 w-100">
-                        <i class="bi bi-webcam me-2"></i> Enable Camera (Words)
-                    </button>
-                </div>
-
-                <div class="col-lg-7 col-12 text-center">
-                    <div class="video-wrapper shadow-lg">
-                        <video id="webcam_words" autoplay playsinline muted></video>
-                        <canvas id="output_canvas_words"></canvas>
-                    </div>
-                    <p class="mt-3 text-muted small"><i class="bi bi-shield-check"></i> Processing happens on your
-                        device. No video is recorded or sent to the cloud.</p>
-                </div>
-
-            </div>
+            <h1>Choose Your <span>Learning Path</span></h1>
+            <p>Real-time AI feedback as you sign. Start with the alphabet, then level up to full words.</p>
         </div>
     </section>
 
-    <footer class="site-footer bg-light pb-4 pt-4 mt-auto">
-        <div class="container text-center">
-            <p class="mb-0 text-muted">Built for the 2026 HackED Hackathon</p>
-        </div>
-    </footer>
+    <section class="modules-section">
+        <div class="container">
 
-    <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+            <div class="tip-banner">
+                <i class="bi bi-lightbulb-fill"></i>
+                <p><strong>Recommended:</strong> Start with the Alphabet module to build your foundation. Every letter
+                    mastered earns XP toward the global leaderboard!</p>
+            </div>
 
-    <script src="https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js"></script>
-    <script src="https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js"></script>
-    <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js"></script>
-    <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js"></script>
+            <!-- ===================== -->
+            <!-- Alphabet Learning -->
+            <!-- ===================== -->
+            <div class="row g-4">
 
-    <!-- Alphabet engine (unchanged) -->
-    <script type="module" src="js/sign-engine.js"></script>
+                <!-- Alphabet -->
+                <div class="col-lg-7 col-12">
+                    <a href="learn-alphabet.html" class="module-card alpha">
+                        <div class="card-accent"></div>
+                        <div class="card-body-custom">
+                            <span class="card-badge badge-alpha"><i class="bi bi-alphabet"></i> Foundation</span>
+                            <span class="card-icon">🤙</span>
+                            <h2>Learn the Alphabet</h2>
+                            <p>Master all 26 ASL handshapes from A to Z. The AI camera watches your hand in real time
+                                and only advances when you nail it — no clicking, just signing.</p>
+                            <div class="pill-row">
+                                <span class="pill pill-alpha">A</span><span class="pill pill-alpha">B</span>
+                                <span class="pill pill-alpha">C</span><span class="pill pill-alpha">D</span>
+                                <span class="pill pill-alpha">E</span><span class="pill pill-alpha">F</span>
+                                <span class="pill pill-alpha">G</span><span class="pill pill-alpha">H</span>
+                                <span class="pill pill-locked">I – Z →</span>
+                            </div>
+                            <span class="card-cta cta-alpha">Start Alphabet <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <div class="val">26</div>
+                                <div class="lbl">Letters</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="val">~15 min</div>
+                                <div class="lbl">To complete</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="val">+50 XP</div>
+                                <div class="lbl">Per letter</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
 
-    <!-- Words engine (separate, no type=module) -->
-    <script src="js/word-engine.js"></script>
+                <!-- Words -->
+                <div class="col-lg-5 col-12">
+                    <a href="learn-word.html" class="module-card words">
+                        <div class="card-accent"></div>
+                        <div class="card-body-custom">
+                            <span class="card-badge badge-words"><i class="bi bi-chat-text"></i> Level Up</span>
+                            <span class="card-icon">🤟</span>
+                            <h2>Learn Words</h2>
+                            <p>Go beyond the alphabet and sign full words. The AI detects your hand shape in real time
+                                and guides you through common ASL phrases.</p>
+                            <div class="pill-row">
+                                <span class="pill pill-words">Hello</span>
+                                <span class="pill pill-words">Thank You</span>
+                                <span class="pill pill-words">I Love You</span>
+                                <span class="pill pill-words">Yes</span>
+                                <span class="pill pill-words">No</span>
+                            </div>
+                            <span class="card-cta cta-words">Start Words <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <div class="val">5</div>
+                                <div class="lbl">Words</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="val">~10 min</div>
+                                <div class="lbl">To complete</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="val">+100 XP</div>
+                                <div class="lbl">Per word</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <footer class="site-footer bg-light pb-4 pt-4 mt-auto">
+                    <div class="container text-center">
+                        <p class="mb-0 text-muted">Built for the 2026 HackED Hackathon</p>
+                    </div>
+                </footer>
+
+                <script src="js/jquery.min.js"></script>
+                <script src="js/bootstrap.min.js"></script>
+
+                <script src="https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js"></script>
+                <script src="https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js"></script>
+                <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js"></script>
+                <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+                ← ADD THIS
+
+                <!-- Alphabet engine (unchanged) -->
+                <script type="module" src="js/sign-engine.js"></script>
+
+                <!-- Words engine (separate, no type=module) -->
+                <script src="js/word-engine.js"></script>
 
 </body>
 
