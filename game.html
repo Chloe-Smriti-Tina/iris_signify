@@ -1092,13 +1092,13 @@
                     if (iAmWinner && window.__localRoundHandled) {
                         // Winner already showed popup locally — host just needs to write scores
                         window.__handledForRound = currentRound;
-                        if (isHost) writeRoundToFirebase(room.roundWinner, room);
+                        if (isHost) writeRoundToFirebase(room.roundWinner);
                     } else if (!window.__localRoundHandled) {
                         // Loser sees popup from Firebase, OR rare safety net for winner
                         window.__handledForRound = currentRound;
                         window.__localRoundHandled = true;
                         showRoundPopup(iAmWinner, room);
-                        if (isHost) writeRoundToFirebase(room.roundWinner, room);
+                        if (isHost) writeRoundToFirebase(room.roundWinner);
                     }
                 }
 
@@ -1138,15 +1138,21 @@
         }
 
         // Only host writes score update to Firebase (called once per round)
-        function writeRoundToFirebase(winnerRole, room) {
-            var hs = winnerRole === 'host' ? ((room.scores ? room.scores.host || 0 : 0) + 1) : (room.scores ? room.scores.host || 0 : 0);
-            var gs = winnerRole === 'guest' ? ((room.scores ? room.scores.guest || 0 : 0) + 1) : (room.scores ? room.scores.guest || 0 : 0);
-            var nextRound = currentRound + 1;
+        // Always fetches fresh scores from Firebase to avoid stale local variable bugs
+        async function writeRoundToFirebase(winnerRole) {
+            var snap = await get(ref(db, 'rooms/' + roomCode));
+            if (!snap.exists()) return;
+            var r = snap.val();
+            // Only write if roundWinner is still set (prevent double-write)
+            if (!r.roundWinner) return;
+            var hs = winnerRole === 'host' ? (r.scores.host || 0) + 1 : (r.scores.host || 0);
+            var gs = winnerRole === 'guest' ? (r.scores.guest || 0) + 1 : (r.scores.guest || 0);
+            var nextRound = (r.currentRound || 0) + 1;
             var isOver = hs >= WIN_SCORE || gs >= WIN_SCORE || nextRound >= TOTAL_ROUNDS;
             var nra = isOver ? null : Date.now() + ROUND_DELAY;
             var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null, nextRoundAt: nra };
             if (isOver) { updateData.status = 'finished'; updateData.gameWinner = hs > gs ? 'host' : 'guest'; }
-            update(ref(db, 'rooms/' + roomCode), updateData);
+            await update(ref(db, 'rooms/' + roomCode), updateData);
             if (!isOver) startCountdown(nra);
         }
 
@@ -1364,7 +1370,7 @@
                                 showRoundPopup(true, { scores: { host: myRole === 'host' ? myScore : oppScore, guest: myRole === 'guest' ? myScore : oppScore } });
                                 await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
                                 // Host writes scores immediately; guest waits for Firebase to confirm winner
-                                if (isHost) writeRoundToFirebase(myRole, { scores: { host: myScore, guest: oppScore } });
+                                if (isHost) writeRoundToFirebase(myRole);
                             }
                         } else if (!isMatch) {
                             window.__matchFrames = Math.max(0, window.__matchFrames - 1);
