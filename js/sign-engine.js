@@ -95,11 +95,11 @@ export const LETTERS = [
 // ── Constants ────
 const XP_PER_LETTER     = 50;
 const HOLD_FRAMES       = 40;   
-const HAND_HOLD_SECS    = 10;   // seconds hand must be present for null-gesture letters
+const HAND_HOLD_SECS    = 3;   // seconds hand must be present for null-gesture letters
 const CONFIDENCE_THRESH = 0.75; // min confidence for a correct gesture match
 
 // ── State ───
-const cfg         = window.SIGNIFY_CONFIG || {};
+let cfg         = window.SIGNIFY_CONFIG || {};
 let completedSet  = cfg.completedSet instanceof Set ? cfg.completedSet : new Set();
 let skippedSet    = new Set(); // letters the user chose to skip
 let currentIndex  = 0;
@@ -110,13 +110,15 @@ let gestureRec    = null;
 let webcamRunning = false;
 let lastVideoTime = -1;
 let sessionXP     = 0;
+let lastFrameTime = 0;
 let totalAttempts = 0;
 let totalHits     = 0;
 let isRetryMode   = false; // true when practising again after XP already earned
+let xpEarnedSet = new Set(); // letters XP was awarded for THIS session
 
 // DOM refs
 let video, canvas, ctx, camBtn, camOverlay,
-    holdBar, holdLabel, detLbl, confLbl;
+    holdBar, holdLabel;
 
 // ── DOM ────
 function grabDom() {
@@ -127,8 +129,6 @@ function grabDom() {
     camOverlay = document.getElementById("camOverlay");
     holdBar    = document.getElementById("holdBar");
     holdLabel  = document.getElementById("holdLabel");
-    detLbl     = document.getElementById("detectedLbl");
-    confLbl    = document.getElementById("confLbl");
 }
 
 // ── Render letter ────
@@ -196,7 +196,8 @@ function buildGrid() {
 // ── Sidebar ──────
 function updateSidebar() {
     const xpEl   = document.getElementById("sb-xp");
-    if (xpEl)    xpEl.textContent = sessionXP;
+    const baseXP = (window.SIGNIFY_CONFIG && window.SIGNIFY_CONFIG.totalXP) || 0;
+    if (xpEl) xpEl.textContent = baseXP + sessionXP;
     const doneEl = document.getElementById("sb-done");
     if (doneEl)  doneEl.textContent = `${completedSet.size}/26`;
     const accEl  = document.getElementById("sb-acc");
@@ -247,8 +248,9 @@ function showSuccess(letter) {
     if (phaseLocked) return;
     phaseLocked = true;
 
-    const alreadyDone = completedSet.has(letter);
+    const alreadyDone = xpEarnedSet.has(letter);
     if (!alreadyDone) {
+        xpEarnedSet.add(letter);
         completedSet.add(letter);
         sessionXP += XP_PER_LETTER;
     }
@@ -390,6 +392,8 @@ function gameLoop() {
     if (!webcamRunning) return;
 
     const now = performance.now();
+    const delta = lastFrameTime ? (now - lastFrameTime) / 1000 : 1 / 60; // seconds elapsed
+    lastFrameTime = now;
     let results;
     if (lastVideoTime !== video.currentTime) {
         lastVideoTime = video.currentTime;
@@ -406,22 +410,13 @@ function gameLoop() {
     }
 
     const l           = LETTERS[currentIndex];
-    const handPresent = results?.landmarks?.length > 0;
-    let   detectedCat = "—";
-    let   detectedConf = "—";
-
-    if (handPresent && results.gestures?.length > 0) {
-        detectedCat  = results.gestures[0][0].categoryName;
-        detectedConf = Math.round(results.gestures[0][0].score * 100) + "%";
-        totalAttempts++;
-    }
-
-    if (detLbl)  detLbl.textContent  = detectedCat;
-    if (confLbl) confLbl.textContent = detectedConf;
+    const handPresent = results != null && results.landmarks?.length > 0;
 
     // ── Gesture-based letters (A, G, S, Y, …) ───────────────
     if (l.gesture !== null) {
-        if (handPresent && results.gestures?.length > 0) {
+        if (!results) {
+            // frame not yet processed — do nothing, hold progress where it is
+        } else if (handPresent && results.gestures?.length > 0) {
             const cat   = results.gestures[0][0].categoryName;
             const score = results.gestures[0][0].score;
             const isMatch = Array.isArray(l.gesture) ? l.gesture.includes(cat) : cat === l.gesture;
@@ -433,7 +428,7 @@ function gameLoop() {
                 holdProgress = Math.max(0, holdProgress - 3);
             }
         } else {
-            // No hand
+            // Hand not present on a real frame — drain
             holdProgress = Math.max(0, holdProgress - 6);
         }
     }
@@ -442,7 +437,7 @@ function gameLoop() {
     // Timer ONLY advances while a hand is actually in frame.
     else {
         if (handPresent) {
-            handTimer    += 1 / 60; // ~60fps, accumulate seconds
+            handTimer    += delta;
             holdProgress  = Math.min(100, (handTimer / HAND_HOLD_SECS) * 100);
         }
         // No hand = timer pauses, progress stays where it is 
@@ -461,6 +456,7 @@ function gameLoop() {
 // ── Boot ──────
 document.addEventListener("DOMContentLoaded", () => {
     grabDom();
+    cfg = window.SIGNIFY_CONFIG || {};
     if (cfg.completedSet instanceof Set) completedSet = cfg.completedSet;
 
     const first = LETTERS.findIndex(l => !completedSet.has(l.letter));
