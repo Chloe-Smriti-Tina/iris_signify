@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,14 +17,14 @@
 
   <style>
     :root {
-      --signify-blue:       #648FFF;
-      --signify-dark:       #1e293b;
-      --signify-accent:     #FE6100;
-      --signify-light:      #f8fafc;
+      --signify-blue: #648FFF;
+      --signify-dark: #1e293b;
+      --signify-accent: #FE6100;
+      --signify-light: #f8fafc;
       --text-high-contrast: #0f172a;
-      --text-muted:         #64748b;
-      --card-bg:            #ffffff;
-      --card-border:        #e2e8f0;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
     }
 
     body {
@@ -45,6 +46,7 @@
       color: white;
       font-weight: bold;
     }
+
     .custom-btn:hover {
       background: var(--signify-dark);
       border-color: var(--signify-dark);
@@ -86,7 +88,10 @@
       transition: border-color 0.2s;
       height: 100%;
     }
-    .profile-card:hover { border-color: var(--signify-blue); }
+
+    .profile-card:hover {
+      border-color: var(--signify-blue);
+    }
 
     /* ── Side badge cards ── */
     .side-card {
@@ -102,7 +107,10 @@
       overflow: hidden;
       transition: border-color 0.2s;
     }
-    .side-card:hover { border-color: var(--signify-blue); }
+
+    .side-card:hover {
+      border-color: var(--signify-blue);
+    }
 
     .side-card-title {
       color: var(--text-muted);
@@ -124,9 +132,19 @@
       scrollbar-width: thin;
       scrollbar-color: rgba(100, 143, 255, 0.3) transparent;
     }
-    .side-card-body::-webkit-scrollbar { width: 4px; }
-    .side-card-body::-webkit-scrollbar-track { background: transparent; }
-    .side-card-body::-webkit-scrollbar-thumb { background: rgba(100,143,255,0.3); border-radius: 99px; }
+
+    .side-card-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .side-card-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .side-card-body::-webkit-scrollbar-thumb {
+      background: rgba(100, 143, 255, 0.3);
+      border-radius: 99px;
+    }
 
     /* ── Avatar ── */
     .avatar-circle {
@@ -150,11 +168,13 @@
       margin: 0 0 4px;
       letter-spacing: 0.5px;
     }
+
     .profile-email {
       color: var(--text-muted);
       font-size: 14px;
       margin: 0 0 10px;
     }
+
     .badge-joined {
       display: inline-block;
       background: #eff6ff;
@@ -166,7 +186,10 @@
     }
 
     /* ── Stats ── */
-    .stats-section { margin-top: 36px; }
+    .stats-section {
+      margin-top: 36px;
+    }
+
     .stats-label {
       color: var(--text-muted);
       font-size: 11px;
@@ -176,11 +199,13 @@
       margin-bottom: 14px;
       text-align: left;
     }
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
+
     .stat-card {
       background: var(--signify-light);
       border: 2px solid var(--card-border);
@@ -189,16 +214,19 @@
       text-align: center;
       transition: border-color 0.2s, transform 0.2s;
     }
+
     .stat-card:hover {
       border-color: var(--signify-blue);
       transform: translateY(-3px);
     }
+
     .stat-icon {
       font-size: 22px;
       margin-bottom: 8px;
       display: block;
       color: var(--signify-accent);
     }
+
     .stat-value {
       color: var(--signify-blue);
       font-size: 26px;
@@ -207,6 +235,7 @@
       line-height: 1;
       margin-bottom: 6px;
     }
+
     .stat-label {
       color: var(--text-muted);
       font-size: 11px;
@@ -227,11 +256,16 @@
       margin-bottom: 8px;
       transition: border-color 0.2s, transform 0.2s;
     }
-    .earned-badge-item:last-child { margin-bottom: 0; }
+
+    .earned-badge-item:last-child {
+      margin-bottom: 0;
+    }
+
     .earned-badge-item:hover {
       border-color: var(--signify-blue);
       transform: translateY(-2px);
     }
+
     .earned-badge-icon {
       font-size: 24px;
       width: 42px;
@@ -243,7 +277,11 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .earned-badge-info { min-width: 0; }
+
+    .earned-badge-info {
+      min-width: 0;
+    }
+
     .earned-badge-name {
       font-size: 13px;
       font-weight: 700;
@@ -253,6 +291,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .earned-badge-desc {
       font-size: 11px;
       color: var(--text-muted);
@@ -263,14 +302,21 @@
     }
 
     /* ── Progress badge rows ── */
-    .progress-badge-item { margin-bottom: 16px; }
-    .progress-badge-item:last-child { margin-bottom: 0; }
+    .progress-badge-item {
+      margin-bottom: 16px;
+    }
+
+    .progress-badge-item:last-child {
+      margin-bottom: 0;
+    }
+
     .progress-badge-header {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 7px;
     }
+
     .progress-badge-icon {
       font-size: 20px;
       width: 36px;
@@ -283,30 +329,39 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .progress-badge-label { flex: 1; min-width: 0; }
+
+    .progress-badge-label {
+      flex: 1;
+      min-width: 0;
+    }
+
     .progress-badge-name {
       font-size: 12px;
       font-weight: 700;
       color: var(--text-high-contrast);
       margin: 0;
     }
+
     .progress-badge-desc {
       font-size: 11px;
       color: var(--text-muted);
       margin: 0;
     }
+
     .progress-badge-pct {
       font-size: 11px;
       font-weight: 700;
       color: var(--signify-blue);
       white-space: nowrap;
     }
+
     .progress-bar-track {
       height: 6px;
       background: var(--card-border);
       border-radius: 99px;
       overflow: hidden;
     }
+
     .progress-bar-fill {
       height: 100%;
       border-radius: 99px;
@@ -320,21 +375,35 @@
       color: var(--text-muted);
       font-size: 13px;
     }
-    .empty-msg span { font-size: 30px; display: block; margin-bottom: 8px; opacity: 0.4; }
+
+    .empty-msg span {
+      font-size: 30px;
+      display: block;
+      margin-bottom: 8px;
+      opacity: 0.4;
+    }
 
     /* ── Not logged in ── */
     .not-logged-in {
       text-align: center;
       padding: 80px 20px;
     }
+
     .not-logged-in i {
       font-size: 52px;
       color: var(--signify-blue);
       display: block;
       margin-bottom: 16px;
     }
-    .not-logged-in h3 { color: var(--text-high-contrast); margin-bottom: 8px; }
-    .not-logged-in p  { color: var(--text-muted); }
+
+    .not-logged-in h3 {
+      color: var(--text-high-contrast);
+      margin-bottom: 8px;
+    }
+
+    .not-logged-in p {
+      color: var(--text-muted);
+    }
 
     .btn-signin {
       background: var(--signify-blue);
@@ -348,7 +417,10 @@
       margin-top: 8px;
       transition: background 0.2s;
     }
-    .btn-signin:hover { background: var(--signify-dark); }
+
+    .btn-signin:hover {
+      background: var(--signify-dark);
+    }
 
     .loading-wrap {
       text-align: center;
@@ -358,9 +430,19 @@
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
-      .profile-layout { flex-direction: column; }
-      .profile-col { flex: none; width: 100%; }
-      .side-card { min-height: 260px; flex: none; }
+      .profile-layout {
+        flex-direction: column;
+      }
+
+      .profile-col {
+        flex: none;
+        width: 100%;
+      }
+
+      .side-card {
+        min-height: 260px;
+        flex: none;
+      }
     }
   </style>
 </head>
@@ -374,17 +456,20 @@
       </button>
       <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
       <div class="d-flex align-items-center d-lg-none">
-        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
+        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn"
+          style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
       </div>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-lg-5">
           <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
           <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
           <li class="nav-item"><a class="nav-link active" href="profile.html">Profile</a></li>
         </ul>
         <div class="d-lg-flex align-items-center d-none ms-auto">
-          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
+          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn"
+            style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
         </div>
       </div>
     </div>
@@ -404,7 +489,8 @@
           <i class="bi-person-lock"></i>
           <h3>You're not signed in</h3>
           <p>Sign in to view your profile and stats.</p>
-          <button class="btn-signin" onclick="document.getElementById('authModal').style.display='flex'">Sign In</button>
+          <button class="btn-signin" onclick="document.getElementById('authModal').style.display='flex'">Sign
+            In</button>
         </div>
       </div>
 
@@ -453,11 +539,12 @@
 
             <div class="side-card">
               <p class="side-card-title">
-              <span style="display:inline-flex;align-items:center;gap:6px;">
-                <span class="material-symbols-outlined" style="font-size:18px;">star_shine</span>
-                Badges Earned
-              </span>
-                <span id="earnedBadgeCount" style="color:var(--signify-blue);font-size:12px;letter-spacing:0;text-transform:none;font-weight:700;margin-left:4px;"></span>
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                  <span class="material-symbols-outlined" style="font-size:18px;">star_shine</span>
+                  Badges Earned
+                </span>
+                <span id="earnedBadgeCount"
+                  style="color:var(--signify-blue);font-size:12px;letter-spacing:0;text-transform:none;font-weight:700;margin-left:4px;"></span>
               </p>
               <div class="side-card-body" id="earnedBadgesList">
                 <div class="empty-msg"><span>🏅</span>Loading...</div>
@@ -505,4 +592,5 @@
   <script type="module" src="js/profile.js"></script>
 
 </body>
+
 </html>
