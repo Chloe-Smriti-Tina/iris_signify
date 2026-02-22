@@ -98,15 +98,9 @@ const WORD_IMAGES = {
     'Yes': 'images/yes.png',
     'No': 'images/no.png',
 };
-const WORD_IMAGES = {
-    'Hello': 'images/hello.png',
-    'Thank You': 'images/thankyou.png',
-    'I Love You': 'images/iloveyou.png',
-    'Yes': 'images/yes.png',
-    'No': 'images/no.png',
-};
 const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
 const MATCH_NEEDED = 15;
+const MIN_WORD_TIME = 3000; // 3 seconds minimum before advancing
 
 // ── DOM refs ──────────────────────────────────────────────────
 const video = document.getElementById('webcam_words');
@@ -115,8 +109,6 @@ const ctx = canvas.getContext('2d');
 const enableBtn = document.getElementById('enableWebcamButtonWords');
 const progressBar = document.getElementById('accuracy-bar-words');
 const holdLabel = document.getElementById('holdLabel');
-const detectedEl = document.getElementById('detectedLabelWords');
-const confidenceEl = document.getElementById('confidenceLabelWords');
 const progFill = document.getElementById('progFill');
 const progressCount = document.getElementById('progressCount');
 
@@ -161,6 +153,7 @@ let currentWord = WORDS[0];
 let matchFrames = 0;
 let totalXP = 0;
 let wordsCompleted = 0;
+let wordStartTime = Date.now(); // tracks when current word began
 
 // ── Build sidebar word list ───────────────────────────────────
 function buildWordList() {
@@ -279,38 +272,39 @@ async function detectLoop() {
             const label = best.name;
             const pct = Math.min(100, Math.round((best.score / 8.0) * 100));
             const isMatch = label === currentWord;
+            const timeElapsed = Date.now() - wordStartTime;
+            const timeReady = timeElapsed >= MIN_WORD_TIME;
 
-
-
-            detectedEl.textContent = label;
-            confidenceEl.textContent = `${pct}%`;
             progressBar.style.width = `${pct}%`;
-            progressBar.className = `hold-fill${isMatch ? ' success' : ''}`;
+            progressBar.className = `hold-fill${isMatch && timeReady ? ' success' : ''}`;
 
-            if (isMatch) {
+            if (isMatch && timeReady) {
                 matchFrames++;
-                const holdPct = Math.round((matchFrames / MATCH_NEEDED) * 100);
-                holdLabel.textContent = matchFrames >= MATCH_NEEDED ? '✓ Perfect!' : `Hold… ${holdPct}%`;
                 if (matchFrames >= MATCH_NEEDED) {
                     advanceWord();
                     matchFrames = 0;
                 }
-            } else {
+            } else if (!isMatch) {
                 matchFrames = Math.max(0, matchFrames - 1);
-                holdLabel.textContent = 'Make the sign!';
+            }
+
+            // Label based on confidence score, feels natural not mechanical
+            if (pct >= 80) {
+                holdLabel.textContent = "Looking great! 🔥";
+            } else if (pct >= 60) {
+                holdLabel.textContent = "Almost there, keep going!";
+            } else if (pct >= 40) {
+                holdLabel.textContent = "Getting closer…";
+            } else {
+                holdLabel.textContent = "Try adjusting your hand";
             }
         } else {
-
-            detectedEl.textContent = '🤔 Keep trying';
-            confidenceEl.textContent = '—';
             progressBar.style.width = '5%';
             progressBar.className = 'hold-fill';
             holdLabel.textContent = 'Hand detected…';
             matchFrames = Math.max(0, matchFrames - 1);
         }
     } else {
-        detectedEl.textContent = '—';
-        confidenceEl.textContent = '—';
         progressBar.style.width = '0%';
         progressBar.className = 'hold-fill';
         holdLabel.textContent = 'Make the sign!';
@@ -332,7 +326,7 @@ function advanceWord() {
     updateOverallProgress();
     updateWordList();
 
-    // Save to Firebase (skips if already learned)
+    // Save to Firebase
     if (typeof window.onWordComplete === 'function') {
         window.onWordComplete(currentWord, xpEarned);
     }
@@ -357,7 +351,7 @@ function showStageComplete() {
     const images = ['images/hello.png', 'images/thankyou.png', 'images/iloveyou.png', 'images/yes.png', 'images/no.png'];
     const wordReview = WORDS.map((w, i) =>
         `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;">
-            <img src="${images[i]}" style="width:40px;height:40px;object-fit:contain;border-radius:6px;">
+            <img src="${images[i]}" style="width:70px;height:70px;object-fit:contain;border-radius:8px;">
             <span style="font-weight:700;color:#0f172a;">${w}</span>
             <span style="margin-left:auto;color:#22c55e;font-weight:700;">✓ +${WORD_XP[w]} XP</span>
         </div>`
@@ -389,6 +383,7 @@ nextWordBtn.addEventListener('click', () => {
 
     currentWordIdx++;
     currentWord = WORDS[currentWordIdx];
+    wordStartTime = Date.now(); // reset timer for new word
 
     wordHighlight.textContent = `"${currentWord}"`;
     wordDesc.textContent = WORD_INSTRUCTIONS[currentWord];
@@ -398,14 +393,11 @@ nextWordBtn.addEventListener('click', () => {
     progressBar.style.width = '0%';
     progressBar.className = 'hold-fill';
     holdLabel.textContent = 'Make the sign!';
-    detectedEl.textContent = '—';
-    confidenceEl.textContent = '—';
 
     updateWordList();
     streaming = true;
     detectLoop();
 });
-
 
 // ── Button ────────────────────────────────────────────────────
 enableBtn.addEventListener('click', async () => {
@@ -419,4 +411,5 @@ enableBtn.addEventListener('click', async () => {
 buildWordList();
 updateOverallProgress();
 updateWordImage(WORDS[0]);
+wordStartTime = Date.now(); // start timer for first word
 loadModels();

@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Signify – Challenge Mode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6d8bfa;
+            --primary-d: #5371e0;
+            --amber: #f59e0b;
+            --text: #0f172a;
+            --muted: #64748b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --success-bg: #f0fdf4;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Nav */
+        .navbar-brand {
+            color: var(--primary) !important;
+            font-weight: 700;
+            font-size: 2rem;
+            text-decoration: none;
+        }
+
+        .custom-btn {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+
+        .custom-btn:hover {
+            background: #1e293b;
+            border-color: #1e293b;
+            color: white;
+        }
+
+        .nav-challenge {
+            color: var(--primary) !important;
+            font-weight: 700 !important;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            min-height: calc(100vh - 72px);
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── LOBBY ── */
+        #lobbyScreen {
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .lobby-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(109, 139, 250, 0.07);
+        }
+
+        .lobby-icon {
+            width: 72px;
+            height: 72px;
+            background: #eff3ff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 20px;
+        }
+
+        .lobby-card h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .lobby-card h1 span {
+            color: var(--primary);
+        }
+
+        .lobby-card>p {
+            color: var(--muted);
+            margin-bottom: 32px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .room-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 20px;
+            font-family: 'DM Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            text-align: center;
+            outline: none;
+            font-weight: 700;
+            transition: border-color 0.2s;
+        }
+
+        .room-input:focus {
+            border-color: var(--primary);
+        }
+
+        .room-input::placeholder {
+            color: #cbd5e1;
+            letter-spacing: 2px;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .btn-primary-game {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary-game:hover {
+            background: var(--primary-d);
+        }
+
+        .btn-outline-game {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-outline-game:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .how-it-works {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            text-align: left;
+        }
+
+        .hw-step {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .hw-step .num {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .hw-step .desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── WAITING ── */
+        #waitingScreen {
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .waiting-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 460px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .waiting-card h2 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .waiting-card>p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .room-code-display {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: var(--primary);
+            background: #eff3ff;
+            border: 2px solid #c7d4fd;
+            border-radius: 14px;
+            padding: 18px;
+            margin: 16px 0;
+        }
+
+        .copy-btn {
+            font-size: 12px;
+            color: var(--muted);
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 20px;
+        }
+
+        .copy-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        .player-slots {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .player-slot {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .player-slot.filled {
+            border-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        .slot-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .slot-name {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .slot-status {
+            font-size: 11px;
+            color: var(--success);
+            margin-top: 2px;
+        }
+
+        .slot-status.waiting {
+            color: var(--muted);
+        }
+
+        /* ── GAME ── */
+        #gameScreen {
+            padding: 20px 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 20px;
+        }
+
+        .score-board {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item .s-name {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .score-item .s-val {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .score-item .s-val.winning {
+            color: var(--primary);
+        }
+
+        .score-divider {
+            font-size: 1.2rem;
+            color: var(--border);
+            font-weight: 900;
+        }
+
+        .round-info {
+            text-align: right;
+        }
+
+        .round-info .r-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+        }
+
+        .round-info .r-num {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .round-dots {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .round-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        .round-dot.my-win {
+            background: var(--primary);
+        }
+
+        .round-dot.opp-win {
+            background: #ef4444;
+        }
+
+        .target-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .target-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .type-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .badge-word {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-letter {
+            background: #eff3ff;
+            color: #3730a3;
+            border: 1px solid #c7d4fd;
+        }
+
+        .target-word {
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -1px;
+        }
+
+        .cameras-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .cam-panel {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .cam-panel.winner {
+            border-color: var(--success);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+        }
+
+        .cam-panel.loser {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        .cam-top {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cam-top .p-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .cam-top .cam-status {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cam-top .cam-status.detecting {
+            color: var(--amber);
+        }
+
+        .cam-top .cam-status.matched {
+            color: var(--success);
+        }
+
+        .video-box {
+            position: relative;
+            aspect-ratio: 4/3;
+            background: #f1f5f9;
+        }
+
+        .video-box video,
+        .video-box canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        .video-box canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .opp-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--muted);
+        }
+
+        .opp-placeholder i {
+            font-size: 3rem;
+            color: #cbd5e1;
+        }
+
+        .opp-placeholder span {
+            font-size: 13px;
+        }
+
+        .cam-bottom {
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Overlays */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay.visible {
+            display: flex;
+        }
+
+        .overlay-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        .overlay-emoji {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .overlay-card h2 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .overlay-card p {
+            color: var(--muted);
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .xp-tag {
+            display: inline-block;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #92400e;
+            margin-bottom: 16px;
+        }
+
+        .overlay-btn {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 13px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.2s;
+        }
+
+        .overlay-btn:hover {
+            background: var(--primary-d);
+        }
+
+        .overlay-btn.secondary {
+            background: var(--bg);
+            color: var(--muted);
+            border: 2px solid var(--border);
+            margin-left: 8px;
+        }
+
+        .overlay-btn.secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--bg);
+        }
+
+        @media (max-width: 640px) {
+            .cameras-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .lobby-card,
+            .waiting-card {
+                padding: 32px 24px;
+            }
+
+            .how-it-works {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-lg-5">
+                    <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
+                    <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
+                    <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
+                </ul>
+                <div class="d-lg-flex align-items-center d-none ms-auto">
+                    <button id="auth-btn" class="custom-btn btn">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── LOBBY ── -->
+    <div class="screen active" id="lobbyScreen">
+        <div class="lobby-card">
+            <div class="lobby-icon">⚡</div>
+            <h1>Challenge <span>Mode</span></h1>
+            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 5 wins +500 XP.
+            </p>
+
+            <button class="btn-primary-game" id="createRoomBtn">
+                <i class="bi bi-plus-circle"></i> Create Room
+            </button>
+
+            <div class="divider">or join with a code</div>
+
+            <input class="room-input" id="roomCodeInput" placeholder="Enter code" maxlength="6">
+            <br><br>
+            <button class="btn-outline-game" id="joinRoomBtn">
+                <i class="bi bi-box-arrow-in-right"></i> Join Room
+            </button>
+
+            <p id="lobbyError" style="color:#ef4444;font-size:13px;margin-top:12px;display:none;"></p>
+
+            <div class="how-it-works">
+                <div class="hw-step">
+                    <div class="num">Step 1</div>
+                    <div class="desc">Create a room and share the code with your opponent</div>
+                </div>
+                <div class="hw-step">
+                    <div class="num">Step 2</div>
+                    <div class="desc">Both players sign the same word or letter on camera</div>
+                </div>
+                <div class="hw-step">
+                    <div class="num">Step 3</div>
+                    <div class="desc">First to sign correctly wins the round. Best of 5!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── WAITING ── -->
+    <div class="screen" id="waitingScreen">
+        <div class="waiting-card">
+            <div style="font-size:2.5rem;margin-bottom:12px;">🎮</div>
+            <h2>Room Created!</h2>
+            <p>Share this code with your opponent:</p>
+            <div class="room-code-display" id="displayRoomCode">------</div>
+            <button class="copy-btn" id="copyCodeBtn"><i class="bi bi-clipboard"></i> Copy code</button>
+            <p class="pulse" style="color:var(--muted);font-size:13px;margin-bottom:20px;">Waiting for opponent to join…
+            </p>
+
+            <div class="player-slots">
+                <div class="player-slot filled">
+                    <div class="slot-label">You (Host)</div>
+                    <div class="slot-name" id="hostName">—</div>
+                    <div class="slot-status">✓ Ready</div>
+                </div>
+                <div class="player-slot" id="guestSlot">
+                    <div class="slot-label">Opponent</div>
+                    <div class="slot-name" id="guestName">Waiting…</div>
+                    <div class="slot-status waiting">Not joined yet</div>
+                </div>
+            </div>
+            <button class="btn-outline-game" id="cancelRoomBtn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- ── GAME ── -->
+    <div class="screen" id="gameScreen">
+        <div class="game-header">
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="s-name" id="myScoreName">You</div>
+                    <div class="s-val" id="myScore">0</div>
+                </div>
+                <div class="score-divider">—</div>
+                <div class="score-item">
+                    <div class="s-name" id="oppScoreName">Opponent</div>
+                    <div class="s-val" id="oppScore">0</div>
+                </div>
+            </div>
+            <div class="round-info">
+                <div class="r-label">Round</div>
+                <div class="r-num"><span id="roundNum">1</span> / 5</div>
+                <div class="round-dots" id="roundDots">
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="target-card">
+            <div class="target-label">Sign this now</div>
+            <div><span class="type-badge badge-word" id="targetTypeBadge">Word</span></div>
+            <div class="target-word" id="targetDisplay">Hello</div>
+        </div>
+
+        <div class="cameras-grid">
+            <div class="cam-panel" id="myCamPanel">
+                <div class="cam-top">
+                    <span class="p-name" id="myCamName">You</span>
+                    <span class="cam-status detecting" id="myCamStatus"><i class="bi bi-camera-video"></i>
+                        Scanning…</span>
+                </div>
+                <div class="video-box">
+                    <video id="myVideo" autoplay playsinline muted></video>
+                    <canvas id="myCanvas"></canvas>
+                </div>
+                <div class="cam-bottom" id="myFeedback">Show your hand to the camera</div>
+            </div>
+
+            <div class="cam-panel" id="oppCamPanel">
+                <div class="cam-top">
+                    <span class="p-name" id="oppCamName">Opponent</span>
+                    <span class="cam-status" id="oppCamStatus"><i class="bi bi-wifi"></i> Connected</span>
+                </div>
+                <div class="video-box">
+                    <div class="opp-placeholder" id="oppPlaceholder">
+                        <i class="bi bi-person-video3"></i>
+                        <span>Opponent is signing on their device…</span>
+                    </div>
+                </div>
+                <div class="cam-bottom" id="oppFeedback" style="color:var(--muted);">Waiting for result…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Round result overlay -->
+    <div class="overlay" id="roundResult">
+        <div class="overlay-card">
+            <span class="overlay-emoji" id="roundEmoji">🏆</span>
+            <h2 id="roundResultTitle">You got it!</h2>
+            <p id="roundResultSub">Round 1 complete</p>
+            <button class="overlay-btn" id="nextRoundBtn">Next Round →</button>
+        </div>
+    </div>
+
+    <!-- Game over overlay -->
+    <div class="overlay" id="gameOver">
+        <div class="overlay-card">
+            <span class="overlay-emoji" id="gameOverEmoji">🏆</span>
+            <h2 id="gameOverTitle">You Win!</h2>
+            <div class="xp-tag" id="xpEarnedDisplay" style="display:none;">+500 XP</div>
+            <p id="gameOverSub">Great signing today!</p>
+            <button class="overlay-btn" onclick="window.location.reload()">Play Again</button>
+            <button class="overlay-btn secondary" onclick="window.location.href='home.html'">Home</button>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, onValue, remove }
+            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getFirestore, doc, updateDoc, increment }
+            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const app = initializeApp({
+            apiKey: "AIzaSyCIm-UGhuGg9aNuK7nWdI2pZ6hLDFxxuis",
+            authDomain: "signify-5ec23.firebaseapp.com",
+            projectId: "signify-5ec23",
+            storageBucket: "signify-5ec23.firebasestorage.app",
+            messagingSenderId: "150947241043",
+            appId: "1:150947241043:web:f2fbb25737e9b7a02c7aa6",
+            databaseURL: "https://signify-5ec23-default-rtdb.firebaseio.com"
+        });
+
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const fs = getFirestore(app);
+
+        const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
+        const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+        let currentUser = null;
+        let roomCode = null, isHost = false, myRole = null;
+        let rounds = [], currentRound = 0;
+        let myScore = 0, oppScore = 0;
+        let roundActive = false, roundLocked = false;
+
+        onAuthStateChanged(auth, u => { currentUser = u; });
+
+        function genCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
+
+        function generateRounds() {
+            const w = [...WORDS].sort(() => Math.random() - 0.5).slice(0, 3);
+            const l = [...LETTERS].sort(() => Math.random() - 0.5).slice(0, 2);
+            return [...w.map(t => ({ type: 'word', target: t })), ...l.map(t => ({ type: 'letter', target: t }))]
+                .sort(() => Math.random() - 0.5);
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('lobbyError');
+            el.textContent = msg; el.style.display = 'block';
+        }
+
+        // Copy code button
+        document.getElementById('copyCodeBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(roomCode);
+            document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-clipboard"></i> Copy code', 2000);
+        });
+
+        // Create room
+        document.getElementById('createRoomBtn').addEventListener('click', async () => {
+            if (!currentUser) { showError('Please sign in first.'); return; }
+            roomCode = genCode(); isHost = true; myRole = 'host';
+            rounds = generateRounds();
+            await set(ref(db, `rooms/${roomCode}`), {
+                host: { uid: currentUser.uid, name: currentUser.displayName || 'Player 1' },
+                guest: null, rounds, scores: { host: 0, guest: 0 },
+                currentRound: 0, status: 'waiting', roundWinner: null
+            });
+            document.getElementById('displayRoomCode').textContent = roomCode;
+            document.getElementById('hostName').textContent = currentUser.displayName || 'You';
+            showScreen('waitingScreen');
+            listenRoom();
+        });
+
+        // Join room
+        document.getElementById('joinRoomBtn').addEventListener('click', async () => {
+            if (!currentUser) { showError('Please sign in first.'); return; }
+            const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            if (code.length < 4) { showError('Enter a valid room code.'); return; }
+            const snap = await get(ref(db, `rooms/${code}`));
+            if (!snap.exists()) { showError('Room not found.'); return; }
+            const room = snap.val();
+            if (room.status !== 'waiting') { showError('This game has already started.'); return; }
+            if (room.guest) { showError('Room is full.'); return; }
+            roomCode = code; isHost = false; myRole = 'guest';
+            rounds = room.rounds;
+            await update(ref(db, `rooms/${roomCode}`), {
+                guest: { uid: currentUser.uid, name: currentUser.displayName || 'Player 2' },
+                status: 'ready'
+            });
+            listenRoom();
+        });
+
+        document.getElementById('cancelRoomBtn').addEventListener('click', async () => {
+            if (roomCode) await remove(ref(db, `rooms/${roomCode}`));
+            showScreen('lobbyScreen');
+        });
+
+        function listenRoom() {
+            onValue(ref(db, `rooms/${roomCode}`), snap => {
+                if (!snap.exists()) { showScreen('lobbyScreen'); return; }
+                const room = snap.val();
+
+                if (room.guest) {
+                    document.getElementById('guestName').textContent = room.guest.name;
+                    document.getElementById('guestSlot').classList.add('filled');
+                    document.getElementById('guestSlot').querySelector('.slot-status').textContent = '✓ Ready';
+                    document.getElementById('guestSlot').querySelector('.slot-status').classList.remove('waiting');
+                }
+
+                if ((room.status === 'ready' || room.status === 'playing') && !window.__gameStarted) {
+                    rounds = room.rounds;
+                    const myName = myRole === 'host' ? room.host.name : room.guest?.name;
+                    const oppName = myRole === 'host' ? room.guest?.name : room.host.name;
+                    document.getElementById('myScoreName').textContent = myName || 'You';
+                    document.getElementById('oppScoreName').textContent = oppName || 'Opponent';
+                    document.getElementById('myCamName').textContent = myName || 'You';
+                    document.getElementById('oppCamName').textContent = oppName || 'Opponent';
+                    if (room.status === 'ready') update(ref(db, `rooms/${roomCode}`), { status: 'playing' });
+                    showScreen('gameScreen');
+                    window.__gameStarted = true;
+                    startGame(room);
+                }
+
+                // Sync scores
+                myScore = myRole === 'host' ? (room.scores?.host || 0) : (room.scores?.guest || 0);
+                oppScore = myRole === 'host' ? (room.scores?.guest || 0) : (room.scores?.host || 0);
+                document.getElementById('myScore').textContent = myScore;
+                document.getElementById('oppScore').textContent = oppScore;
+                updateScoreStyles();
+
+                // Round winner from DB
+                if (room.roundWinner && !roundLocked) {
+                    handleRoundEnd(room.roundWinner, room);
+                }
+
+                // Game over
+                if (room.status === 'finished' && !window.__gameOver) {
+                    window.__gameOver = true;
+                    setTimeout(() => showGameOver(room.gameWinner === myRole), 2000);
+                }
+            });
+        }
+
+        function updateScoreStyles() {
+            document.getElementById('myScore').className = `s-val${myScore > oppScore ? ' winning' : ''}`;
+            document.getElementById('oppScore').className = `s-val${oppScore > myScore ? ' winning' : ''}`;
+        }
+
+        function updateRoundDots() {
+            const dots = document.querySelectorAll('.round-dot');
+            dots.forEach((d, i) => {
+                d.className = 'round-dot';
+                // We can't easily know which rounds each player won without more state,
+                // so just show total wins as filled dots
+            });
+        }
+
+        function startGame(room) {
+            currentRound = room.currentRound || 0;
+            startRound();
+            startCamera();
+        }
+
+        function startRound() {
+            roundLocked = false; roundActive = true;
+            const r = rounds[currentRound];
+            document.getElementById('roundNum').textContent = currentRound + 1;
+            document.getElementById('targetDisplay').textContent = r.target;
+            document.getElementById('targetTypeBadge').textContent = r.type === 'word' ? 'Word' : 'Letter';
+            document.getElementById('targetTypeBadge').className = `type-badge badge-${r.type}`;
+            document.getElementById('myCamPanel').classList.remove('winner', 'loser');
+            document.getElementById('oppCamPanel').classList.remove('winner', 'loser');
+            document.getElementById('myCamStatus').textContent = 'Scanning…';
+            document.getElementById('myCamStatus').className = 'cam-status detecting';
+            document.getElementById('myFeedback').textContent = 'Show your hand to the camera';
+            document.getElementById('oppFeedback').textContent = 'Waiting for result…';
+            window.__matchFrames = 0;
+            window.__wordStartTime = Date.now();
+        }
+
+        function handleRoundEnd(winnerRole, room) {
+            if (roundLocked) return;
+            roundLocked = true; roundActive = false;
+            const iWon = winnerRole === myRole;
+
+            document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
+            document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
+            document.getElementById('roundResultSub').textContent = `Round ${currentRound + 1} of 5 complete`;
+            document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
+            document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
+            document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
+            document.getElementById('roundResult').classList.add('visible');
+
+            // Host updates DB scores
+            if (isHost) {
+                const hs = winnerRole === 'host' ? (room.scores?.host || 0) + 1 : (room.scores?.host || 0);
+                const gs = winnerRole === 'guest' ? (room.scores?.guest || 0) + 1 : (room.scores?.guest || 0);
+                const nextRound = currentRound + 1;
+                const isOver = hs >= 3 || gs >= 3 || nextRound >= 5;
+                const gameWinner = hs > gs ? 'host' : 'guest';
+                update(ref(db, `rooms/${roomCode}`), {
+                    'scores/host': hs, 'scores/guest': gs,
+                    currentRound: nextRound,
+                    roundWinner: null,
+                    ...(isOver ? { status: 'finished', gameWinner } : {})
+                });
+            }
+        }
+
+        document.getElementById('nextRoundBtn').addEventListener('click', () => {
+            document.getElementById('roundResult').classList.remove('visible');
+            currentRound++;
+            if (currentRound < 5 && myScore < 3 && oppScore < 3) startRound();
+        });
+
+        async function showGameOver(iWon) {
+            document.getElementById('gameOverEmoji').textContent = iWon ? '🏆' : '😔';
+            document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
+            document.getElementById('gameOverSub').textContent = iWon
+                ? 'Incredible signing! +500 XP added to your profile.'
+                : 'Close game! Practice more and challenge again.';
+            if (iWon) {
+                document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
+                if (currentUser) {
+                    try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(500) }); }
+                    catch (e) { console.error('XP update failed:', e); }
+                }
+            }
+            document.getElementById('roundResult').classList.remove('visible');
+            document.getElementById('gameOver').classList.add('visible');
+            if (typeof confetti === 'function' && iWon) confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+        }
+
+        // Camera + detection
+        window.__matchFrames = 0;
+        window.__wordStartTime = Date.now();
+        const MATCH_NEEDED = 15, MIN_TIME = 2000;
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+                const video = document.getElementById('myVideo');
+                const canvas = document.getElementById('myCanvas');
+                video.srcObject = stream;
+                video.addEventListener('loadeddata', () => {
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    loadDetection(video, canvas);
+                });
+            } catch (e) { document.getElementById('myFeedback').textContent = '⚠️ Camera access denied'; }
+        }
+
+        async function loadDetection(video, canvas) {
+            const load = src => new Promise((res, rej) => {
+                if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+                const s = document.createElement('script');
+                s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+            });
+            await load('https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js');
+            await load('https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js');
+            await load('https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js');
+            await load('https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js');
+            await load('https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js');
+            await load('https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js');
+
+            const model = await handpose.load();
+            const estimator = new fp.GestureEstimator(buildGestures());
+            const ctx = canvas.getContext('2d');
+
+            async function loop() {
+                if (!roundActive) { requestAnimationFrame(loop); return; }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const preds = await model.estimateHands(video);
+                const timeReady = (Date.now() - window.__wordStartTime) >= MIN_TIME;
+
+                if (preds.length > 0) {
+                    const est = estimator.estimate(preds[0].landmarks, 4.0);
+                    if (est.gestures.length > 0) {
+                        const best = [...est.gestures].sort((a, b) => b.score - a.score)[0];
+                        const pct = Math.min(100, Math.round((best.score / 8.0) * 100));
+                        const target = rounds[currentRound]?.target;
+                        const isMatch = best.name === target;
+
+                        document.getElementById('myCamStatus').textContent = isMatch ? '✓ Matched!' : 'Scanning…';
+                        document.getElementById('myCamStatus').className = `cam-status ${isMatch ? 'matched' : 'detecting'}`;
+
+                        if (pct >= 80) document.getElementById('myFeedback').textContent = "Looking great! 🔥";
+                        else if (pct >= 60) document.getElementById('myFeedback').textContent = "Almost there!";
+                        else if (pct >= 40) document.getElementById('myFeedback').textContent = "Getting closer…";
+                        else document.getElementById('myFeedback').textContent = "Try adjusting your hand";
+
+                        if (isMatch && timeReady) {
+                            window.__matchFrames++;
+                            if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
+                                roundLocked = true; roundActive = false;
+                                await update(ref(db, `rooms/${roomCode}`), { roundWinner: myRole });
+                                handleRoundEnd(myRole, { scores: { host: myRole === 'host' ? myScore : oppScore, guest: myRole === 'guest' ? myScore : oppScore } });
+                            }
+                        } else if (!isMatch) {
+                            window.__matchFrames = Math.max(0, window.__matchFrames - 1);
+                        }
+                    } else {
+                        document.getElementById('myCamStatus').textContent = 'Hand detected…';
+                        document.getElementById('myCamStatus').className = 'cam-status detecting';
+                        document.getElementById('myFeedback').textContent = 'Hand detected, keep signing…';
+                    }
+                } else {
+                    document.getElementById('myCamStatus').textContent = 'Scanning…';
+                    document.getElementById('myCamStatus').className = 'cam-status';
+                    document.getElementById('myFeedback').textContent = 'Show your hand to the camera';
+                    window.__matchFrames = 0;
+                }
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function buildGestures() {
+            const g = [];
+            // Words
+            const helloG = new fp.GestureDescription('Thank You');
+            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => helloG.addCurl(f, fp.FingerCurl.NoCurl, 1.0));
+            helloG.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
+            helloG.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
+            helloG.addDirection(fp.Finger.Ring, fp.FingerDirection.VerticalUp, 1.0);
+            helloG.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
+            g.push(helloG);
+
+            const tyG = new fp.GestureDescription('Hello');
+            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => tyG.addCurl(f, fp.FingerCurl.NoCurl, 1.0));
+            tyG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 1.0);
+            tyG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpRight, 1.0);
+            tyG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 1.0);
+            tyG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpRight, 1.0);
+            g.push(tyG);
+
+            const ily = new fp.GestureDescription('I Love You');
+            ily.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); ily.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
+            ily.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl, 1.0); ily.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
+            ily.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
+            ily.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
+            ily.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
+            g.push(ily);
+
+            const yes = new fp.GestureDescription('Yes');
+            yes.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
+            [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => yes.addCurl(f, fp.FingerCurl.FullCurl, 1.0));
+            yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.VerticalUp, 1.0);
+            g.push(yes);
+
+            const no = new fp.GestureDescription('No');
+            no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0);
+            no.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); no.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
+            [fp.Finger.Ring, fp.Finger.Pinky].forEach(f => no.addCurl(f, fp.FingerCurl.FullCurl, 1.0));
+            no.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
+            no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
+            g.push(no);
+
+            // Letters
+            const defs = {
+                'A': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.8); },
+                'B': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
+                'C': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9)); },
+                'D': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.8); },
+                'E': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
+                'F': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.HalfCurl, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 0.9); }); },
+                'G': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalLeft, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+                'H': d => { [fp.Finger.Index, fp.Finger.Middle].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.HorizontalLeft, 0.9); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+                'I': d => { d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+                'L': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Thumb, fp.FingerDirection.HorizontalLeft, 0.9);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+                'O': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9)); },
+                'V': d => { [fp.Finger.Index, fp.Finger.Middle].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+                'W': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0); },
+                'Y': d => { d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+            };
+            Object.entries(defs).forEach(([name, fn]) => {
+                const d = new fp.GestureDescription(name); fn(d); g.push(d);
+            });
+            return g;
+        }
+    </script>
+    <script type="module" src="js/firebase-auth.js"></script>
+</body>
+
+</html>

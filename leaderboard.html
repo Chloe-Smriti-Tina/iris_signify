@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,14 +16,14 @@
 
   <style>
     :root {
-      --signify-blue:       #648FFF;
-      --signify-dark:       #1e293b;
-      --signify-accent:     #FE6100;
-      --signify-light:      #f8fafc;
+      --signify-blue: #648FFF;
+      --signify-dark: #1e293b;
+      --signify-accent: #FE6100;
+      --signify-light: #f8fafc;
       --text-high-contrast: #0f172a;
-      --text-muted:         #64748b;
-      --card-bg:            #ffffff;
-      --card-border:        #e2e8f0;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
     }
 
     body {
@@ -149,9 +150,17 @@
       font-size: 14px;
     }
 
-    .rank-1 { color: #f59e0b; }
-    .rank-2 { color: #94a3b8; }
-    .rank-3 { color: #b45309; }
+    .rank-1 {
+      color: #f59e0b;
+    }
+
+    .rank-2 {
+      color: #94a3b8;
+    }
+
+    .rank-3 {
+      color: #b45309;
+    }
 
     /* Avatar circle in table */
     .table-avatar {
@@ -204,7 +213,8 @@
     }
 
     /* ── Loading / empty ── */
-    .loading-wrap, .empty-wrap {
+    .loading-wrap,
+    .empty-wrap {
       text-align: center;
       padding: 60px 20px;
       color: var(--text-muted);
@@ -243,17 +253,20 @@
       </button>
       <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
       <div class="d-flex align-items-center d-lg-none">
-        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
+        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn"
+          style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
       </div>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-lg-5">
           <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
           <li class="nav-item"><a class="nav-link active" href="leaderboard.html">Leaderboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
           <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
         </ul>
         <div class="d-lg-flex align-items-center d-none ms-auto">
-          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
+          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn"
+            style="cursor:pointer;font-size:22px;color:var(--signify-blue);"></i>
         </div>
       </div>
     </div>
@@ -331,4 +344,5 @@
   <script type="module" src="js/leaderboard.js"></script>
 
 </body>
+
 </html>
