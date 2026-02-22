@@ -140,7 +140,6 @@ let lastFrameTime = 0;
 let totalAttempts = 0;
 let totalHits     = 0;
 let isRetryMode   = false; // true when practising again after XP already earned
-let xpEarnedSet = new Set(); // letters XP was awarded for THIS session
 let lastResults = null;
 
 // DOM refs
@@ -275,9 +274,8 @@ function showSuccess(letter) {
     if (phaseLocked) return;
     phaseLocked = true;
 
-    const alreadyDone = xpEarnedSet.has(letter);
+    const alreadyDone = completedSet.has(letter);
     if (!alreadyDone) {
-        xpEarnedSet.add(letter);
         completedSet.add(letter);
         sessionXP += XP_PER_LETTER;
     }
@@ -301,7 +299,7 @@ function showSuccess(letter) {
 
     showOverlay("successOverlay");
 
-    // XP pop (only on first completion)
+    // XP pop and Firebase Save (only on first completion)
     if (!alreadyDone) {
         const pop = document.createElement("div");
         pop.style.cssText = "position:fixed;left:50%;top:42%;transform:translateX(-50%);font-size:1.6rem;font-weight:900;color:#f59e0b;pointer-events:none;z-index:9999;animation:xpPop 1.1s ease-out forwards;text-shadow:0 2px 12px rgba(245,158,11,.4);";
