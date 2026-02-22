@@ -154,8 +154,6 @@
       <div class="stats-grid">
         <div class="mini-stat"><span class="val" id="sb-xp">0</span><span class="lbl">XP Earned</span></div>
         <div class="mini-stat"><span class="val" id="sb-done">0/26</span><span class="lbl">Letters</span></div>
-        <div class="mini-stat"><span class="val" id="sb-acc">—</span><span class="lbl">Accuracy</span></div>
-        <div class="mini-stat"><span class="val" id="sb-streak">0</span><span class="lbl">Streak</span></div>
       </div>
       <div class="sidebar-label" style="margin-top:8px;">All Letters</div>
       <div class="letter-grid" id="letterGrid"></div>
@@ -166,7 +164,6 @@
           <span style="width:10px;height:10px;border-radius:3px;background:#22c55e;flex-shrink:0;"></span> Done
         </span>
         <span style="display:inline-flex;align-items:center;gap:4px;">
-          <span style="width:10px;height:10px;border-radius:3px;background:#fde68a;flex-shrink:0;"></span> Skipped
         </span>
       </div>
     </aside>
@@ -218,10 +215,6 @@
             <div class="hold-track">
               <div class="hold-fill" id="holdBar" style="width:0%"></div>
               <div class="hold-label" id="holdLabel">Make the sign!</div>
-            </div>
-            <div class="detect-row">
-              <span>Detected: <strong id="detectedLbl">—</strong></span>
-              <span>Conf: <strong id="confLbl">—</strong></span>
             </div>
           </div>
 
@@ -305,10 +298,10 @@
       streak: 0,
       onSuccess: async (letter, sessionXP) => {
         if (!currentUser) return;
+        const uid  = currentUser.uid;
         const secs = Math.round((Date.now() - sessionStart) / 1000);
         const done = window.SIGNIFY_CONFIG.completedSet;
-        const AtoM = [...'ABCDEFGHIJKLM'].filter(l => done.has(l)).length;
-        const NtoZ = [...'NOPQRSTUVWXYZ'].filter(l => done.has(l)).length;
+        const AtoM = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].filter(l => done.has(l)).length;
         const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const nextLetter = alpha[Math.min(alpha.indexOf(letter) + 1, 25)];
         await updateDoc(doc(db, "users", currentUser.uid), {
@@ -317,8 +310,6 @@
           "allTime.totalTimeSpent": increment(secs),
           [`alphabet.${letter}`]: true,
           nextLetter,
-          progressAtoM: Math.round((AtoM / 13) * 100),
-          progressNtoZ: Math.round((NtoZ / 13) * 100),
           lastSeen: serverTimestamp()
         });
         sessionStart = Date.now();
@@ -338,6 +329,7 @@
     });
   </script>
 
+  <script src="https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js"></script>
   <script type="module" src="js/sign-engine.js"></script>
   <script type="module" src="js/firebase-auth.js"></script>
 
