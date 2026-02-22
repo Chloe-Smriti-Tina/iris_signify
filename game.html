@@ -698,7 +698,6 @@
             background: var(--bg);
         }
 
-        /* Countdown ring */
         .countdown-wrap {
             margin: 20px auto 4px;
             display: flex;
@@ -748,16 +747,16 @@
 
         @media(max-width:640px) {
             .cameras-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr
             }
 
             .lobby-card,
             .waiting-card {
-                padding: 32px 24px;
+                padding: 32px 24px
             }
 
             .how-it-works {
-                flex-direction: column;
+                flex-direction: column
             }
         }
     </style>
@@ -774,7 +773,7 @@
                     <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
                     <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="game.html">Game</a></li>
                     <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
                 </ul>
                 <div class="d-lg-flex align-items-center d-none ms-auto">
@@ -788,8 +787,8 @@
         <div class="lobby-card">
             <div class="lobby-icon">&#x26A1;</div>
             <h1>Challenge <span>Mode</span></h1>
-            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 10 — winner
-                earns +200 XP!</p>
+            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 5 — winner earns
+                +200 XP!</p>
             <button class="btn-primary-game" id="createRoomBtn"><i class="bi bi-plus-circle"></i> Create Room</button>
             <div class="divider">or join with a code</div>
             <input class="room-input" id="roomCodeInput" placeholder="Enter code" maxlength="6"><br><br>
@@ -807,7 +806,7 @@
                 </div>
                 <div class="hw-step">
                     <div class="num">Step 3</div>
-                    <div class="desc">First to sign correctly wins the round. Best of 10!</div>
+                    <div class="desc">First to sign correctly wins the round. Best of 5!</div>
                 </div>
             </div>
         </div>
@@ -853,13 +852,8 @@
             </div>
             <div class="round-info">
                 <div class="r-label">Round</div>
-                <div class="r-num"><span id="roundNum">1</span> / 10</div>
+                <div class="r-num"><span id="roundNum">1</span> / 5</div>
                 <div class="round-dots" id="roundDots">
-                    <div class="round-dot"></div>
-                    <div class="round-dot"></div>
-                    <div class="round-dot"></div>
-                    <div class="round-dot"></div>
-                    <div class="round-dot"></div>
                     <div class="round-dot"></div>
                     <div class="round-dot"></div>
                     <div class="round-dot"></div>
@@ -894,7 +888,6 @@
         </div>
     </div>
 
-    <!-- Round result — no button, only Firebase-synced countdown -->
     <div class="overlay" id="roundResult">
         <div class="overlay-card" style="max-width:480px;">
             <span class="overlay-emoji" id="roundEmoji">&#x1F3C6;</span>
@@ -914,7 +907,7 @@
                     </svg>
                     <div class="cnum" id="cdNum">5</div>
                 </div>
-                <span class="next-lbl">Next round starting…</span>
+                <span class="next-lbl">Next round starting&#x2026;</span>
             </div>
         </div>
     </div>
@@ -954,9 +947,11 @@
         const fs = getFirestore(app);
 
         const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
-        const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        // Best of 5: 3 words + 2 letters = 5 rounds
+        const TOTAL_ROUNDS = 5;
+        const WIN_SCORE = 3; // first to 3 wins
         const ROUND_DELAY = 5000;
-        const CIRCUMFERENCE = 2 * Math.PI * 27; // ~169.6
+        const CIRCUMFERENCE = 2 * Math.PI * 27;
 
         let currentUser = null;
         let roomCode = null, isHost = false, myRole = null;
@@ -972,15 +967,11 @@
         onAuthStateChanged(auth, function (u) { currentUser = u; });
 
         function resetState() {
-            window.__gameStarted = false;
-            window.__cameraStarted = false;
-            window.__gameOver = false;
-            window.__matchFrames = 0;
-            window.__wordStartTime = Date.now();
-            window.__answerSent = false;
-            window.__answerReceived = false;
+            window.__gameStarted = false; window.__cameraStarted = false; window.__gameOver = false;
+            window.__matchFrames = 0; window.__wordStartTime = Date.now();
+            window.__answerSent = false; window.__answerReceived = false;
             window.__addedCandidates = new Set();
-            window.__handledRoundWinner = null;
+            window.__localRoundHandled = false; // NEW: tracks if we already showed popup locally
             scheduledNextRoundAt = null;
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
@@ -999,8 +990,8 @@
         function genCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
 
         function generateRounds() {
-            var w = WORDS.slice().sort(function () { return Math.random() - 0.5; });
-            var l = ['C', 'G', 'L', 'Y', 'V'].sort(function () { return Math.random() - 0.5; });
+            var w = WORDS.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+            var l = ['C', 'G', 'L', 'Y', 'V'].sort(function () { return Math.random() - 0.5; }).slice(0, 2);
             return w.map(function (t) { return { type: 'word', target: t }; })
                 .concat(l.map(function (t) { return { type: 'letter', target: t }; }))
                 .sort(function () { return Math.random() - 0.5; });
@@ -1093,16 +1084,31 @@
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
 
-                // Both players react to roundWinner
-                if (room.roundWinner && room.roundWinner !== window.__handledRoundWinner) {
-                    window.__handledRoundWinner = room.roundWinner;
-                    handleRoundEnd(room.roundWinner, room);
+                // KEY FIX: Only show popup from Firebase for the OPPONENT (loser).
+                // The winner already showed it locally immediately.
+                // Both players respond to roundWinner, but winner skips if already handled locally.
+                if (room.roundWinner && !roundLocked) {
+                    var iAmWinner = room.roundWinner === myRole;
+                    // If I won, I already showed popup locally — just lock and let host write scores
+                    if (iAmWinner && window.__localRoundHandled) {
+                        // Already handled — do nothing, host writes scores via handleRoundEnd
+                    } else if (!iAmWinner && !window.__localRoundHandled) {
+                        // I lost — show popup immediately from Firebase notification
+                        window.__localRoundHandled = true;
+                        showRoundPopup(false, room);
+                        if (isHost) writeRoundToFirebase(room.roundWinner, room);
+                    } else if (iAmWinner && !window.__localRoundHandled) {
+                        // Rare: Firebase came before local detection fired (shouldn't happen but safety net)
+                        window.__localRoundHandled = true;
+                        showRoundPopup(true, room);
+                        if (isHost) writeRoundToFirebase(room.roundWinner, room);
+                    }
                 }
 
-                // Both players sync countdown from nextRoundAt written by host
+                // Countdown synced from Firebase
                 if (room.nextRoundAt && room.nextRoundAt !== scheduledNextRoundAt) {
                     scheduledNextRoundAt = room.nextRoundAt;
-                    startCountdown(room.nextRoundAt, room);
+                    startCountdown(room.nextRoundAt);
                 }
 
                 if (room.status === 'finished' && !window.__gameOver) {
@@ -1115,42 +1121,61 @@
             });
         }
 
-        // ── Firebase-synced countdown (both players call this from nextRoundAt) ──
-        function startCountdown(nextRoundAt, room) {
+        // Show the round result popup immediately (called locally for winner, from Firebase for loser)
+        function showRoundPopup(iWon, room) {
+            roundLocked = true; roundActive = false;
+            document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
+            document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
+            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 5 complete';
+            document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
+            document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
+            document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
+
+            var target = rounds[currentRound] ? rounds[currentRound].target : '';
+            var imgSrc = getSignImageUrl(target);
+            var imgBox = document.getElementById('signImageBox');
+            if (imgSrc) { imgBox.style.display = 'block'; document.getElementById('signImage').src = imgSrc; document.getElementById('signImageLabel').textContent = target; }
+            else { imgBox.style.display = 'none'; }
+
+            document.getElementById('roundResult').classList.add('visible');
+        }
+
+        // Only host writes score update to Firebase (called once per round)
+        function writeRoundToFirebase(winnerRole, room) {
+            var hs = winnerRole === 'host' ? ((room.scores ? room.scores.host || 0 : 0) + 1) : (room.scores ? room.scores.host || 0 : 0);
+            var gs = winnerRole === 'guest' ? ((room.scores ? room.scores.guest || 0 : 0) + 1) : (room.scores ? room.scores.guest || 0 : 0);
+            var nextRound = currentRound + 1;
+            var isOver = hs >= WIN_SCORE || gs >= WIN_SCORE || nextRound >= TOTAL_ROUNDS;
+            var nra = isOver ? null : Date.now() + ROUND_DELAY;
+            var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null, nextRoundAt: nra };
+            if (isOver) { updateData.status = 'finished'; updateData.gameWinner = hs > gs ? 'host' : 'guest'; }
+            update(ref(db, 'rooms/' + roomCode), updateData);
+            if (!isOver) startCountdown(nra);
+        }
+
+        function startCountdown(nextRoundAt) {
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
             var circle = document.getElementById('cdCircle');
             var numEl = document.getElementById('cdNum');
-
-            function tick() {
-                var now = Date.now();
-                var remaining = Math.max(0, nextRoundAt - now);
-                var secs = Math.ceil(remaining / 1000);
-                var frac = remaining / ROUND_DELAY; // 1→0
-
-                numEl.textContent = secs;
-                circle.style.strokeDashoffset = CIRCUMFERENCE * (1 - frac);
-
-                if (remaining <= 0) {
-                    clearInterval(cdInterval); cdInterval = null;
-                    advanceRound(room);
-                }
-            }
-            // Reset ring
             circle.style.transition = 'none';
             circle.style.strokeDashoffset = '0';
             numEl.textContent = '5';
-            // Force reflow then start animating
             circle.getBoundingClientRect();
             circle.style.transition = '';
+
+            function tick() {
+                var remaining = Math.max(0, nextRoundAt - Date.now());
+                numEl.textContent = Math.ceil(remaining / 1000);
+                circle.style.strokeDashoffset = CIRCUMFERENCE * (1 - remaining / ROUND_DELAY);
+                if (remaining <= 0) { clearInterval(cdInterval); cdInterval = null; advanceRound(); }
+            }
             tick();
             cdInterval = setInterval(tick, 100);
         }
 
-        function advanceRound(room) {
+        function advanceRound() {
             document.getElementById('roundResult').classList.remove('visible');
             document.getElementById('signImageBox').style.display = 'none';
-
-            // Pull latest round from Firebase snapshot
             get(ref(db, 'rooms/' + roomCode)).then(function (snap) {
                 if (!snap.exists()) return;
                 var r = snap.val();
@@ -1160,11 +1185,11 @@
                 document.getElementById('myScore').textContent = myScore;
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
-                if (currentRound < 10 && myScore < 6 && oppScore < 6) startRound();
+                if (currentRound < TOTAL_ROUNDS && myScore < WIN_SCORE && oppScore < WIN_SCORE) startRound();
             });
         }
 
-        // ── WebRTC signaling ──────────────────────────────────────
+        // ── WebRTC ────────────────────────────────────────────────
         async function handleSignaling(webrtc) {
             if (!peerConnection || !webrtcReady) return;
             if (!isHost && webrtc.offer && !window.__answerSent) {
@@ -1181,10 +1206,8 @@
             if (isHost && webrtc.answer && !window.__answerReceived) {
                 if (peerConnection.signalingState === 'have-local-offer') {
                     window.__answerReceived = true;
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.answer));
-                        flushIce(webrtc);
-                    } catch (e) { console.error('host answer err:', e); window.__answerReceived = false; }
+                    try { await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.answer)); flushIce(webrtc); }
+                    catch (e) { console.error('host answer err:', e); window.__answerReceived = false; }
                 }
                 return;
             }
@@ -1208,7 +1231,6 @@
             peerConnection = new RTCPeerConnection(ICE);
             localStream = stream;
             stream.getTracks().forEach(function (t) { peerConnection.addTrack(t, stream); });
-
             peerConnection.ontrack = function (ev) {
                 var ov = document.getElementById('oppVideo');
                 var ph = document.getElementById('oppPlaceholder');
@@ -1219,7 +1241,6 @@
                 document.getElementById('oppCamStatus').className = 'cam-status matched';
                 ov.play().catch(function () { });
             };
-
             var myKey = isHost ? 'hostCandidates' : 'guestCandidates';
             peerConnection.onicecandidate = async function (ev) {
                 if (ev.candidate) await push(ref(db, 'rooms/' + roomCode + '/webrtc/' + myKey), { candidate: ev.candidate.candidate, sdpMLineIndex: ev.candidate.sdpMLineIndex, sdpMid: ev.candidate.sdpMid });
@@ -1229,7 +1250,6 @@
                 if (s === 'connected') { document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live'; document.getElementById('oppCamStatus').className = 'cam-status matched'; }
                 else if (s === 'failed' || s === 'disconnected') { document.getElementById('oppVideo').style.display = 'none'; document.getElementById('oppPlaceholder').style.display = 'flex'; }
             };
-
             if (isHost) {
                 try {
                     var offer = await peerConnection.createOffer();
@@ -1237,16 +1257,14 @@
                     webrtcReady = true;
                     await update(ref(db, 'rooms/' + roomCode + '/webrtc'), { offer: { type: offer.type, sdp: offer.sdp } });
                 } catch (e) { console.error('offer err:', e); }
-            } else {
-                webrtcReady = true;
-            }
+            } else { webrtcReady = true; }
         }
 
         function startGame(room) { currentRound = room.currentRound || 0; startRound(); startCamera(); }
 
         function startRound() {
             roundLocked = false; roundActive = true;
-            window.__handledRoundWinner = null;
+            window.__localRoundHandled = false; // reset for new round
             scheduledNextRoundAt = null;
             var r = rounds[currentRound];
             document.getElementById('roundNum').textContent = currentRound + 1;
@@ -1263,50 +1281,13 @@
             window.__wordStartTime = Date.now();
         }
 
-        function handleRoundEnd(winnerRole, room) {
-            if (roundLocked) return;
-            roundLocked = true; roundActive = false;
-
-            var iWon = winnerRole === myRole;
-            document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
-            document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
-            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 10 complete';
-            document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
-            document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
-            document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
-
-            var target = rounds[currentRound] ? rounds[currentRound].target : '';
-            var imgSrc = getSignImageUrl(target);
-            var imgBox = document.getElementById('signImageBox');
-            if (imgSrc) { imgBox.style.display = 'block'; document.getElementById('signImage').src = imgSrc; document.getElementById('signImageLabel').textContent = target; }
-            else { imgBox.style.display = 'none'; }
-
-            document.getElementById('roundResult').classList.add('visible');
-
-            // HOST writes nextRoundAt so both players countdown together
-            if (isHost) {
-                var hs = winnerRole === 'host' ? ((room.scores ? room.scores.host || 0 : 0) + 1) : (room.scores ? room.scores.host || 0 : 0);
-                var gs = winnerRole === 'guest' ? ((room.scores ? room.scores.guest || 0 : 0) + 1) : (room.scores ? room.scores.guest || 0 : 0);
-                var nextRound = currentRound + 1;
-                var isOver = hs >= 6 || gs >= 6 || nextRound >= 10;
-                var nra = isOver ? null : Date.now() + ROUND_DELAY;
-                var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null, nextRoundAt: nra };
-                if (isOver) { updateData.status = 'finished'; updateData.gameWinner = hs > gs ? 'host' : 'guest'; }
-                update(ref(db, 'rooms/' + roomCode), updateData);
-
-                // Host starts its own countdown immediately from the same timestamp
-                if (!isOver) startCountdown(nra, room);
-            }
-            // Guest countdown triggered by listenRoom reading nextRoundAt from Firebase
-        }
-
         async function showGameOver(iWon) {
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
             document.getElementById('gameOverEmoji').textContent = iWon ? '🏆' : '😔';
             document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
             document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! Practice more and challenge again.';
             if (currentUser) {
-                try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(iWon ? 200 : -50) }); }
+                try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(iWon ? 200 : 0) }); }
                 catch (e) { console.error('XP fail:', e); }
             }
             if (iWon) document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
@@ -1379,8 +1360,13 @@
                         if (isMatch && timeReady) {
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
+                                // KEY FIX: Show popup IMMEDIATELY locally, then write to Firebase
                                 roundActive = false;
+                                window.__localRoundHandled = true;
+                                showRoundPopup(true, { scores: { host: myRole === 'host' ? myScore : oppScore, guest: myRole === 'guest' ? myScore : oppScore } });
                                 await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
+                                // Host writes scores immediately; guest waits for Firebase to confirm winner
+                                if (isHost) writeRoundToFirebase(myRole, { scores: { host: myScore, guest: oppScore } });
                             }
                         } else if (!isMatch) {
                             window.__matchFrames = Math.max(0, window.__matchFrames - 1);
