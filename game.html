@@ -716,13 +716,10 @@
 </head>
 
 <body>
-
     <nav class="navbar navbar-expand-lg bg-white shadow-sm">
         <div class="container">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span
+                    class="navbar-toggler-icon"></span></button>
             <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-lg-5">
@@ -739,28 +736,19 @@
         </div>
     </nav>
 
-    <!-- ── LOBBY ── -->
     <div class="screen active" id="lobbyScreen">
         <div class="lobby-card">
-            <div class="lobby-icon">⚡</div>
+            <div class="lobby-icon">&#x26A1;</div>
             <h1>Challenge <span>Mode</span></h1>
             <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 5 wins +500 XP.
             </p>
-
-            <button class="btn-primary-game" id="createRoomBtn">
-                <i class="bi bi-plus-circle"></i> Create Room
-            </button>
-
+            <button class="btn-primary-game" id="createRoomBtn"><i class="bi bi-plus-circle"></i> Create Room</button>
             <div class="divider">or join with a code</div>
-
             <input class="room-input" id="roomCodeInput" placeholder="Enter code" maxlength="6">
             <br><br>
-            <button class="btn-outline-game" id="joinRoomBtn">
-                <i class="bi bi-box-arrow-in-right"></i> Join Room
-            </button>
-
+            <button class="btn-outline-game" id="joinRoomBtn"><i class="bi bi-box-arrow-in-right"></i> Join
+                Room</button>
             <p id="lobbyError" style="color:#ef4444;font-size:13px;margin-top:12px;display:none;"></p>
-
             <div class="how-it-works">
                 <div class="hw-step">
                     <div class="num">Step 1</div>
@@ -778,26 +766,24 @@
         </div>
     </div>
 
-    <!-- ── WAITING ── -->
     <div class="screen" id="waitingScreen">
         <div class="waiting-card">
-            <div style="font-size:2.5rem;margin-bottom:12px;">🎮</div>
+            <div style="font-size:2.5rem;margin-bottom:12px;">&#x1F3AE;</div>
             <h2>Room Created!</h2>
             <p>Share this code with your opponent:</p>
             <div class="room-code-display" id="displayRoomCode">------</div>
             <button class="copy-btn" id="copyCodeBtn"><i class="bi bi-clipboard"></i> Copy code</button>
-            <p class="pulse" style="color:var(--muted);font-size:13px;margin-bottom:20px;">Waiting for opponent to join…
-            </p>
-
+            <p class="pulse" style="color:var(--muted);font-size:13px;margin-bottom:20px;">Waiting for opponent to
+                join&#x2026;</p>
             <div class="player-slots">
                 <div class="player-slot filled">
                     <div class="slot-label">You (Host)</div>
-                    <div class="slot-name" id="hostName">—</div>
-                    <div class="slot-status">✓ Ready</div>
+                    <div class="slot-name" id="hostName">&#x2014;</div>
+                    <div class="slot-status">&#x2713; Ready</div>
                 </div>
                 <div class="player-slot" id="guestSlot">
                     <div class="slot-label">Opponent</div>
-                    <div class="slot-name" id="guestName">Waiting…</div>
+                    <div class="slot-name" id="guestName">Waiting&#x2026;</div>
                     <div class="slot-status waiting">Not joined yet</div>
                 </div>
             </div>
@@ -805,7 +791,6 @@
         </div>
     </div>
 
-    <!-- ── GAME ── -->
     <div class="screen" id="gameScreen">
         <div class="game-header">
             <div class="score-board">
@@ -813,7 +798,7 @@
                     <div class="s-name" id="myScoreName">You</div>
                     <div class="s-val" id="myScore">0</div>
                 </div>
-                <div class="score-divider">—</div>
+                <div class="score-divider">&#x2014;</div>
                 <div class="score-item">
                     <div class="s-name" id="oppScoreName">Opponent</div>
                     <div class="s-val" id="oppScore">0</div>
@@ -831,19 +816,17 @@
                 </div>
             </div>
         </div>
-
         <div class="target-card">
             <div class="target-label">Sign this now</div>
             <div><span class="type-badge badge-word" id="targetTypeBadge">Word</span></div>
             <div class="target-word" id="targetDisplay">Hello</div>
         </div>
-
         <div class="cameras-grid">
             <div class="cam-panel" id="myCamPanel">
                 <div class="cam-top">
                     <span class="p-name" id="myCamName">You</span>
                     <span class="cam-status detecting" id="myCamStatus"><i class="bi bi-camera-video"></i>
-                        Scanning…</span>
+                        Scanning&#x2026;</span>
                 </div>
                 <div class="video-box">
                     <video id="myVideo" autoplay playsinline muted></video>
@@ -851,40 +834,38 @@
                 </div>
                 <div class="cam-bottom" id="myFeedback">Show your hand to the camera</div>
             </div>
-
             <div class="cam-panel" id="oppCamPanel">
                 <div class="cam-top">
                     <span class="p-name" id="oppCamName">Opponent</span>
-                    <span class="cam-status" id="oppCamStatus"><i class="bi bi-wifi"></i> Connecting…</span>
+                    <span class="cam-status" id="oppCamStatus"><i class="bi bi-wifi"></i> Connecting&#x2026;</span>
                 </div>
                 <div class="video-box">
-                    <!-- Opponent live video (shown when WebRTC connected) -->
                     <video id="oppVideo" autoplay playsinline muted style="display:none;"></video>
-                    <!-- Fallback placeholder -->
                     <div class="opp-placeholder" id="oppPlaceholder">
                         <i class="bi bi-person-video3"></i>
-                        <span>Connecting to opponent…</span>
+                        <span id="oppPlaceholderText">Connecting&#x2026;</span>
+                    </div>
+                    <div id="rtcLog"
+                        style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.8);color:#a3e635;font-size:10px;font-family:monospace;line-height:1.4;padding:6px 8px;max-height:120px;overflow-y:auto;z-index:20;">
                     </div>
                 </div>
-                <div class="cam-bottom" id="oppFeedback" style="color:var(--muted);">Waiting for result…</div>
+                <div class="cam-bottom" id="oppFeedback" style="color:var(--muted);">Waiting for result&#x2026;</div>
             </div>
         </div>
     </div>
 
-    <!-- Round result overlay -->
     <div class="overlay" id="roundResult">
         <div class="overlay-card">
-            <span class="overlay-emoji" id="roundEmoji">🏆</span>
+            <span class="overlay-emoji" id="roundEmoji">&#x1F3C6;</span>
             <h2 id="roundResultTitle">You got it!</h2>
             <p id="roundResultSub">Round 1 complete</p>
-            <button class="overlay-btn" id="nextRoundBtn">Next Round →</button>
+            <button class="overlay-btn" id="nextRoundBtn">Next Round &#x2192;</button>
         </div>
     </div>
 
-    <!-- Game over overlay -->
     <div class="overlay" id="gameOver">
         <div class="overlay-card">
-            <span class="overlay-emoji" id="gameOverEmoji">🏆</span>
+            <span class="overlay-emoji" id="gameOverEmoji">&#x1F3C6;</span>
             <h2 id="gameOverTitle">You Win!</h2>
             <div class="xp-tag" id="xpEarnedDisplay" style="display:none;">+500 XP</div>
             <p id="gameOverSub">Great signing today!</p>
@@ -895,16 +876,13 @@
 
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, get, update, onValue, remove, push, off }
-            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getFirestore, doc, updateDoc, increment }
-            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, set, get, update, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getFirestore, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const app = initializeApp({
+        const firebaseConfig = {
             apiKey: "AIzaSyCIm-UGhuGg9aNuK7nWdI2pZ6hLDFxxuis",
             authDomain: "signify-5ec23.firebaseapp.com",
             projectId: "signify-5ec23",
@@ -912,8 +890,8 @@
             messagingSenderId: "150947241043",
             appId: "1:150947241043:web:f2fbb25737e9b7a02c7aa6",
             databaseURL: "https://signify-5ec23-default-rtdb.firebaseio.com"
-        });
-
+        };
+        const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
         const fs = getFirestore(app);
@@ -926,11 +904,7 @@
         let rounds = [], currentRound = 0;
         let myScore = 0, oppScore = 0;
         let roundActive = false, roundLocked = false;
-
-        // ── WebRTC state ──
-        let peerConnection = null;
-        let localStream = null;
-        let webrtcReady = false;
+        let peerConnection = null, localStream = null, webrtcReady = false;
 
         const ICE_SERVERS = {
             iceServers: [
@@ -939,41 +913,83 @@
             ]
         };
 
-        onAuthStateChanged(auth, u => { currentUser = u; });
+        onAuthStateChanged(auth, function (u) { currentUser = u; });
+
+        function resetState() {
+            window.__gameStarted = false;
+            window.__cameraStarted = false;
+            window.__gameOver = false;
+            window.__matchFrames = 0;
+            window.__wordStartTime = Date.now();
+            window.__answerSent = false;
+            window.__answerReceived = false;
+            window.__addedCandidates = new Set();
+            if (peerConnection) { peerConnection.close(); peerConnection = null; }
+            webrtcReady = false;
+            if (localStream) { localStream.getTracks().forEach(function (t) { t.stop(); }); localStream = null; }
+            var myVid = document.getElementById('myVideo');
+            var oppVid = document.getElementById('oppVideo');
+            if (myVid) myVid.srcObject = null;
+            if (oppVid) { oppVid.srcObject = null; oppVid.style.display = 'none'; }
+            var ph = document.getElementById('oppPlaceholder');
+            if (ph) { ph.style.display = 'flex'; ph.querySelector('span').textContent = 'Connecting...'; }
+            var log = document.getElementById('rtcLog');
+            if (log) log.innerHTML = '';
+            currentRound = 0; myScore = 0; oppScore = 0;
+            roundActive = false; roundLocked = false; rounds = [];
+        }
 
         function genCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
 
         function generateRounds() {
-            const w = [...WORDS].sort(() => Math.random() - 0.5).slice(0, 3);
-            const l = [...LETTERS].sort(() => Math.random() - 0.5).slice(0, 2);
-            return [...w.map(t => ({ type: 'word', target: t })), ...l.map(t => ({ type: 'letter', target: t }))]
-                .sort(() => Math.random() - 0.5);
+            var w = WORDS.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+            var l = LETTERS.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 2);
+            var all = w.map(function (t) { return { type: 'word', target: t }; })
+                .concat(l.map(function (t) { return { type: 'letter', target: t }; }));
+            return all.sort(function () { return Math.random() - 0.5; });
         }
 
         function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
             document.getElementById(id).classList.add('active');
         }
 
         function showError(msg) {
-            const el = document.getElementById('lobbyError');
+            var el = document.getElementById('lobbyError');
             el.textContent = msg; el.style.display = 'block';
         }
 
-        document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        function rtcLog(msg) {
+            console.log('[WebRTC]', msg);
+            var el = document.getElementById('rtcLog');
+            if (!el) return;
+            var line = document.createElement('div');
+            line.textContent = new Date().toISOString().substr(11, 8) + ' ' + msg;
+            el.appendChild(line);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function updateScoreStyles() {
+            document.getElementById('myScore').className = myScore > oppScore ? 's-val winning' : 's-val';
+            document.getElementById('oppScore').className = oppScore > myScore ? 's-val winning' : 's-val';
+        }
+
+        document.getElementById('copyCodeBtn').addEventListener('click', function () {
             navigator.clipboard.writeText(roomCode);
             document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-check"></i> Copied!';
-            setTimeout(() => document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-clipboard"></i> Copy code', 2000);
+            setTimeout(function () {
+                document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-clipboard"></i> Copy code';
+            }, 2000);
         });
 
-        // ── Create room ──
-        document.getElementById('createRoomBtn').addEventListener('click', async () => {
+        document.getElementById('createRoomBtn').addEventListener('click', async function () {
             if (!currentUser) { showError('Please sign in first.'); return; }
+            resetState();
             roomCode = genCode(); isHost = true; myRole = 'host';
             rounds = generateRounds();
-            await set(ref(db, `rooms/${roomCode}`), {
+            await set(ref(db, 'rooms/' + roomCode), {
                 host: { uid: currentUser.uid, name: currentUser.displayName || 'Player 1' },
-                guest: null, rounds, scores: { host: 0, guest: 0 },
+                guest: null, rounds: rounds, scores: { host: 0, guest: 0 },
                 currentRound: 0, status: 'waiting', roundWinner: null,
                 webrtc: { offer: null, answer: null, hostCandidates: [], guestCandidates: [] }
             });
@@ -983,197 +999,199 @@
             listenRoom();
         });
 
-        // ── Join room ──
-        document.getElementById('joinRoomBtn').addEventListener('click', async () => {
+        document.getElementById('joinRoomBtn').addEventListener('click', async function () {
             if (!currentUser) { showError('Please sign in first.'); return; }
-            const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            var code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
             if (code.length < 4) { showError('Enter a valid room code.'); return; }
-            const snap = await get(ref(db, `rooms/${code}`));
+            var snap = await get(ref(db, 'rooms/' + code));
             if (!snap.exists()) { showError('Room not found.'); return; }
-            const room = snap.val();
+            var room = snap.val();
             if (room.status !== 'waiting') { showError('This game has already started.'); return; }
             if (room.guest) { showError('Room is full.'); return; }
+            resetState();
             roomCode = code; isHost = false; myRole = 'guest';
             rounds = room.rounds;
-            await update(ref(db, `rooms/${roomCode}`), {
+            await update(ref(db, 'rooms/' + roomCode), {
                 guest: { uid: currentUser.uid, name: currentUser.displayName || 'Player 2' },
                 status: 'ready'
             });
             listenRoom();
         });
 
-        document.getElementById('cancelRoomBtn').addEventListener('click', async () => {
-            if (roomCode) await remove(ref(db, `rooms/${roomCode}`));
+        document.getElementById('cancelRoomBtn').addEventListener('click', async function () {
+            if (roomCode) await remove(ref(db, 'rooms/' + roomCode));
             showScreen('lobbyScreen');
         });
 
-        // ── Room listener ──
         function listenRoom() {
-            onValue(ref(db, `rooms/${roomCode}`), snap => {
+            onValue(ref(db, 'rooms/' + roomCode), function (snap) {
                 if (!snap.exists()) { showScreen('lobbyScreen'); return; }
-                const room = snap.val();
+                var room = snap.val();
 
                 if (room.guest) {
                     document.getElementById('guestName').textContent = room.guest.name;
                     document.getElementById('guestSlot').classList.add('filled');
-                    document.getElementById('guestSlot').querySelector('.slot-status').textContent = '✓ Ready';
+                    document.getElementById('guestSlot').querySelector('.slot-status').textContent = 'Ready';
                     document.getElementById('guestSlot').querySelector('.slot-status').classList.remove('waiting');
                 }
 
                 if ((room.status === 'ready' || room.status === 'playing') && !window.__gameStarted) {
                     rounds = room.rounds;
-                    const myName = myRole === 'host' ? room.host.name : room.guest?.name;
-                    const oppName = myRole === 'host' ? room.guest?.name : room.host.name;
-                    document.getElementById('myScoreName').textContent = myName || 'You';
-                    document.getElementById('oppScoreName').textContent = oppName || 'Opponent';
-                    document.getElementById('myCamName').textContent = myName || 'You';
-                    document.getElementById('oppCamName').textContent = oppName || 'Opponent';
-                    if (room.status === 'ready') update(ref(db, `rooms/${roomCode}`), { status: 'playing' });
+                    var myName = myRole === 'host' ? room.host.name : (room.guest ? room.guest.name : 'You');
+                    var oppName = myRole === 'host' ? (room.guest ? room.guest.name : 'Opponent') : room.host.name;
+                    document.getElementById('myScoreName').textContent = myName;
+                    document.getElementById('oppScoreName').textContent = oppName;
+                    document.getElementById('myCamName').textContent = myName;
+                    document.getElementById('oppCamName').textContent = oppName;
+                    if (room.status === 'ready') update(ref(db, 'rooms/' + roomCode), { status: 'playing' });
                     showScreen('gameScreen');
                     window.__gameStarted = true;
                     startGame(room);
                 }
 
-                // Sync scores
-                myScore = myRole === 'host' ? (room.scores?.host || 0) : (room.scores?.guest || 0);
-                oppScore = myRole === 'host' ? (room.scores?.guest || 0) : (room.scores?.host || 0);
+                myScore = myRole === 'host' ? (room.scores ? room.scores.host || 0 : 0) : (room.scores ? room.scores.guest || 0 : 0);
+                oppScore = myRole === 'host' ? (room.scores ? room.scores.guest || 0 : 0) : (room.scores ? room.scores.host || 0 : 0);
                 document.getElementById('myScore').textContent = myScore;
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
 
-                // Round winner from DB
                 if (room.roundWinner && !roundLocked) {
                     handleRoundEnd(room.roundWinner, room);
                 }
 
-                // Game over
                 if (room.status === 'finished' && !window.__gameOver) {
                     window.__gameOver = true;
-                    setTimeout(() => showGameOver(room.gameWinner === myRole), 2000);
+                    setTimeout(function () { showGameOver(room.gameWinner === myRole); }, 2000);
                 }
 
-                // ── WebRTC signaling ──
                 if (window.__gameStarted && room.webrtc) {
                     handleSignaling(room.webrtc);
                 }
             });
         }
 
-        // ── WebRTC signaling handler ──
         async function handleSignaling(webrtc) {
-            // Don't attempt signaling until our peerConnection is fully set up
-            if (!peerConnection || !webrtcReady) return;
+            if (!peerConnection || !webrtcReady) { return; }
 
-            // Guest receives host's offer and sends answer
             if (!isHost && webrtc.offer && !window.__answerSent) {
-                const state = peerConnection.signalingState;
-                if (state === 'stable' || state === 'have-remote-offer') {
-                    window.__answerSent = true;
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.offer));
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-                        await update(ref(db, `rooms/${roomCode}/webrtc`), { answer: { type: answer.type, sdp: answer.sdp } });
-                        // Now safe to add any buffered ICE candidates
-                        flushIceCandidates(webrtc);
-                    } catch (e) { console.warn('Answer error:', e); window.__answerSent = false; }
+                rtcLog('guest: got offer');
+                window.__answerSent = true;
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.offer));
+                    var answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    rtcLog('guest: uploading answer');
+                    await update(ref(db, 'rooms/' + roomCode + '/webrtc'), { answer: { type: answer.type, sdp: answer.sdp } });
+                    rtcLog('guest: answer uploaded');
+                    flushIceCandidates(webrtc);
+                } catch (e) {
+                    rtcLog('guest answer error: ' + e.message);
+                    window.__answerSent = false;
                 }
                 return;
             }
 
-            // Host receives guest's answer
             if (isHost && webrtc.answer && !window.__answerReceived) {
+                rtcLog('host: got answer');
                 if (peerConnection.signalingState === 'have-local-offer') {
                     window.__answerReceived = true;
                     try {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.answer));
+                        rtcLog('host: remote desc set');
                         flushIceCandidates(webrtc);
-                    } catch (e) { console.warn('Set answer error:', e); window.__answerReceived = false; }
+                    } catch (e) {
+                        rtcLog('host answer error: ' + e.message);
+                        window.__answerReceived = false;
+                    }
                 }
                 return;
             }
 
-            // Add remote ICE candidates if remote description already set
             if (peerConnection.remoteDescription) {
                 flushIceCandidates(webrtc);
             }
         }
 
         function flushIceCandidates(webrtc) {
-            const remoteCandidates = isHost ? webrtc.guestCandidates : webrtc.hostCandidates;
-            if (!remoteCandidates || !peerConnection.remoteDescription) return;
+            var remoteCandidates = isHost ? webrtc.guestCandidates : webrtc.hostCandidates;
+            if (!remoteCandidates || !peerConnection || !peerConnection.remoteDescription) return;
             if (!window.__addedCandidates) window.__addedCandidates = new Set();
-            Object.values(remoteCandidates).forEach(async (c) => {
+            Object.values(remoteCandidates).forEach(async function (c) {
                 if (!window.__addedCandidates.has(c.candidate)) {
                     window.__addedCandidates.add(c.candidate);
-                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch (e) { }
+                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); rtcLog('ICE added'); }
+                    catch (e) { rtcLog('ICE fail: ' + e.message); }
                 }
             });
         }
 
-        // ── Setup WebRTC peer connection ──
         async function setupWebRTC(stream) {
+            rtcLog('setup, role=' + myRole);
             peerConnection = new RTCPeerConnection(ICE_SERVERS);
             localStream = stream;
 
-            // Add local tracks to peer connection
-            stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+            stream.getTracks().forEach(function (track) {
+                peerConnection.addTrack(track, stream);
+                rtcLog('added track: ' + track.kind);
+            });
 
-            // When we get remote tracks, show opponent video
-            peerConnection.ontrack = (event) => {
-                const oppVideo = document.getElementById('oppVideo');
-                const oppPlaceholder = document.getElementById('oppPlaceholder');
-                if (event.streams && event.streams[0]) {
-                    oppVideo.srcObject = event.streams[0];
-                    oppVideo.style.display = 'block';
-                    oppPlaceholder.style.display = 'none';
-                    document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
-                    document.getElementById('oppCamStatus').className = 'cam-status matched';
-                }
+            peerConnection.ontrack = function (event) {
+                rtcLog('ontrack: ' + event.track.kind);
+                var oppVideo = document.getElementById('oppVideo');
+                var oppPlaceholder = document.getElementById('oppPlaceholder');
+                var remoteStream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
+                oppVideo.srcObject = remoteStream;
+                oppVideo.style.display = 'block';
+                oppVideo.style.position = 'absolute';
+                oppVideo.style.top = '0';
+                oppVideo.style.left = '0';
+                oppVideo.style.zIndex = '5';
+                oppPlaceholder.style.display = 'none';
+                document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
+                document.getElementById('oppCamStatus').className = 'cam-status matched';
+                oppVideo.play().then(function () { rtcLog('opp video playing'); }).catch(function (e) { rtcLog('play err: ' + e.message); });
             };
 
-            // Send our ICE candidates to Firebase
-            const myKey = isHost ? 'hostCandidates' : 'guestCandidates';
-            peerConnection.onicecandidate = async (event) => {
+            var myKey = isHost ? 'hostCandidates' : 'guestCandidates';
+            peerConnection.onicecandidate = async function (event) {
                 if (event.candidate) {
-                    await push(ref(db, `rooms/${roomCode}/webrtc/${myKey}`), {
+                    await push(ref(db, 'rooms/' + roomCode + '/webrtc/' + myKey), {
                         candidate: event.candidate.candidate,
                         sdpMLineIndex: event.candidate.sdpMLineIndex,
                         sdpMid: event.candidate.sdpMid
                     });
-                }
+                } else { rtcLog('ICE gathering done'); }
             };
 
-            peerConnection.onconnectionstatechange = () => {
-                if (peerConnection.connectionState === 'connected') {
+            peerConnection.oniceconnectionstatechange = function () {
+                rtcLog('ICE: ' + peerConnection.iceConnectionState);
+            };
+
+            peerConnection.onconnectionstatechange = function () {
+                var s = peerConnection.connectionState;
+                rtcLog('conn: ' + s);
+                if (s === 'connected') {
                     document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
                     document.getElementById('oppCamStatus').className = 'cam-status matched';
-                } else if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'disconnected') {
-                    document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-wifi-off"></i> Disconnected';
-                    document.getElementById('oppCamStatus').className = 'cam-status';
+                } else if (s === 'failed' || s === 'disconnected') {
                     document.getElementById('oppVideo').style.display = 'none';
                     document.getElementById('oppPlaceholder').style.display = 'flex';
-                    document.getElementById('oppPlaceholder').querySelector('span').textContent = 'Opponent disconnected';
                 }
             };
 
-            // Host creates the offer
             if (isHost) {
                 try {
-                    const offer = await peerConnection.createOffer();
+                    var offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
                     webrtcReady = true;
-                    await update(ref(db, `rooms/${roomCode}/webrtc`), { offer: { type: offer.type, sdp: offer.sdp } });
-                } catch (e) { console.warn('Offer error:', e); }
+                    rtcLog('host: uploading offer');
+                    await update(ref(db, 'rooms/' + roomCode + '/webrtc'), { offer: { type: offer.type, sdp: offer.sdp } });
+                    rtcLog('host: offer uploaded');
+                } catch (e) { rtcLog('offer error: ' + e.message); }
             } else {
-                // Guest is ready to receive signaling
                 webrtcReady = true;
+                rtcLog('guest: ready');
             }
-        }
-
-        function updateScoreStyles() {
-            document.getElementById('myScore').className = `s-val${myScore > oppScore ? ' winning' : ''}`;
-            document.getElementById('oppScore').className = `s-val${oppScore > myScore ? ' winning' : ''}`;
         }
 
         function startGame(room) {
@@ -1184,17 +1202,17 @@
 
         function startRound() {
             roundLocked = false; roundActive = true;
-            const r = rounds[currentRound];
+            var r = rounds[currentRound];
             document.getElementById('roundNum').textContent = currentRound + 1;
             document.getElementById('targetDisplay').textContent = r.target;
             document.getElementById('targetTypeBadge').textContent = r.type === 'word' ? 'Word' : 'Letter';
-            document.getElementById('targetTypeBadge').className = `type-badge badge-${r.type}`;
+            document.getElementById('targetTypeBadge').className = 'type-badge badge-' + r.type;
             document.getElementById('myCamPanel').classList.remove('winner', 'loser');
             document.getElementById('oppCamPanel').classList.remove('winner', 'loser');
-            document.getElementById('myCamStatus').textContent = 'Scanning…';
+            document.getElementById('myCamStatus').textContent = 'Scanning...';
             document.getElementById('myCamStatus').className = 'cam-status detecting';
             document.getElementById('myFeedback').textContent = 'Show your hand to the camera';
-            document.getElementById('oppFeedback').textContent = 'Waiting for result…';
+            document.getElementById('oppFeedback').textContent = 'Waiting for result...';
             window.__matchFrames = 0;
             window.__wordStartTime = Date.now();
         }
@@ -1202,57 +1220,45 @@
         function handleRoundEnd(winnerRole, room) {
             if (roundLocked) return;
             roundLocked = true; roundActive = false;
-            const iWon = winnerRole === myRole;
-
+            var iWon = winnerRole === myRole;
             document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
             document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
-            document.getElementById('roundResultSub').textContent = `Round ${currentRound + 1} of 5 complete`;
+            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 5 complete';
             document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
             document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
             document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
             document.getElementById('roundResult').classList.add('visible');
 
-            // Only host writes scores + advances round in DB
             if (isHost) {
-                const hs = winnerRole === 'host' ? (room.scores?.host || 0) + 1 : (room.scores?.host || 0);
-                const gs = winnerRole === 'guest' ? (room.scores?.guest || 0) + 1 : (room.scores?.guest || 0);
-                const nextRound = currentRound + 1;
-                const isOver = hs >= 3 || gs >= 3 || nextRound >= 5;
-                const gameWinner = hs > gs ? 'host' : 'guest';
-                update(ref(db, `rooms/${roomCode}`), {
-                    'scores/host': hs,
-                    'scores/guest': gs,
-                    currentRound: nextRound,
-                    roundWinner: null,
-                    ...(isOver ? { status: 'finished', gameWinner } : {})
-                });
+                var hs = winnerRole === 'host' ? ((room.scores ? room.scores.host || 0 : 0) + 1) : (room.scores ? room.scores.host || 0 : 0);
+                var gs = winnerRole === 'guest' ? ((room.scores ? room.scores.guest || 0 : 0) + 1) : (room.scores ? room.scores.guest || 0 : 0);
+                var nextRound = currentRound + 1;
+                var isOver = hs >= 3 || gs >= 3 || nextRound >= 5;
+                var gameWinner = hs > gs ? 'host' : 'guest';
+                var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null };
+                if (isOver) { updateData.status = 'finished'; updateData.gameWinner = gameWinner; }
+                update(ref(db, 'rooms/' + roomCode), updateData);
             }
         }
 
-        // ── FIX: Both players read currentRound from DB when clicking Next Round ──
-        document.getElementById('nextRoundBtn').addEventListener('click', async () => {
+        document.getElementById('nextRoundBtn').addEventListener('click', async function () {
             document.getElementById('roundResult').classList.remove('visible');
-            // Always read the authoritative round number from DB
-            const snap = await get(ref(db, `rooms/${roomCode}`));
+            var snap = await get(ref(db, 'rooms/' + roomCode));
             if (!snap.exists()) return;
-            const room = snap.val();
+            var room = snap.val();
             currentRound = room.currentRound || 0;
-            myScore = myRole === 'host' ? (room.scores?.host || 0) : (room.scores?.guest || 0);
-            oppScore = myRole === 'host' ? (room.scores?.guest || 0) : (room.scores?.host || 0);
+            myScore = myRole === 'host' ? (room.scores ? room.scores.host || 0 : 0) : (room.scores ? room.scores.guest || 0 : 0);
+            oppScore = myRole === 'host' ? (room.scores ? room.scores.guest || 0 : 0) : (room.scores ? room.scores.host || 0 : 0);
             document.getElementById('myScore').textContent = myScore;
             document.getElementById('oppScore').textContent = oppScore;
             updateScoreStyles();
-            if (currentRound < 5 && myScore < 3 && oppScore < 3) {
-                startRound();
-            }
+            if (currentRound < 5 && myScore < 3 && oppScore < 3) startRound();
         });
 
         async function showGameOver(iWon) {
             document.getElementById('gameOverEmoji').textContent = iWon ? '🏆' : '😔';
             document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
-            document.getElementById('gameOverSub').textContent = iWon
-                ? 'Incredible signing! +500 XP added to your profile.'
-                : 'Close game! Practice more and challenge again.';
+            document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +500 XP added.' : 'Close game! Practice more and challenge again.';
             if (iWon) {
                 document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
                 if (currentUser) {
@@ -1263,91 +1269,92 @@
             document.getElementById('roundResult').classList.remove('visible');
             document.getElementById('gameOver').classList.add('visible');
             if (typeof confetti === 'function' && iWon) confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
-            // Clean up peer connection
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
         }
 
-        // ── Camera + WebRTC setup ──
         window.__matchFrames = 0;
         window.__wordStartTime = Date.now();
-        const MATCH_NEEDED = 15, MIN_TIME = 2000;
+        var MATCH_NEEDED = 15, MIN_TIME = 2000;
 
         async function startCamera() {
+            if (window.__cameraStarted) return;
+            window.__cameraStarted = true;
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
+                var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
                 localStream = stream;
-                const video = document.getElementById('myVideo');
-                const canvas = document.getElementById('myCanvas');
+                var video = document.getElementById('myVideo');
+                var canvas = document.getElementById('myCanvas');
                 video.srcObject = stream;
-                video.addEventListener('loadeddata', () => {
+                video.addEventListener('loadeddata', function () {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
                     loadDetection(video, canvas);
                 });
-                // Start WebRTC after getting camera
                 await setupWebRTC(stream);
             } catch (e) {
-                document.getElementById('myFeedback').textContent = '⚠️ Camera access denied';
+                document.getElementById('myFeedback').textContent = 'Camera access denied';
                 console.error('Camera error:', e);
             }
         }
 
         async function loadDetection(video, canvas) {
-            const load = src => new Promise((res, rej) => {
-                if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-                const s = document.createElement('script');
-                s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
-            });
-            await load('https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js');
-            await load('https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js');
-            await load('https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js');
-            await load('https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js');
-            await load('https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js');
-            await load('https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js');
+            function loadScript(src) {
+                return new Promise(function (res, rej) {
+                    if (document.querySelector('script[src="' + src + '"]')) { res(); return; }
+                    var s = document.createElement('script');
+                    s.src = src; s.onload = res; s.onerror = rej;
+                    document.head.appendChild(s);
+                });
+            }
+            await loadScript('https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js');
+            await loadScript('https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js');
+            await loadScript('https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js');
+            await loadScript('https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js');
+            await loadScript('https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js');
+            await loadScript('https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js');
 
-            const model = await handpose.load();
-            const estimator = new fp.GestureEstimator(buildGestures());
-            const ctx = canvas.getContext('2d');
+            var model = await handpose.load();
+            var estimator = new fp.GestureEstimator(buildGestures());
+            var ctx = canvas.getContext('2d');
 
             async function loop() {
                 if (!roundActive) { requestAnimationFrame(loop); return; }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const preds = await model.estimateHands(video);
-                const timeReady = (Date.now() - window.__wordStartTime) >= MIN_TIME;
+                var preds = await model.estimateHands(video);
+                var timeReady = (Date.now() - window.__wordStartTime) >= MIN_TIME;
 
                 if (preds.length > 0) {
-                    const est = estimator.estimate(preds[0].landmarks, 4.0);
+                    var est = estimator.estimate(preds[0].landmarks, 4.0);
                     if (est.gestures.length > 0) {
-                        const best = [...est.gestures].sort((a, b) => b.score - a.score)[0];
-                        const pct = Math.min(100, Math.round((best.score / 8.0) * 100));
-                        const target = rounds[currentRound]?.target;
-                        const isMatch = best.name === target;
+                        var best = est.gestures.slice().sort(function (a, b) { return b.score - a.score; })[0];
+                        var pct = Math.min(100, Math.round((best.score / 8.0) * 100));
+                        var target = rounds[currentRound] ? rounds[currentRound].target : '';
+                        var isMatch = best.name === target;
 
-                        document.getElementById('myCamStatus').textContent = isMatch ? '✓ Matched!' : 'Scanning…';
-                        document.getElementById('myCamStatus').className = `cam-status ${isMatch ? 'matched' : 'detecting'}`;
+                        document.getElementById('myCamStatus').textContent = isMatch ? 'Matched!' : 'Scanning...';
+                        document.getElementById('myCamStatus').className = 'cam-status ' + (isMatch ? 'matched' : 'detecting');
 
-                        if (pct >= 80) document.getElementById('myFeedback').textContent = "Looking great! 🔥";
-                        else if (pct >= 60) document.getElementById('myFeedback').textContent = "Almost there!";
-                        else if (pct >= 40) document.getElementById('myFeedback').textContent = "Getting closer…";
-                        else document.getElementById('myFeedback').textContent = "Try adjusting your hand";
+                        if (pct >= 80) document.getElementById('myFeedback').textContent = 'Looking great!';
+                        else if (pct >= 60) document.getElementById('myFeedback').textContent = 'Almost there!';
+                        else if (pct >= 40) document.getElementById('myFeedback').textContent = 'Getting closer...';
+                        else document.getElementById('myFeedback').textContent = 'Try adjusting your hand';
 
                         if (isMatch && timeReady) {
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
                                 roundLocked = true; roundActive = false;
-                                // Only write to DB — Firebase listener triggers handleRoundEnd for BOTH players
-                                await update(ref(db, `rooms/${roomCode}`), { roundWinner: myRole });
+                                await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
                             }
                         } else if (!isMatch) {
                             window.__matchFrames = Math.max(0, window.__matchFrames - 1);
                         }
                     } else {
-                        document.getElementById('myCamStatus').textContent = 'Hand detected…';
+                        document.getElementById('myCamStatus').textContent = 'Hand detected...';
                         document.getElementById('myCamStatus').className = 'cam-status detecting';
-                        document.getElementById('myFeedback').textContent = 'Hand detected, keep signing…';
+                        document.getElementById('myFeedback').textContent = 'Hand detected, keep signing...';
                     }
                 } else {
-                    document.getElementById('myCamStatus').textContent = 'Scanning…';
+                    document.getElementById('myCamStatus').textContent = 'Scanning...';
                     document.getElementById('myCamStatus').className = 'cam-status';
                     document.getElementById('myFeedback').textContent = 'Show your hand to the camera';
                     window.__matchFrames = 0;
@@ -1358,24 +1365,24 @@
         }
 
         function buildGestures() {
-            const g = [];
-            const helloG = new fp.GestureDescription('Thank You');
-            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => helloG.addCurl(f, fp.FingerCurl.NoCurl, 1.0));
+            var g = [];
+            var helloG = new fp.GestureDescription('Thank You');
+            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { helloG.addCurl(f, fp.FingerCurl.NoCurl, 1.0); });
             helloG.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
             helloG.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
             helloG.addDirection(fp.Finger.Ring, fp.FingerDirection.VerticalUp, 1.0);
             helloG.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
             g.push(helloG);
 
-            const tyG = new fp.GestureDescription('Hello');
-            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => tyG.addCurl(f, fp.FingerCurl.NoCurl, 1.0));
+            var tyG = new fp.GestureDescription('Hello');
+            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { tyG.addCurl(f, fp.FingerCurl.NoCurl, 1.0); });
             tyG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 1.0);
             tyG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpRight, 1.0);
             tyG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 1.0);
             tyG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpRight, 1.0);
             g.push(tyG);
 
-            const ily = new fp.GestureDescription('I Love You');
+            var ily = new fp.GestureDescription('I Love You');
             ily.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); ily.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
             ily.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl, 1.0); ily.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
             ily.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
@@ -1383,38 +1390,38 @@
             ily.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
             g.push(ily);
 
-            const yes = new fp.GestureDescription('Yes');
+            var yes = new fp.GestureDescription('Yes');
             yes.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
-            [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => yes.addCurl(f, fp.FingerCurl.FullCurl, 1.0));
+            [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { yes.addCurl(f, fp.FingerCurl.FullCurl, 1.0); });
             yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.VerticalUp, 1.0);
             g.push(yes);
 
-            const no = new fp.GestureDescription('No');
+            var no = new fp.GestureDescription('No');
             no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0);
             no.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); no.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
-            [fp.Finger.Ring, fp.Finger.Pinky].forEach(f => no.addCurl(f, fp.FingerCurl.FullCurl, 1.0));
+            [fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { no.addCurl(f, fp.FingerCurl.FullCurl, 1.0); });
             no.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
             no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
             g.push(no);
 
-            const defs = {
-                'A': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.8); },
-                'B': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
-                'C': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9)); },
-                'D': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.8); },
-                'E': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
-                'F': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.HalfCurl, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 0.9); }); },
-                'G': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalLeft, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
-                'H': d => { [fp.Finger.Index, fp.Finger.Middle].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.HorizontalLeft, 0.9); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
-                'I': d => { d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
-                'L': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Thumb, fp.FingerDirection.HorizontalLeft, 0.9);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
-                'O': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9)); },
-                'V': d => { [fp.Finger.Index, fp.Finger.Middle].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
-                'W': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0); },
-                'Y': d => { d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+            var defs = {
+                'A': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.8); },
+                'B': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
+                'C': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(function (f) { d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9); }); },
+                'D': function (d) { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.8); },
+                'E': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.HalfCurl, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
+                'F': function (d) { d.addCurl(fp.Finger.Index, fp.FingerCurl.HalfCurl, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 0.9); }); },
+                'G': function (d) { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalLeft, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); },
+                'H': function (d) { [fp.Finger.Index, fp.Finger.Middle].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.HorizontalLeft, 0.9); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); },
+                'I': function (d) { d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); },
+                'L': function (d) { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Thumb, fp.FingerDirection.HorizontalLeft, 0.9);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); },
+                'O': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(function (f) { d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9); }); },
+                'V': function (d) { [fp.Finger.Index, fp.Finger.Middle].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); },
+                'W': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0); },
+                'Y': function (d) { d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); }
             };
-            Object.entries(defs).forEach(([name, fn]) => {
-                const d = new fp.GestureDescription(name); fn(d); g.push(d);
+            Object.keys(defs).forEach(function (name) {
+                var d = new fp.GestureDescription(name); defs[name](d); g.push(d);
             });
             return g;
         }
