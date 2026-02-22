@@ -12,6 +12,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-icons.css" rel="stylesheet">
     <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -33,6 +34,7 @@
 
         .navbar-brand {
             color: var(--primary) !important;
+            font-family: 'Quicksand', sans-serif;
             font-weight: 700;
             font-size: 2rem;
         }
@@ -296,16 +298,15 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
+            <a href="index.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
 
             <div class="d-flex align-items-center d-lg-none">
-                <i class="navbar-icon bi-camera-video me-3"></i>
-                <a class="custom-btn btn text-white" href="learn.html">Start</a>
+                <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
             </div>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-lg-5">
-                    <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link active" href="learn.html">Learn</a></li>
                     <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
@@ -313,8 +314,7 @@
                 </ul>
 
                 <div class="d-lg-flex align-items-center d-none ms-auto">
-                    <i class="navbar-icon bi-camera-video me-3 text-primary"></i>
-                    <a class="custom-btn btn text-white" href="learn.html">Start Learning</a>
+                    <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
                 </div>
             </div>
         </div>
@@ -333,7 +333,7 @@
             <div class="tip-banner">
                 <i class="bi bi-lightbulb-fill"></i>
                 <p><strong>Recommended:</strong> Start with the Alphabet module to build your foundation. Every letter
-                    mastered earns XP toward the global leaderboard!</p>
+                    mastered earns XP toward the leaderboard!</p>
             </div>
 
             <!-- ===================== -->
@@ -347,10 +347,10 @@
                         <div class="card-accent"></div>
                         <div class="card-body-custom">
                             <span class="card-badge badge-alpha"><i class="bi bi-alphabet"></i> Foundation</span>
-                            <span class="card-icon">🤙</span>
+                            <span class="card-icon">✌️</span>
                             <h2>Learn the Alphabet</h2>
                             <p>Master all 26 ASL handshapes from A to Z. The AI camera watches your hand in real time
-                                and only advances when you nail it — no clicking, just signing.</p>
+                                and only advances when you nail it; no clicking, just signing.</p>
                             <div class="pill-row">
                                 <span class="pill pill-alpha">A</span><span class="pill pill-alpha">B</span>
                                 <span class="pill pill-alpha">C</span><span class="pill pill-alpha">D</span>
@@ -437,10 +437,12 @@
                 <script src="https://cdn.jsdelivr.net/npm/fingerpose@0.1.0/dist/fingerpose.min.js"></script>
                 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-                <!-- Alphabet engine (unchanged) -->
+                <script type="module" src="js/firebase-auth.js"></script>
+                
+                <!-- Alphabet engine -->
                 <script type="module" src="js/sign-engine.js"></script>
 
-                <!-- Words engine (separate, no type=module) -->
+                <!-- Words engine -->
                 <script src="js/word-engine.js"></script>
 
 </body>

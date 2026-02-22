@@ -155,6 +155,7 @@ let totalXP = 0;
 let wordsCompleted = 0;
 let wordStartTime = Date.now(); // tracks when current word began
 
+
 // ── Build sidebar word list ───────────────────────────────────
 function buildWordList() {
     wordListEl.innerHTML = '';

@@ -11,6 +11,7 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/bootstrap-icons.css" rel="stylesheet">
   <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -30,7 +31,7 @@
 
     /* ── Navbar — solid, sticky, matches profile.html ── */
     .navbar { background: #fff !important; border-bottom: 2px solid var(--border); box-shadow: 0 2px 12px rgba(15,23,42,0.06); }
-    .navbar-brand { color: var(--primary) !important; font-weight: 700; font-size: 1.8rem; }
+    .navbar-brand { color: var(--primary) !important; font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 1.8rem; }
     .back-link { color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.15s; }
     .back-link:hover { color: var(--primary); border-color: var(--primary); background: #eff3ff; }
 
@@ -137,10 +138,10 @@
 </head>
 <body>
 
-  <!-- Navbar: solid, sticky, profile.html style -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container-fluid px-4" style="gap:16px; min-height:60px;">
-      <a href="home.html" class="navbar-brand" style="margin-right:0;">Signify</a>
+      <a href="index.html" class="navbar-brand" style="margin-right:0;">Signify</a>
       <a href="learn.html" class="back-link ms-2"><i class="bi bi-arrow-left"></i> Modules</a>
       <div class="ms-auto d-none d-lg-flex align-items-center">
         <i class="bi bi-person-circle profile-icon-btn" style="cursor:pointer;font-size:22px;color:var(--muted);"></i>
@@ -270,7 +271,6 @@
 
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
-  <script src="js/jquery.sticky.js"></script>
   <script src="js/custom.js"></script>
 
   <!-- Firebase: sets window.SIGNIFY_CONFIG -->
