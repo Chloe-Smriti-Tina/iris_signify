@@ -1,237 +1,271 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Signify - Learn ASL with AI">
+  <title>Signify - Dashboard</title>
 
-        <meta name="description" content= "Signify - Learn ASL with AI">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-icons.css" rel="stylesheet">
+  <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
-        <title>Signify - Dashboard</title>
+  <style>
+    :root {
+      --signify-blue:       #648FFF;
+      --signify-dark:       #1e293b;
+      --signify-accent:     #FE6100;
+      --signify-light:      #f8fafc;
+      --text-high-contrast: #0f172a;
+    }
 
-        <!-- CSS FILES -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-        <link href="css/bootstrap.min.css" rel="stylesheet">
-        <link href="css/bootstrap-icons.css" rel="stylesheet">
-        <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
-        
-        <style>
-            :root {
-                /* Colorblind-safe palette  */
-                --signify-blue: #6d8bfa; 
-                --signify-dark: #1e293b; /* High contrast dark background */
-                --signify-accent: #fbbf24; /* Accessible amber/yellow for highlights */
-                --signify-light: #f8fafc;
-                --text-high-contrast: #0f172a;
-            }
+    body {
+      background-color: var(--signify-light);
+      color: var(--text-high-contrast);
+    }
 
-            body {
-                background-color: var(--signify-light);
-                color: var(--text-high-contrast);
-            }
+    .navbar-brand {
+      color: var(--signify-blue) !important;
+      font-weight: 700;
+      font-size: 2rem;
+    }
 
-            .navbar-brand {
-                color: var(--signify-blue) !important;
-                font-weight: 700;
-                font-size: 2rem;
-            }
+    .navbar-nav .nav-link {
+      color: var(--signify-blue) !important;
+    }
+    .navbar-nav .nav-link.active,
+    .navbar-nav .nav-link:hover {
+      color: var(--signify-accent) !important;
+    }
 
-            .custom-btn {
-                background: var(--signify-blue);
-                border-color: var(--signify-blue);
-                color: white;
-                font-weight: bold;
-            }
+    .custom-btn {
+      background: var(--signify-blue);
+      border-color: var(--signify-blue);
+      color: white;
+      font-weight: bold;
+    }
+    .custom-btn:hover {
+      background: var(--signify-dark);
+      border-color: var(--signify-dark);
+      color: white;
+    }
 
-            .custom-btn:hover {
-                background: var(--signify-dark);
-                border-color: var(--signify-dark);
-                color: white;
-            }
+    .dash-card {
+      background: white;
+      border-radius: 15px;
+      border: 2px solid #e2e8f0;
+      transition: transform 0.2s ease;
+    }
+    .dash-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--signify-blue);
+    }
 
-            /* Dashboard Cards */
-            .dash-card {
-                background: white;
-                border-radius: 15px;
-                border: 2px solid #e2e8f0;
-                transition: transform 0.2s ease;
-            }
-            .dash-card:hover {
-                transform: translateY(-5px);
-                border-color: var(--signify-blue);
-            }
+    .icon-wrapper {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
 
-            .icon-wrapper {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-            }
+    .progress {
+      height: 25px;
+      border-radius: 12px;
+      background-color: #e2e8f0;
+    }
+    .progress-bar {
+      background-color: var(--signify-blue);
+      font-weight: bold;
+    }
 
-            /* Progress Bar Styling */
-            .progress {
-                height: 25px;
-                border-radius: 12px;
-                background-color: #e2e8f0;
-            }
-            .progress-bar {
-                background-color: var(--signify-blue);
-                font-weight: bold;
-            }
-        </style>
-    </head>
-    
-    <body>
-        <nav class="navbar navbar-expand-lg bg-white shadow-sm">
-            <div class="container">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-lg-5">
-                        <li class="nav-item"><a class="nav-link active" href="home.html">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
-                        <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
-                    </ul>
+    .rank-1 { color: #f59e0b; }
+    .rank-2 { color: #94a3b8; }
+    .rank-3 { color: #b45309; }
 
-                    <div class="d-lg-flex align-items-center d-none ms-auto">
-                        <button id="auth-btn" class="custom-btn btn">Sign In</button>
-                    </div>
-                </div>
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
+      <div class="d-flex align-items-center d-lg-none">
+        <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+      </div>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-lg-5">
+          <li class="nav-item"><a class="nav-link active" href="home.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
+          <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
+        </ul>
+        <div class="d-lg-flex align-items-center d-none ms-auto">
+          <i class="navbar-icon bi-person-circle me-3 profile-icon-btn" style="cursor:pointer;font-size:22px;"></i>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:100px;padding-bottom:60px;">
+
+    <!-- Loading -->
+    <div id="loadingView" class="text-center py-5" style="display:none;">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2">Loading your progress...</p>
+    </div>
+
+    <!-- Returning user dashboard -->
+    <div id="returningUserView" style="display:none;">
+
+      <div class="row mb-5 align-items-center">
+        <div class="col-md-8">
+          <h1 class="display-5 fw-bold" style="color:var(--signify-dark);">Welcome back!</h1>
+          <p class="lead text-muted">Ready to continue your ASL journey?</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <a href="learn.html" class="custom-btn btn btn-lg px-4 py-3 shadow-sm">
+            <i class="bi bi-play-circle-fill me-2"></i> Continue Lesson
+          </a>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="row g-4 mb-5">
+        <div class="col-md-4">
+          <div class="dash-card p-4 shadow-sm h-100 d-flex align-items-center">
+            <div class="icon-wrapper me-3" style="background-color:#fff4eb;color:#FE6100;">
+            <span class="material-icons">whatshot</span>
             </div>
-        </nav>
-
-        <main class="container py-5">
-            <div id="loadingView" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">Loading your progress...</p>
+            <div>
+              <h3 class="mb-0 fw-bold" id="stat-streak">0 Days</h3>
+              <p class="mb-0 text-muted small">Current Streak</p>
             </div>
+          </div>
+        </div>
 
-            <div id="returningUserView">
-                <div class="row mb-5 align-items-center">
-                    <div class="col-md-8">
-                        <h1 class="display-5 fw-bold" style="color: var(--signify-dark);">Welcome back, Hari!</h1>
-                        <p class="lead text-muted">Ready to continue your ASL journey?</p>
-                    </div>
-                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <a href="learn.html" class="custom-btn btn btn-lg px-4 py-3 shadow-sm">
-                            <i class="bi bi-play-circle-fill me-2"></i> Continue Lesson
-                        </a>
-                    </div>
-                </div>
-
-                <div class="row g-4 mb-5">
-                    <div class="col-md-4">
-                        <div class="dash-card p-4 shadow-sm h-100 d-flex align-items-center">
-                            <div class="icon-wrapper me-3" style="background-color: #fffbeb; color: var(--signify-accent);">
-                                <i class="bi bi-fire"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-0 fw-bold">12 Days</h3>
-                                <p class="mb-0 text-muted small">Current Streak</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="dash-card p-4 shadow-sm h-100 d-flex align-items-center">
-                            <div class="icon-wrapper me-3" style="background-color: #eff6ff; color: var(--signify-blue);">
-                                <i class="bi bi-star-fill"></i></div>
-                                <div>
-                                    <h3 class="mb-0 fw-bold" id="stat-xp">0 XP</h3>
-                                    <p class="mb-0 text-muted small">Total Score</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    <div class="col-md-4">
-                        <div class="dash-card p-4 shadow-sm h-100 d-flex align-items-center">
-                            <div class="icon-wrapper me-3" style="background-color: #f1f5f9; color: var(--signify-dark);">
-                                <i class="bi bi-trophy-fill"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-0 fw-bold">Unranked</h3>
-                                <p class="mb-0 text-muted small">Global Leaderboard</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-4">
-                    <div class="col-lg-7">
-                        <div class="dash-card p-4 shadow-sm h-100">
-                            <h4 class="fw-bold mb-4">Current Module: ASL Alphabet</h4>
-                            
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Letters A - Z</span>
-                                <strong id="progress-AtoZ-text">0%</strong>
-                            </div>
-                            <div class="progress mb-4">
-                                <div id="progress-AtoZ-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
-                            </div>
-
-                            <a href="learn.html" id="next-lesson-btn" class="btn btn-outline-primary w-100 fw-bold" style="border-color: var(--signify-blue); color: var(--signify-blue);">Jump to Next Letter</a>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-5">
-                        <div class="dash-card p-4 shadow-sm h-100">
-                            <h4 class="fw-bold mb-4">Top Learners</h4>
-                            <ul class="list-group list-group-flush" id="mini-leaderboard">
-                                </ul>
-                            <a href="leaderboard.html" class="text-decoration-none small d-block text-center mt-3" style="color: var(--signify-blue);">View Full Leaderboard &rarr;</a>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-4">
+          <div class="dash-card p-4 shadow-sm h-100 d-flex align-items-center">
+            <div class="icon-wrapper me-3" style="background-color:#fffbeb;color:#FFB000;">
+            <span class="material-icons">bolt</span>
             </div>
+            <div>
+              <h3 class="mb-0 fw-bold" id="stat-xp">0 XP</h3>
+              <p class="mb-0 text-muted small">Total XP</p>
+            </div>
+          </div>
+        </div>
 
-            <div id="newUserView" style="display: none;">
-                <div class="row align-items-center" style="min-height: 70vh;">
-                    <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
-                        <span class="badge px-3 py-2 mb-3" style="background-color: var(--signify-accent); color: var(--text-high-contrast);">Free & Accessible Education</span>
-                        <h1 class="display-4 fw-bold mb-4" style="color: var(--signify-dark);">Learn Sign Language with Real-Time AI Feedback.</h1>
-                        <p class="lead mb-4 text-muted">Think of it like a typing game, but for your hands. Use your device's built-in camera to learn ASL interactively.</p>
-                        
-                        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-                            <button id="hero-signin-btn" class="custom-btn btn btn-lg px-5 py-3 shadow profile-icon-btn">
-                                <i class="bi bi-google me-2"></i> Sign in to Start
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 text-center">
-                        <div class="p-5 rounded-4 shadow-lg" style="background-color: var(--signify-blue);">
-                            <i class="bi bi-universal-access text-white" style="font-size: 8rem;"></i>
-                            <h3 class="text-white mt-3">Accessibility is for everyone</h3>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-4">
+          <div class="dash-card p-4 shadow-sm h-100 d-flex align-items-center">
+            <div class="icon-wrapper me-3" style="background-color:#ffebf7;color:#DC267F;">
+              <span class="material-icons">emoji_events</span>
+            </div>
+            <div>
+              <h3 class="mb-0 fw-bold" id="stat-rank">—</h3>
+              <p class="mb-0 text-muted small">Global Leaderboard</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress + mini leaderboard -->
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="dash-card p-4 shadow-sm h-100">
+            <h4 class="fw-bold mb-4">Current Module: ASL Alphabet</h4>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span>Letters A – Z</span>
+              <strong id="progress-AtoZ-text">0%</strong>
+            </div>
+            <div class="progress mb-4">
+              <div id="progress-AtoZ-bar" class="progress-bar" role="progressbar" style="width:0%;"></div>
             </div>
 
-        </main>
-        
-        <footer class="site-footer">
-            <div class="container">
-            <div class="row">
-                <div class="col-lg-12 col-12">
-                <div class="copyright-text-wrap">
-                    <p class="mb-0">
-                    <span class="copyright-text">Copyright © 2026 <a href="#">Signify</a>. All rights reserved.</span>
-                    </p>
-                </div>
-                </div>
-            </div>
-            </div>
-        </footer>
+            <a href="learn.html" id="next-lesson-btn"
+               class="btn btn-outline-primary w-100 fw-bold"
+               style="border-color:var(--signify-blue);color:var(--signify-blue);">
+              Jump to Next Letter
+            </a>
+          </div>
+        </div>
 
-        <script src="js/jquery.min.js"></script>
-        <script src="js/bootstrap.min.js"></script>
-        <script type="module" src="js/firebase-auth.js"></script>
-    </body>
+        <div class="col-lg-5">
+          <div class="dash-card p-4 shadow-sm h-100">
+            <h4 class="fw-bold mb-4">Top Learners</h4>
+            <ul class="list-group list-group-flush" id="mini-leaderboard"></ul>
+            <a href="leaderboard.html"
+               class="text-decoration-none small d-block text-center mt-3"
+               style="color:var(--signify-blue);">
+              View Full Leaderboard &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New user / logged out -->
+    <div id="newUserView" style="display:none;">
+      <div class="row align-items-center" style="min-height:70vh;">
+        <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
+          <span class="badge px-3 py-2 mb-3"
+                style="background-color:var(--signify-accent);color:var(--text-high-contrast);">
+            Free &amp; Accessible Education
+          </span>
+          <h1 class="display-4 fw-bold mb-4" style="color:var(--signify-dark);">
+            Learn Sign Language with Real-Time AI Feedback.
+          </h1>
+          <p class="lead mb-4 text-muted">
+            Think of it like a typing game, but for your hands. Use your device's built-in camera to learn ASL interactively.
+          </p>
+          <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+            <button class="custom-btn btn btn-lg px-5 py-3 shadow profile-icon-btn">
+              <i class="bi bi-person-circle me-2"></i> Sign in to Start
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-6 text-center">
+          <div class="p-5 rounded-4 shadow-lg" style="background-color:var(--signify-blue);">
+            <i class="bi bi-universal-access text-white" style="font-size:8rem;"></i>
+            <h3 class="text-white mt-3">Accessibility is for everyone</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 col-12">
+          <div class="copyright-text-wrap">
+            <p class="mb-0">
+              <span class="copyright-text">Copyright © 2026 <a href="#">Signify</a>. All rights reserved.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.sticky.js"></script>
+  <script src="js/custom.js"></script>
+  <script type="module" src="js/firebase-auth.js"></script>
+  <script type="module" src="js/home.js"></script>
+</body>
 </html>
