@@ -1,8 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// ── Firebase config ──────────────────────────────────────────
+import { getFirestore, doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCIm-UGhuGg9aNuK7nWdI2pZ6hLDFxxuis",
@@ -17,49 +15,37 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ── IBM colorblind-friendly palette ─────────────────────────
-// Based on IBM's design guidance: https://www.ibm.com/design/language/color/
-
-const IBM_COLORS = [
-  "#648FFF", // blue
-  "#785EF0", // purple
-  "#DC267F", // magenta
-  "#FE6100", // orange
-  "#FFB000", // yellow
-];
-
+const IBM_COLORS = ["#648FFF","#785EF0","#DC267F","rgb(254, 97, 0)","#FFB000"];
 function getAvatarColor(initial) {
-  const index = initial.charCodeAt(0) % IBM_COLORS.length;
-  return IBM_COLORS[index];
+  return IBM_COLORS[initial.charCodeAt(0) % IBM_COLORS.length];
 }
-
-// ── Auth state — load profile when user is known ─────────────
 
 onAuthStateChanged(auth, async (user) => {
   document.getElementById("loadingState").style.display = "none";
-
   if (!user) {
     document.getElementById("notLoggedIn").style.display = "block";
     return;
   }
 
-  // Hide not logged in, show content
-  document.getElementById("notLoggedIn").style.display = "none";  
-
+  document.getElementById("notLoggedIn").style.display = "none";
   document.getElementById("profileContent").style.display = "block";
 
-  // Fetch Firestore document
-  const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
+  // Fetch user doc, all badges, and earned badges in parallel
+  const [snap, allBadgesSnap, earnedSnap] = await Promise.all([
+    getDoc(doc(db, "users", user.uid)),
+    getDocs(collection(db, "badges")),
+    getDocs(collection(db, "users", user.uid, "badges"))
+  ]);
 
+  if (!snap.exists()) return;
   const data = snap.data();
 
-  // ── Display name & email ──
+  // ── Name & email ──
   const displayName = data.displayName || "User";
   document.getElementById("profileName").textContent = displayName;
   document.getElementById("profileEmail").textContent = data.email || user.email;
 
-  // ── Avatar: first initial with IBM color ──
+  // ── Avatar ──
   const initial = displayName.charAt(0).toUpperCase();
   const avatarEl = document.getElementById("avatarCircle");
   avatarEl.textContent = initial;
@@ -68,20 +54,25 @@ onAuthStateChanged(auth, async (user) => {
   // ── Joined date ──
   if (data.createdAt) {
     const date = data.createdAt.toDate();
-    const formatted = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    document.getElementById("profileJoined").textContent = "Joined " + formatted;
+    document.getElementById("profileJoined").textContent =
+      "Joined " + date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   }
 
   // ── Stats ──
   const allTime = data.allTime || {};
-
-  // totalTimeSpent is stored in seconds, show as hours
-  const seconds = allTime.totalTimeSpent || 0;
-  const hours = Math.floor(seconds / 60 / 60);
-  document.getElementById("statTime").textContent = hours;
-
+  const currentStreak = data.currentStreak || {};
+  document.getElementById("statTime").textContent = Math.floor((allTime.totalTimeSpent || 0) / 3600);
   document.getElementById("statChallenges").textContent = allTime.challengesCompleted || 0;
+  document.getElementById("statAccuracy").textContent = (allTime.accuracy || 0) + "%";
+  document.getElementById("statCurrentStreak").textContent = currentStreak.count || 0;
+  document.getElementById("statLongestStreak").textContent = allTime.longestStreak || 0;
 
-  const accuracy = allTime.accuracy || 0;
-  document.getElementById("statAccuracy").textContent = accuracy + "%";
+  // ── Badges ──
+  const allBadges = allBadgesSnap.docs.map(d => d.data());
+  const earnedIds = earnedSnap.docs.map(d => d.data().id);
+  document.getElementById("statNumBadges").textContent = earnedIds.length;
+
+  if (window.renderBadgePanels) {
+    window.renderBadgePanels(allBadges, earnedIds, allTime);
+  }
 });

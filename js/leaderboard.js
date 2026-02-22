@@ -115,9 +115,9 @@ function buildRow(rank, user, tab, isCurrentUser) {
   const statVal = formatStat(getStatValue(user, tab), tab);
 
   let rankDisplay = `#${rank}`;
-  if (rank === 1) rankDisplay = `<span class="rank-1">🥇 1</span>`;
-  else if (rank === 2) rankDisplay = `<span class="rank-2">🥈 2</span>`;
-  else if (rank === 3) rankDisplay = `<span class="rank-3">🥉 3</span>`;
+if (rank === 1) rankDisplay = `<span class="rank-1" style="display:inline-flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:18px;">emoji_events</span>1</span>`;
+else if (rank === 2) rankDisplay = `<span class="rank-2" style="display:inline-flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:18px;">emoji_events</span>2</span>`;
+else if (rank === 3) rankDisplay = `<span class="rank-3" style="display:inline-flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:18px;">emoji_events</span>3</span>`;
 
   const youBadge = isCurrentUser ? `<span class="you-badge">YOU</span>` : "";
 

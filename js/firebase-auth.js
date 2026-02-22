@@ -48,7 +48,7 @@ document.body.insertAdjacentHTML("beforeend", `
     align-items:center;
   ">
     <div style="
-      background:#1a1a2e;
+      background:#ffffff;
       border:1px solid rgba(255,255,255,0.1);
       border-radius:16px;
       padding:40px;
@@ -59,7 +59,7 @@ document.body.insertAdjacentHTML("beforeend", `
     ">
       <button id="authModalClose" style="
         position:absolute;top:16px;right:16px;
-        background:none;border:none;color:#aaa;
+        background:none;border:none;color:#64748b;
         font-size:22px;cursor:pointer;line-height:1;
       ">✕</button>
 
@@ -68,10 +68,10 @@ document.body.insertAdjacentHTML("beforeend", `
         <button id="tabSignIn" onclick="switchTab('signin')" style="
           flex:1;background:none;border:none;color:#fff;
           font-size:15px;font-weight:600;padding:10px;cursor:pointer;
-          border-bottom:2px solid #535da1;transition:all .2s;
+          border-bottom:2px solid #648FFF;transition:all .2s;
         ">Sign In</button>
         <button id="tabSignUp" onclick="switchTab('signup')" style="
-          flex:1;background:none;border:none;color:#aaa;
+          flex:1;background:none;border:none;color:#64748b;
           font-size:15px;font-weight:600;padding:10px;cursor:pointer;
           border-bottom:2px solid transparent;transition:all .2s;
         ">Sign Up</button>
@@ -79,19 +79,19 @@ document.body.insertAdjacentHTML("beforeend", `
 
       <!-- Sign In Form -->
       <div id="formSignIn">
-        <h3 style="color:#fff;margin-bottom:24px;font-size:22px;">Welcome back</h3>
+        <h3 style="color:#0f172a;margin-bottom:24px;font-size:22px;">Welcome back</h3>
         <input id="siEmail" type="email" placeholder="Email address" style="
           width:100%;padding:13px 16px;margin-bottom:14px;
-          background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-          border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+          background:#f8fafc;border:1px solid #e2e8f0;
+          border-radius:8px;color:#0f172a;font-size:14px;box-sizing:border-box;outline:none;
         ">
         <input id="siPassword" type="password" placeholder="Password" style="
           width:100%;padding:13px 16px;margin-bottom:20px;
-          background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-          border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+          background:#f8fafc;border:1px solid #e2e8f0;
+          border-radius:8px;color:#0f172a;font-size:14px;box-sizing:border-box;outline:none;
         ">
         <button onclick="handleSignIn()" style="
-          width:100%;padding:14px;background:#535da1;
+          width:100%;padding:14px;background:#648FFF;
           border:none;border-radius:8px;color:#fff;
           font-size:15px;font-weight:600;cursor:pointer;
         ">Sign In</button>
@@ -100,29 +100,29 @@ document.body.insertAdjacentHTML("beforeend", `
 
       <!-- Sign Up Form -->
       <div id="formSignUp" style="display:none;">
-        <h3 style="color:#fff;margin-bottom:24px;font-size:22px;">Create account</h3>
+        <h3 style="color:#0f172a;margin-bottom:24px;font-size:22px;">Create account</h3>
         <input id="suName" type="text" placeholder="Display name" style="
             width:100%;padding:13px 16px;margin-bottom:14px;
-            background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-            border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+            background:#f8fafc;border:1px solid #e2e8f0;
+            border-radius:8px;color:#0f172a;font-size:14px;box-sizing:border-box;outline:none;
         ">
         <input id="suEmail" type="email" placeholder="Email address" style="
           width:100%;padding:13px 16px;margin-bottom:14px;
-          background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-          border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+          background:#f8fafc;border:1px solid #e2e8f0;
+          border-radius:8px;color:#0f172a;font-size:14px;box-sizing:border-box;outline:none;
         ">
         <input id="suPassword" type="password" placeholder="Password" style="
           width:100%;padding:13px 16px;margin-bottom:14px;
-          background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-          border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+          background:#f8fafc;border:1px solid #e2e8f0;
+          border-radius:8px;color:#0f172a;font-size:14px;box-sizing:border-box;outline:none;
         ">
         <input id="suPassword2" type="password" placeholder="Confirm password" style="
           width:100%;padding:13px 16px;margin-bottom:20px;
-          background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
-          border-radius:8px;color:#fff;font-size:14px;box-sizing:border-box;outline:none;
+          background:#f8fafc;border:1px solid #e2e8f0;
+          border-radius:8px;color:#0f172a;font-size:14px;box-sizing:border-box;outline:none;
         ">
         <button onclick="handleSignUp()" style="
-          width:100%;padding:14px;background:#535da1;
+          width:100%;padding:14px;background:#648FFF;
           border:none;border-radius:8px;color:#fff;
           font-size:15px;font-weight:600;cursor:pointer;
         ">Create Account</button>
@@ -135,7 +135,7 @@ document.body.insertAdjacentHTML("beforeend", `
   <div id="profileDropdown" style="
     display:none;
     position:fixed;
-    background:#1a1a2e;
+    background:#ffffff;
     border:1px solid rgba(255,255,255,0.1);
     border-radius:10px;
     padding:8px;
@@ -144,19 +144,19 @@ document.body.insertAdjacentHTML("beforeend", `
     z-index:9998;
   ">
     <p id="dropdownEmail" style="
-      color:#aaa;font-size:12px;
+      color:#64748b;font-size:12px;
       padding:8px 12px 4px;margin:0 0 6px 0;
       border-bottom:1px solid rgba(255,255,255,0.08);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     "></p>
     <a href="profile.html" style="
       display:block;padding:9px 12px;
-      color:#fff;text-decoration:none;font-size:14px;
+      color:#0f172a;text-decoration:none;font-size:14px;
       border-radius:6px;transition:background .15s;
     "
       onmouseover="this.style.background='rgba(83,93,161,0.3)'"
       onmouseout="this.style.background='none'"
-    >👤 Go to Profile</a>
+    ><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#cecece"><path d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg> Go to Profile</a>
     <button onclick="handleSignOut()" style="
       width:100%;text-align:left;padding:9px 12px;
       background:none;border:none;color:#ff6b6b;
@@ -165,7 +165,7 @@ document.body.insertAdjacentHTML("beforeend", `
     "
       onmouseover="this.style.background='rgba(255,107,107,0.1)'"
       onmouseout="this.style.background='none'"
-    >🚪 Log Out</button>
+    ><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#cecece"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg> Log Out</button>
   </div>
 
 `);
@@ -298,7 +298,7 @@ window.handleSignOut = async function() {
 
 onAuthStateChanged(auth, (user) => {
   document.querySelectorAll(".profile-icon-btn").forEach(icon => {
-    icon.style.color = user ? "#535da1" : "#000000";
+    icon.style.color = user ? "#648FFF" : "#0f172a";
   });
 });
 
@@ -323,7 +323,7 @@ function friendlyError(code) {
 onAuthStateChanged(auth, async (user) => {
   // 1. Update Profile Icons Globally
   document.querySelectorAll(".profile-icon-btn").forEach(icon => {
-    icon.style.color = user ? "#535da1" : "#000000";
+    icon.style.color = user ? "#648FFF" : "#0f172a";
   });
 
   // 2. Dashboard Logic (ONLY runs if we are on home.html)
