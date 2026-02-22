@@ -60,10 +60,10 @@ async function loadUserData(user) {
   if (xpEl) xpEl.innerText = `${data.total_xp || 0} XP`;
 
   // Alphabet progress from subcollection
-  const alphaSnap = await getDocs(collection(db, "users", user.uid, "alphabet"));
-  const total   = alphaSnap.size;
-  const learned = alphaSnap.docs.filter(d => d.data().learned).length;
-  const pct     = total > 0 ? Math.round((learned / total) * 100) : 0;
+  // const alphaSnap = await getDocs(collection(db, "users", user.uid, "alphabet")); not neccessary since it is not being used anymore in this way
+  const alphaMap = data.alphabet || {};
+  const learned  = Object.values(alphaMap).filter(v => v === true).length;
+  const pct      = Math.round((learned / 26) * 100);
 
   const pAtoZText = document.getElementById('progress-AtoZ-text');
   const pAtoZBar  = document.getElementById('progress-AtoZ-bar');
