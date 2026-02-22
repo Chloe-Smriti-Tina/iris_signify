@@ -323,6 +323,9 @@
       if (!snap.exists()) return;
       const data = snap.data();
       window.SIGNIFY_CONFIG.streak = data.streak || 0;
+      window.SIGNIFY_CONFIG.totalXP = data.total_xp || 0;
+      const xpEl = document.getElementById("sb-xp");
+      if (xpEl) xpEl.textContent = data.total_xp || 0;
       const alphaMap = data.alphabet || {};
       Object.keys(alphaMap).forEach(l => { if (alphaMap[l]) window.SIGNIFY_CONFIG.completedSet.add(l); });
       if (window.__signEngineReady) window.__signEngineRerender();
