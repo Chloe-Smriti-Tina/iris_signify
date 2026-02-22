@@ -202,7 +202,7 @@
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
 
@@ -510,7 +510,7 @@
                 <p class="stats-label">All-time stats</p>
                 <div class="stats-grid">
                   <div class="stat-card">
-                    <span class="stat-icon material-icons">whatshot</span>
+                    <span class="stat-icon material-icons">local_fire_department</span>
                     <span class="stat-value" id="statLongestStreak">0</span>
                     <span class="stat-label">Longest Streak</span>
                   </div>
@@ -520,24 +520,14 @@
                     <span class="stat-label">Current Streak</span>
                   </div>
                   <div class="stat-card">
-                    <span class="stat-icon material-icons">emoji_events</span>
-                    <span class="stat-value" id="statNumBadges">0</span>
-                    <span class="stat-label">Badges</span>
-                  </div>
-                  <div class="stat-card">
-                    <span class="stat-icon material-icons">schedule</span>
-                    <span class="stat-value" id="statTime">0</span>
-                    <span class="stat-label">Hours</span>
-                  </div>
-                  <div class="stat-card">
-                    <span class="stat-icon material-icons">check_circle</span>
+                    <span class="stat-icon material-icons">task_alt</span>
                     <span class="stat-value" id="statChallenges">0</span>
                     <span class="stat-label">Challenges</span>
                   </div>
                   <div class="stat-card">
-                    <span class="stat-icon material-icons">gps_fixed</span>
-                    <span class="stat-value" id="statAccuracy">0%</span>
-                    <span class="stat-label">Accuracy</span>
+                    <span class="stat-icon material-icons">bolt</span>
+                    <span class="stat-value" id="statXP">0</span>
+                    <span class="stat-label">XP</span>
                   </div>
                 </div>
               </div>
@@ -562,12 +552,13 @@
             </div>
 
             <div class="side-card">
-              <p class="side-card-title">
-                <span style="display:inline-flex;align-items:center;gap:6px;">
-                  <span class="material-symbols-outlined" style="font-size:18px;">star</span>
-                  Badge Progress
-                </span>
-              <div class="side-card-body" id="badgeProgressList">
+            <p class="side-card-title">
+              <span style="display:inline-flex;align-items:center;gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:18px;">star</span>
+                Badge Progress
+              </span>
+            </p>
+            <div class="side-card-body" id="badgeProgressList">
                 <div class="empty-msg"><span>📊</span>Loading...</div>
               </div>
             </div>
@@ -598,71 +589,6 @@
   <script src="js/jquery.sticky.js"></script>
   <script src="js/custom.js"></script>
   <script type="module" src="js/firebase-auth.js"></script>
-
-  <!--
-    Call window.renderBadgePanels(allBadges, earnedBadgeIds, userAllTime) from profile.js
-
-    allBadges      – all docs from /badges collection: { id, name, description, icon, stat, threshold }
-    earnedBadgeIds – array of badge id strings from users/{uid}/badges sub-collection
-    userAllTime    – user.allTime map: { challengesCompleted, longestStreak, totalTimeSpent, accuracy }
-  -->
-  <script type="module">
-    window.renderBadgePanels = function (allBadges, earnedBadgeIds, userStats) {
-      const earnedSet = new Set(earnedBadgeIds);
-      const earned = allBadges.filter(b => earnedSet.has(b.id));
-      const notEarned = allBadges.filter(b => !earnedSet.has(b.id));
-
-      /* Earned */
-      const earnedEl = document.getElementById('earnedBadgesList');
-      document.getElementById('earnedBadgeCount').textContent = earned.length ? `(${earned.length})` : '';
-
-      earnedEl.innerHTML = earned.length === 0
-        ? `<div class="empty-msg"><span>🏅</span>No badges yet — complete challenges to unlock your first!</div>`
-        : earned.map(b => `
-            <div class="earned-badge-item">
-              <div class="earned-badge-icon">${b.icon}</div>
-              <div class="earned-badge-info">
-                <p class="earned-badge-name">${b.name}</p>
-                <p class="earned-badge-desc">${b.description}</p>
-              </div>
-            </div>`).join('');
-
-      /* Progress */
-      const progressEl = document.getElementById('badgeProgressList');
-
-      if (notEarned.length === 0) {
-        progressEl.innerHTML = `<div class="empty-msg"><span>🎉</span>You've earned every badge!</div>`;
-        return;
-      }
-
-      const statMap = {
-        challengesCompleted: userStats.challengesCompleted || 0,
-        longestStreak: userStats.longestStreak || 0,
-        totalTimeSpent: userStats.totalTimeSpent || 0,
-        accuracy: userStats.accuracy || 0,
-      };
-
-      progressEl.innerHTML = notEarned.map(b => {
-        const current = statMap[b.stat] ?? 0;
-        const pct = Math.min(100, Math.round((current / b.threshold) * 100));
-        return `
-          <div class="progress-badge-item">
-            <div class="progress-badge-header">
-              <div class="progress-badge-icon">${b.icon}</div>
-              <div class="progress-badge-label">
-                <p class="progress-badge-name">${b.name}</p>
-                <p class="progress-badge-desc">${b.description}</p>
-              </div>
-              <span class="progress-badge-pct">${current} / ${b.threshold}</span>
-            </div>
-            <div class="progress-bar-track">
-              <div class="progress-bar-fill" style="width:${pct}%"></div>
-            </div>
-          </div>`;
-      }).join('');
-    };
-  </script>
-
   <script type="module" src="js/profile.js"></script>
 
 </body>

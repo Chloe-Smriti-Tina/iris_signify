@@ -37,6 +37,12 @@
       padding: 100px 0 60px;
     }
 
+    .navbar-brand {
+      color: var(--signify-blue) !important;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
     .page-title {
       color: var(--text-high-contrast);
       font-size: 32px;
@@ -126,7 +132,6 @@
       background: var(--signify-light);
     }
 
-    /* Current user row */
     .lb-table tbody tr.is-current-user {
       background: #eff6ff;
       border-left: 3px solid var(--signify-blue);
@@ -142,7 +147,6 @@
       font-size: 14px;
     }
 
-    /* Rank column */
     .rank-col {
       width: 60px;
       font-weight: 700;
@@ -162,7 +166,6 @@
       color: #b45309;
     }
 
-    /* Avatar circle in table */
     .table-avatar {
       width: 34px;
       height: 34px;
@@ -201,7 +204,6 @@
       text-align: right;
     }
 
-    /* Divider */
     .lb-divider td {
       padding: 8px 20px;
       text-align: center;
@@ -212,9 +214,7 @@
       letter-spacing: 1px;
     }
 
-    /* ── Loading / empty ── */
-    .loading-wrap,
-    .empty-wrap {
+    .loading-wrap, .empty-wrap {
       text-align: center;
       padding: 60px 20px;
       color: var(--text-muted);
@@ -224,7 +224,6 @@
       color: var(--signify-blue);
     }
 
-    /* ── Not logged in notice ── */
     .login-notice {
       background: #eff6ff;
       border: 1px solid rgba(100, 143, 255, 0.3);
@@ -285,17 +284,17 @@
       </div>
 
       <div class="stat-tabs">
-        <button class="stat-tab active" onclick="switchTab('challenges', this)">
-          <span class="material-icons" style="font-size:16px;">check_circle</span>
+        <button class="stat-tab active" onclick="switchTab('xp', this)">
+          <span class="material-icons" style="font-size:16px;">bolt</span>
+          XP
+        </button>
+        <button class="stat-tab" onclick="switchTab('challenges', this)">
+          <span class="material-icons" style="font-size:16px;">task_alt</span>
           Challenges
         </button>
-        <button class="stat-tab" onclick="switchTab('accuracy', this)">
-          <span class="material-icons" style="font-size:16px;">gps_fixed</span>
-          Accuracy
-        </button>
-        <button class="stat-tab" onclick="switchTab('time', this)">
-          <span class="material-icons" style="font-size:16px;">schedule</span>
-          Time
+        <button class="stat-tab" onclick="switchTab('streak', this)">
+          <span class="material-icons" style="font-size:16px;">local_fire_department</span>
+          Longest Streak
         </button>
       </div>
 
@@ -311,7 +310,7 @@
               <tr>
                 <th class="rank-col">#</th>
                 <th>User</th>
-                <th style="text-align:right;" id="statColHeader">Challenges</th>
+                <th style="text-align:right;" id="statColHeader">XP</th>
               </tr>
             </thead>
             <tbody id="leaderboardBody"></tbody>
