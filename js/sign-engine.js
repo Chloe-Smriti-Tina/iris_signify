@@ -12,40 +12,40 @@ import {
 // For null-gesture letters the bar fills only while a hand is visible.
 // The user still has to actively show their hand — idle frames don't count.
 export const LETTERS = [
-    { letter:"A", gesture:"Closed_Fist",
+    { letter:"A", gesture:"A",
       desc:"Make a fist with your thumb resting against the side of your index finger. Keep all four fingers curled tightly.",
       tip:"Fist facing forward — thumb to the side, not on top." },
-    { letter:"B", gesture:null,
+    { letter:"B", gesture:"B",
       desc:"Hold all four fingers together pointing straight up. Fold your thumb flat across the palm.",
       tip:"Think of holding a flat book upright." },
     { letter:"C", gesture:null,
       desc:"Curve all fingers and thumb into the shape of the letter C, like gripping a can from the side.",
       tip:"Your hand should make a half-circle opening." },
-    { letter:"D", gesture:null,
+    { letter:"D", gesture:"D",
       desc:"Point your index finger up. Bring the middle, ring, and pinky fingers down to touch the tip of your thumb, forming a circle.",
       tip:"The loop is the round part of the letter D." },
-    { letter:"E", gesture:null,
+    { letter:"E", gesture:"E",
       desc:"Curl all four fingers downward like bent claws. Tuck your thumb underneath the curled fingers.",
       tip:"Fingertips should nearly touch the thumb." },
-    { letter:"F", gesture:null,
+    { letter:"F", gesture:"F",
       desc:"Connect your index finger and thumb in a circle. Hold the other three fingers upright and spread.",
       tip:"Similar to the OK hand sign, but held sideways." },
-    { letter:"G", gesture:["Pointing_Up", "None"],
+    { letter:"G", gesture:"G",
       desc:"Point your index finger out to the side. Hold your thumb parallel to it, pointing the same direction.",
       tip:"Like a sideways finger gun." },
-    { letter:"H", gesture:null,
+    { letter:"H", gesture:"H",
       desc:"Point both your index and middle fingers out to the side together, side by side and flat.",
       tip:"Two fingers horizontal — like a sideways peace sign." },
-    { letter:"I", gesture:null,
+    { letter:"I", gesture:"I",
       desc:"Raise only your pinky finger. Curl all other fingers into a fist.",
       tip:"Like a pinky promise." },
     { letter:"J", gesture:null,
       desc:"Start with the I handshape (pinky up), then trace a J shape in the air with your pinky.",
       tip:"The movement draws the letter — don't forget the curve!" },
-    { letter:"K", gesture:null,
+    { letter:"K", gesture:"K",
       desc:"Extend your index and middle fingers up in a V shape. Place your thumb between them, pointing out.",
       tip:"Like a peace sign, but with the thumb extended between the fingers." },
-    { letter:"L", gesture:null,
+    { letter:"L", gesture:"L",
       desc:"Point your index finger straight up. Extend your thumb out to the side. Keep other fingers curled.",
       tip:"Your hand literally makes the shape of the letter L." },
     { letter:"M", gesture:null,
@@ -54,7 +54,7 @@ export const LETTERS = [
     { letter:"N", gesture:null,
       desc:"Tuck your index and middle fingers over the top of your thumb. Keep other fingers curled.",
       tip:"Two fingers on top = N." },
-    { letter:"O", gesture:null,
+    { letter:"O", gesture:"O",
       desc:"Bring all your fingertips and thumb together to form the letter O, like holding a small ball.",
       tip:"The gap in the circle should be visible." },
     { letter:"P", gesture:null,
@@ -63,7 +63,7 @@ export const LETTERS = [
     { letter:"Q", gesture:null,
       desc:"Make the G handshape but point it downward instead.",
       tip:"G flipped to point down." },
-    { letter:"R", gesture:null,
+    { letter:"R", gesture:"R",
       desc:"Cross your index finger over your middle finger. Keep other fingers curled.",
       tip:"Think of crossing your fingers for luck." },
     { letter:"S", gesture:"Closed_Fist",
@@ -72,19 +72,19 @@ export const LETTERS = [
     { letter:"T", gesture:null,
       desc:"Make a fist and poke your thumb up between your index and middle finger so the tip peeks out.",
       tip:"The thumb tip shows through the fist." },
-    { letter:"U", gesture:null,
+    { letter:"U", gesture:"U",
       desc:"Hold your index and middle fingers together, pointing straight up. Keep other fingers and thumb curled.",
       tip:"Two fingers together pointing up." },
-    { letter:"V", gesture:null,
+    { letter:"V", gesture:"V",
       desc:"Hold your index and middle fingers apart in a V shape pointing up. Keep other fingers curled.",
       tip:"The classic peace sign!" },
-    { letter:"W", gesture:null,
+    { letter:"W", gesture:"W",
       desc:"Hold your index, middle, and ring fingers up and spread apart to form a W. Keep pinky and thumb folded.",
       tip:"Three fingers spread = W." },
-    { letter:"X", gesture:null,
+    { letter:"X", gesture:"X",
       desc:"Extend your index finger and curl it into a hook shape. Keep all other fingers curled.",
       tip:"Like a beckoning 'come here' motion — but held still." },
-    { letter:"Y", gesture:"Thumb_Up",
+    { letter:"Y", gesture:"Y",
       desc:"Extend your thumb and pinky finger outward. Keep your index, middle, and ring fingers curled.",
       tip:"Imagine a Y-shape made by your thumb and pinky." },
     { letter:"Z", gesture:null,
@@ -97,6 +97,32 @@ const XP_PER_LETTER     = 50;
 const HOLD_FRAMES       = 40;   
 const HAND_HOLD_SECS    = 3;   // seconds hand must be present for null-gesture letters
 const CONFIDENCE_THRESH = 0.75; // min confidence for a correct gesture match
+
+let fpEstimator = null;
+
+// Exact function from game.html for gestures 
+function buildGestures() {
+    const g = [];
+    const defs = {
+        'A': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.8); },
+        'B': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
+        'D': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl, 0.8); },
+        'E': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
+        'F': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.HalfCurl, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 0.9); }); },
+        'G': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.HorizontalLeft, 1.0);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+        'H': d => { [fp.Finger.Index, fp.Finger.Middle].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.HorizontalLeft, 0.9); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+        'I': d => { d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+        'L': d => { d.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addDirection(fp.Finger.Thumb, fp.FingerDirection.HorizontalLeft, 0.9);[fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+        'O': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky, fp.Finger.Thumb].forEach(f => d.addCurl(f, fp.FingerCurl.HalfCurl, 0.9)); },
+        'V': d => { [fp.Finger.Index, fp.Finger.Middle].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); });[fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+        'W': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0); },
+        'Y': d => { d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); },
+    };
+    Object.entries(defs).forEach(([name, fn]) => {
+        const d = new fp.GestureDescription(name); fn(d); g.push(d);
+    });
+    return g;
+}
 
 // ── State ───
 let cfg         = window.SIGNIFY_CONFIG || {};
@@ -115,6 +141,7 @@ let totalAttempts = 0;
 let totalHits     = 0;
 let isRetryMode   = false; // true when practising again after XP already earned
 let xpEarnedSet = new Set(); // letters XP was awarded for THIS session
+let lastResults = null;
 
 // DOM refs
 let video, canvas, ctx, camBtn, camOverlay,
@@ -351,6 +378,7 @@ async function initRecognizer() {
         runningMode: "VIDEO",
         numHands: 1
     });
+    fpEstimator = new fp.GestureEstimator(buildGestures());
     camBtn.disabled = false;
     camBtn.innerHTML = '<i class="bi bi-webcam"></i> Enable Camera';
     camBtn.addEventListener("click", toggleCam);
@@ -398,6 +426,7 @@ function gameLoop() {
     if (lastVideoTime !== video.currentTime) {
         lastVideoTime = video.currentTime;
         results = gestureRec.recognizeForVideo(video, now);
+        lastResults = results;
     }
 
     // Clear canvas but draw NOTHING — skeleton removed per request
@@ -409,27 +438,51 @@ function gameLoop() {
         return;
     }
 
-    const l           = LETTERS[currentIndex];
-    const handPresent = results != null && results.landmarks?.length > 0;
+    const l = LETTERS[currentIndex];
+    const handPresent = lastResults != null && lastResults.landmarks?.length > 0;
 
     // ── Gesture-based letters (A, G, S, Y, …) ───────────────
     if (l.gesture !== null) {
-        if (!results) {
-            // frame not yet processed — do nothing, hold progress where it is
-        } else if (handPresent && results.gestures?.length > 0) {
-            const cat   = results.gestures[0][0].categoryName;
-            const score = results.gestures[0][0].score;
-            const isMatch = Array.isArray(l.gesture) ? l.gesture.includes(cat) : cat === l.gesture;
-            if (isMatch && score >= CONFIDENCE_THRESH) {
-                holdProgress += (100 / HOLD_FRAMES);
-                totalHits++;
-            } else {
-                // Wrong gesture
-                holdProgress = Math.max(0, holdProgress - 3);
+        let isMatch = false;
+
+        if (handPresent) {
+            // 1. Try MediaPipe built-in gestures first (A, G, S, Y)
+            if (lastResults.gestures?.length > 0) {
+                const cat = lastResults.gestures[0][0].categoryName;
+                const score = lastResults.gestures[0][0].score;
+                if ((Array.isArray(l.gesture) ? l.gesture.includes(cat) : cat === l.gesture) && score >= CONFIDENCE_THRESH) {
+                    isMatch = true;
+                }
             }
+
+            // 2. If MediaPipe didn't catch it, try Fingerpose
+            if (!isMatch && fpEstimator) {
+                // IMPORTANT: Map MediaPipe 0-1 coordinates to screen pixels for Fingerpose
+                const pixelLandmarks = lastResults.landmarks[0].map(lm => [
+                    lm.x * canvas.width, 
+                    lm.y * canvas.height, 
+                    lm.z * canvas.width
+                ]);
+
+                // Run Fingerpose with a confidence threshold of 7.0
+                const est = fpEstimator.estimate(pixelLandmarks, 7.0);
+                if (est.gestures.length > 0) {
+                    const best = est.gestures.reduce((p, c) => p.score > c.score ? p : c);
+                    if (best.name === l.gesture) {
+                        isMatch = true;
+                    }
+                }
+            }
+        }
+
+        // Apply progress
+        if (isMatch) {
+            holdProgress += (100 / HOLD_FRAMES);
+            totalHits++;
+        } else if (handPresent) {
+            holdProgress = Math.max(0, holdProgress - 3); // Hand present, wrong sign
         } else {
-            // Hand not present on a real frame — drain
-            holdProgress = Math.max(0, holdProgress - 6);
+            holdProgress = Math.max(0, holdProgress - 6); // No hand
         }
     }
 
