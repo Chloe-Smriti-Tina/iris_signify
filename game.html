@@ -1000,7 +1000,7 @@
 
         function generateRounds() {
             var w = WORDS.slice().sort(function () { return Math.random() - 0.5; });
-            var l = ['C', 'G', 'L', 'Y', 'U'].sort(function () { return Math.random() - 0.5; });
+            var l = ['C', 'G', 'L', 'Y', 'V'].sort(function () { return Math.random() - 0.5; });
             return w.map(function (t) { return { type: 'word', target: t }; })
                 .concat(l.map(function (t) { return { type: 'letter', target: t }; }))
                 .sort(function () { return Math.random() - 0.5; });
