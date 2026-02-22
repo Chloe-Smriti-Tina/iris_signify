@@ -30,7 +30,7 @@ export const LETTERS = [
     { letter:"F", gesture:null,
       desc:"Connect your index finger and thumb in a circle. Hold the other three fingers upright and spread.",
       tip:"Similar to the OK hand sign, but held sideways." },
-    { letter:"G", gesture:"Pointing_Up",
+    { letter:"G", gesture:["Pointing_Up", "None"],
       desc:"Point your index finger out to the side. Hold your thumb parallel to it, pointing the same direction.",
       tip:"Like a sideways finger gun." },
     { letter:"H", gesture:null,
@@ -424,15 +424,16 @@ function gameLoop() {
         if (handPresent && results.gestures?.length > 0) {
             const cat   = results.gestures[0][0].categoryName;
             const score = results.gestures[0][0].score;
-            if (cat === l.gesture && score >= CONFIDENCE_THRESH) {
+            const isMatch = Array.isArray(l.gesture) ? l.gesture.includes(cat) : cat === l.gesture;
+            if (isMatch && score >= CONFIDENCE_THRESH) {
                 holdProgress += (100 / HOLD_FRAMES);
                 totalHits++;
             } else {
-                // Wrong gesture — drain slowly
+                // Wrong gesture
                 holdProgress = Math.max(0, holdProgress - 3);
             }
         } else {
-            // No hand — drain faster
+            // No hand
             holdProgress = Math.max(0, holdProgress - 6);
         }
     }
