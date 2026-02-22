@@ -3,10 +3,6 @@
 //  Uses MediaPipe Handpose + Fingerpose (loads from CDN)
 // ============================================================
 
-// ── Firebase (for badge assignment) ──
-import { getFirestore, doc, getDoc, getDocs, setDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
 function makeHelloGesture() {
     const hello = new fp.GestureDescription('Thank You');
     for (const f of [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky]) {
@@ -159,68 +155,6 @@ let totalXP = 0;
 let wordsCompleted = 0;
 let wordStartTime = Date.now(); // tracks when current word began
 
-// ── Badge checking ──────────────────────────────────────────────────────────
-/**
- * Checks all badge thresholds against the user's current stats and writes any
- * newly-earned badges to Firestore under users/{uid}/badges/{badgeId}.
- * The document id and the `id` field both use the badge's name (matching
- * how profile.js reads them back with earnedSnap.docs.map(d => d.data().id)).
- */
-async function checkAndAssignBadges() {
-    try {
-        const auth = getAuth();
-        const user = auth.currentUser;
-        if (!user) return; // not signed in – nothing to do
-
-        const db = getFirestore();
-
-        // 1. Fetch all badge definitions from the top-level "badges" collection
-        const allBadgesSnap = await getDocs(collection(db, "badges"));
-        if (allBadgesSnap.empty) return;
-
-        // 2. Fetch the user doc to get current stats
-        const userSnap = await getDoc(doc(db, "users", user.uid));
-        if (!userSnap.exists()) return;
-        const data = userSnap.data();
-
-        const statMap = {
-            total_challenges_completed: data.total_challenges_completed || 0,
-            longest_streak:             data.longest_streak             || 0,
-            total_xp:                   data.total_xp                   || 0,
-        };
-
-        // 3. Fetch already-earned badge ids so we don't double-write
-        const earnedSnap = await getDocs(collection(db, "users", user.uid, "badges"));
-        const alreadyEarned = new Set(earnedSnap.docs.map(d => d.data().id));
-
-        // 4. Check each badge definition
-        const writes = [];
-        allBadgesSnap.forEach(badgeDoc => {
-            const badge = badgeDoc.data(); // { id, name, icon, description, stat, threshold, … }
-
-            // Skip if already earned
-            if (alreadyEarned.has(badge.id)) return;
-
-            // Skip if the stat we need isn't tracked
-            if (!(badge.stat in statMap)) return;
-
-            // Check threshold
-            if (statMap[badge.stat] >= badge.threshold) {
-                // Write to users/{uid}/badges/{badge.id}
-                // doc id = badge.id  |  field id = badge.id  (mirrors profile.js expectations)
-                const badgeRef = doc(db, "users", user.uid, "badges", badge.id);
-                writes.push(
-                    setDoc(badgeRef, { id: badge.id }, { merge: true })
-                        .then(() => console.log(`[Signify] Badge earned: ${badge.id}`))
-                );
-            }
-        });
-
-        await Promise.all(writes);
-    } catch (err) {
-        console.error("[Signify] Badge check failed:", err);
-    }
-}
 
 // ── Build sidebar word list ───────────────────────────────────
 function buildWordList() {
@@ -397,10 +331,6 @@ function advanceWord() {
     if (typeof window.onWordComplete === 'function') {
         window.onWordComplete(currentWord, xpEarned);
     }
-
-    // ── Check badges after stats have been updated by onWordComplete ──
-    // Defer slightly so any Firestore stat writes from onWordComplete can settle.
-    setTimeout(checkAndAssignBadges, 1500);
 
     const isLast = currentWordIdx >= WORDS.length - 1;
 
