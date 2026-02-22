@@ -40,7 +40,6 @@
             min-height: 100vh;
         }
 
-        /* Nav */
         .navbar-brand {
             color: var(--primary) !important;
             font-weight: 700;
@@ -61,12 +60,6 @@
             color: white;
         }
 
-        .nav-challenge {
-            color: var(--primary) !important;
-            font-weight: 700 !important;
-        }
-
-        /* Screens */
         .screen {
             display: none;
             min-height: calc(100vh - 72px);
@@ -77,7 +70,6 @@
             flex-direction: column;
         }
 
-        /* ── LOBBY ── */
         #lobbyScreen {
             align-items: center;
             justify-content: center;
@@ -245,7 +237,6 @@
             line-height: 1.5;
         }
 
-        /* ── WAITING ── */
         #waitingScreen {
             align-items: center;
             justify-content: center;
@@ -363,7 +354,6 @@
             color: var(--muted);
         }
 
-        /* ── GAME ── */
         #gameScreen {
             padding: 20px 24px;
             max-width: 900px;
@@ -608,7 +598,6 @@
             align-items: center;
         }
 
-        /* Overlays */
         .overlay {
             display: none;
             position: fixed;
@@ -866,12 +855,15 @@
             <div class="cam-panel" id="oppCamPanel">
                 <div class="cam-top">
                     <span class="p-name" id="oppCamName">Opponent</span>
-                    <span class="cam-status" id="oppCamStatus"><i class="bi bi-wifi"></i> Connected</span>
+                    <span class="cam-status" id="oppCamStatus"><i class="bi bi-wifi"></i> Connecting…</span>
                 </div>
                 <div class="video-box">
+                    <!-- Opponent live video (shown when WebRTC connected) -->
+                    <video id="oppVideo" autoplay playsinline muted style="display:none;"></video>
+                    <!-- Fallback placeholder -->
                     <div class="opp-placeholder" id="oppPlaceholder">
                         <i class="bi bi-person-video3"></i>
-                        <span>Opponent is signing on their device…</span>
+                        <span>Connecting to opponent…</span>
                     </div>
                 </div>
                 <div class="cam-bottom" id="oppFeedback" style="color:var(--muted);">Waiting for result…</div>
@@ -907,7 +899,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, get, update, onValue, remove }
+        import { getDatabase, ref, set, get, update, onValue, remove, push, off }
             from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getFirestore, doc, updateDoc, increment }
             from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -935,6 +927,18 @@
         let myScore = 0, oppScore = 0;
         let roundActive = false, roundLocked = false;
 
+        // ── WebRTC state ──
+        let peerConnection = null;
+        let localStream = null;
+        let webrtcReady = false;
+
+        const ICE_SERVERS = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
         onAuthStateChanged(auth, u => { currentUser = u; });
 
         function genCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
@@ -956,14 +960,13 @@
             el.textContent = msg; el.style.display = 'block';
         }
 
-        // Copy code button
         document.getElementById('copyCodeBtn').addEventListener('click', () => {
             navigator.clipboard.writeText(roomCode);
             document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-check"></i> Copied!';
             setTimeout(() => document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-clipboard"></i> Copy code', 2000);
         });
 
-        // Create room
+        // ── Create room ──
         document.getElementById('createRoomBtn').addEventListener('click', async () => {
             if (!currentUser) { showError('Please sign in first.'); return; }
             roomCode = genCode(); isHost = true; myRole = 'host';
@@ -971,7 +974,8 @@
             await set(ref(db, `rooms/${roomCode}`), {
                 host: { uid: currentUser.uid, name: currentUser.displayName || 'Player 1' },
                 guest: null, rounds, scores: { host: 0, guest: 0 },
-                currentRound: 0, status: 'waiting', roundWinner: null
+                currentRound: 0, status: 'waiting', roundWinner: null,
+                webrtc: { offer: null, answer: null, hostCandidates: [], guestCandidates: [] }
             });
             document.getElementById('displayRoomCode').textContent = roomCode;
             document.getElementById('hostName').textContent = currentUser.displayName || 'You';
@@ -979,7 +983,7 @@
             listenRoom();
         });
 
-        // Join room
+        // ── Join room ──
         document.getElementById('joinRoomBtn').addEventListener('click', async () => {
             if (!currentUser) { showError('Please sign in first.'); return; }
             const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
@@ -1003,6 +1007,7 @@
             showScreen('lobbyScreen');
         });
 
+        // ── Room listener ──
         function listenRoom() {
             onValue(ref(db, `rooms/${roomCode}`), snap => {
                 if (!snap.exists()) { showScreen('lobbyScreen'); return; }
@@ -1046,21 +1051,129 @@
                     window.__gameOver = true;
                     setTimeout(() => showGameOver(room.gameWinner === myRole), 2000);
                 }
+
+                // ── WebRTC signaling ──
+                if (window.__gameStarted && room.webrtc) {
+                    handleSignaling(room.webrtc);
+                }
             });
+        }
+
+        // ── WebRTC signaling handler ──
+        async function handleSignaling(webrtc) {
+            // Don't attempt signaling until our peerConnection is fully set up
+            if (!peerConnection || !webrtcReady) return;
+
+            // Guest receives host's offer and sends answer
+            if (!isHost && webrtc.offer && !window.__answerSent) {
+                const state = peerConnection.signalingState;
+                if (state === 'stable' || state === 'have-remote-offer') {
+                    window.__answerSent = true;
+                    try {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.offer));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        await update(ref(db, `rooms/${roomCode}/webrtc`), { answer: { type: answer.type, sdp: answer.sdp } });
+                        // Now safe to add any buffered ICE candidates
+                        flushIceCandidates(webrtc);
+                    } catch (e) { console.warn('Answer error:', e); window.__answerSent = false; }
+                }
+                return;
+            }
+
+            // Host receives guest's answer
+            if (isHost && webrtc.answer && !window.__answerReceived) {
+                if (peerConnection.signalingState === 'have-local-offer') {
+                    window.__answerReceived = true;
+                    try {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.answer));
+                        flushIceCandidates(webrtc);
+                    } catch (e) { console.warn('Set answer error:', e); window.__answerReceived = false; }
+                }
+                return;
+            }
+
+            // Add remote ICE candidates if remote description already set
+            if (peerConnection.remoteDescription) {
+                flushIceCandidates(webrtc);
+            }
+        }
+
+        function flushIceCandidates(webrtc) {
+            const remoteCandidates = isHost ? webrtc.guestCandidates : webrtc.hostCandidates;
+            if (!remoteCandidates || !peerConnection.remoteDescription) return;
+            if (!window.__addedCandidates) window.__addedCandidates = new Set();
+            Object.values(remoteCandidates).forEach(async (c) => {
+                if (!window.__addedCandidates.has(c.candidate)) {
+                    window.__addedCandidates.add(c.candidate);
+                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch (e) { }
+                }
+            });
+        }
+
+        // ── Setup WebRTC peer connection ──
+        async function setupWebRTC(stream) {
+            peerConnection = new RTCPeerConnection(ICE_SERVERS);
+            localStream = stream;
+
+            // Add local tracks to peer connection
+            stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+            // When we get remote tracks, show opponent video
+            peerConnection.ontrack = (event) => {
+                const oppVideo = document.getElementById('oppVideo');
+                const oppPlaceholder = document.getElementById('oppPlaceholder');
+                if (event.streams && event.streams[0]) {
+                    oppVideo.srcObject = event.streams[0];
+                    oppVideo.style.display = 'block';
+                    oppPlaceholder.style.display = 'none';
+                    document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
+                    document.getElementById('oppCamStatus').className = 'cam-status matched';
+                }
+            };
+
+            // Send our ICE candidates to Firebase
+            const myKey = isHost ? 'hostCandidates' : 'guestCandidates';
+            peerConnection.onicecandidate = async (event) => {
+                if (event.candidate) {
+                    await push(ref(db, `rooms/${roomCode}/webrtc/${myKey}`), {
+                        candidate: event.candidate.candidate,
+                        sdpMLineIndex: event.candidate.sdpMLineIndex,
+                        sdpMid: event.candidate.sdpMid
+                    });
+                }
+            };
+
+            peerConnection.onconnectionstatechange = () => {
+                if (peerConnection.connectionState === 'connected') {
+                    document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
+                    document.getElementById('oppCamStatus').className = 'cam-status matched';
+                } else if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'disconnected') {
+                    document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-wifi-off"></i> Disconnected';
+                    document.getElementById('oppCamStatus').className = 'cam-status';
+                    document.getElementById('oppVideo').style.display = 'none';
+                    document.getElementById('oppPlaceholder').style.display = 'flex';
+                    document.getElementById('oppPlaceholder').querySelector('span').textContent = 'Opponent disconnected';
+                }
+            };
+
+            // Host creates the offer
+            if (isHost) {
+                try {
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    webrtcReady = true;
+                    await update(ref(db, `rooms/${roomCode}/webrtc`), { offer: { type: offer.type, sdp: offer.sdp } });
+                } catch (e) { console.warn('Offer error:', e); }
+            } else {
+                // Guest is ready to receive signaling
+                webrtcReady = true;
+            }
         }
 
         function updateScoreStyles() {
             document.getElementById('myScore').className = `s-val${myScore > oppScore ? ' winning' : ''}`;
             document.getElementById('oppScore').className = `s-val${oppScore > myScore ? ' winning' : ''}`;
-        }
-
-        function updateRoundDots() {
-            const dots = document.querySelectorAll('.round-dot');
-            dots.forEach((d, i) => {
-                d.className = 'round-dot';
-                // We can't easily know which rounds each player won without more state,
-                // so just show total wins as filled dots
-            });
         }
 
         function startGame(room) {
@@ -1099,7 +1212,7 @@
             document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
             document.getElementById('roundResult').classList.add('visible');
 
-            // Host updates DB scores
+            // Only host writes scores + advances round in DB
             if (isHost) {
                 const hs = winnerRole === 'host' ? (room.scores?.host || 0) + 1 : (room.scores?.host || 0);
                 const gs = winnerRole === 'guest' ? (room.scores?.guest || 0) + 1 : (room.scores?.guest || 0);
@@ -1107,7 +1220,8 @@
                 const isOver = hs >= 3 || gs >= 3 || nextRound >= 5;
                 const gameWinner = hs > gs ? 'host' : 'guest';
                 update(ref(db, `rooms/${roomCode}`), {
-                    'scores/host': hs, 'scores/guest': gs,
+                    'scores/host': hs,
+                    'scores/guest': gs,
                     currentRound: nextRound,
                     roundWinner: null,
                     ...(isOver ? { status: 'finished', gameWinner } : {})
@@ -1115,10 +1229,22 @@
             }
         }
 
-        document.getElementById('nextRoundBtn').addEventListener('click', () => {
+        // ── FIX: Both players read currentRound from DB when clicking Next Round ──
+        document.getElementById('nextRoundBtn').addEventListener('click', async () => {
             document.getElementById('roundResult').classList.remove('visible');
-            currentRound++;
-            if (currentRound < 5 && myScore < 3 && oppScore < 3) startRound();
+            // Always read the authoritative round number from DB
+            const snap = await get(ref(db, `rooms/${roomCode}`));
+            if (!snap.exists()) return;
+            const room = snap.val();
+            currentRound = room.currentRound || 0;
+            myScore = myRole === 'host' ? (room.scores?.host || 0) : (room.scores?.guest || 0);
+            oppScore = myRole === 'host' ? (room.scores?.guest || 0) : (room.scores?.host || 0);
+            document.getElementById('myScore').textContent = myScore;
+            document.getElementById('oppScore').textContent = oppScore;
+            updateScoreStyles();
+            if (currentRound < 5 && myScore < 3 && oppScore < 3) {
+                startRound();
+            }
         });
 
         async function showGameOver(iWon) {
@@ -1137,24 +1263,33 @@
             document.getElementById('roundResult').classList.remove('visible');
             document.getElementById('gameOver').classList.add('visible');
             if (typeof confetti === 'function' && iWon) confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+            // Clean up peer connection
+            if (peerConnection) { peerConnection.close(); peerConnection = null; }
         }
 
-        // Camera + detection
+        // ── Camera + WebRTC setup ──
         window.__matchFrames = 0;
         window.__wordStartTime = Date.now();
         const MATCH_NEEDED = 15, MIN_TIME = 2000;
 
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
+                localStream = stream;
                 const video = document.getElementById('myVideo');
                 const canvas = document.getElementById('myCanvas');
                 video.srcObject = stream;
                 video.addEventListener('loadeddata', () => {
-                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
                     loadDetection(video, canvas);
                 });
-            } catch (e) { document.getElementById('myFeedback').textContent = '⚠️ Camera access denied'; }
+                // Start WebRTC after getting camera
+                await setupWebRTC(stream);
+            } catch (e) {
+                document.getElementById('myFeedback').textContent = '⚠️ Camera access denied';
+                console.error('Camera error:', e);
+            }
         }
 
         async function loadDetection(video, canvas) {
@@ -1200,8 +1335,8 @@
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
                                 roundLocked = true; roundActive = false;
+                                // Only write to DB — Firebase listener triggers handleRoundEnd for BOTH players
                                 await update(ref(db, `rooms/${roomCode}`), { roundWinner: myRole });
-                                handleRoundEnd(myRole, { scores: { host: myRole === 'host' ? myScore : oppScore, guest: myRole === 'guest' ? myScore : oppScore } });
                             }
                         } else if (!isMatch) {
                             window.__matchFrames = Math.max(0, window.__matchFrames - 1);
@@ -1224,7 +1359,6 @@
 
         function buildGestures() {
             const g = [];
-            // Words
             const helloG = new fp.GestureDescription('Thank You');
             [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => helloG.addCurl(f, fp.FingerCurl.NoCurl, 1.0));
             helloG.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
@@ -1263,7 +1397,6 @@
             no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
             g.push(no);
 
-            // Letters
             const defs = {
                 'A': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => d.addCurl(f, fp.FingerCurl.FullCurl, 1.0)); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.8); },
                 'B': d => { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(f => { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
