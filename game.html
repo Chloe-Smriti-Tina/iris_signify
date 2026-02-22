@@ -740,8 +740,8 @@
         <div class="lobby-card">
             <div class="lobby-icon">&#x26A1;</div>
             <h1>Challenge <span>Mode</span></h1>
-            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 5 wins +500 XP.
-            </p>
+            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 5 — winner earns
+                +200 XP!</p>
             <button class="btn-primary-game" id="createRoomBtn"><i class="bi bi-plus-circle"></i> Create Room</button>
             <div class="divider">or join with a code</div>
             <input class="room-input" id="roomCodeInput" placeholder="Enter code" maxlength="6">
@@ -855,11 +855,24 @@
     </div>
 
     <div class="overlay" id="roundResult">
-        <div class="overlay-card">
+        <div class="overlay-card" style="max-width:480px;">
             <span class="overlay-emoji" id="roundEmoji">&#x1F3C6;</span>
             <h2 id="roundResultTitle">You got it!</h2>
             <p id="roundResultSub">Round 1 complete</p>
-            <button class="overlay-btn" id="nextRoundBtn">Next Round &#x2192;</button>
+            <div id="signImageBox" style="margin:16px 0;display:none;">
+                <p style="font-size:12px;color:#64748b;margin-bottom:8px;">Correct sign for <strong
+                        id="signImageLabel"></strong></p>
+                <img id="signImage" src="" alt="ASL sign"
+                    style="width:180px;height:180px;object-fit:contain;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;">
+            </div>
+            <div id="autoNextBar"
+                style="margin-top:16px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;display:none;">
+                <div id="autoNextProgress"
+                    style="height:100%;background:#6d8bfa;width:100%;transition:width 5s linear;"></div>
+            </div>
+            <p id="autoNextLabel" style="font-size:12px;color:#64748b;margin-top:8px;display:none;">Next round in 5s...
+            </p>
+            <button class="overlay-btn" id="nextRoundBtn" style="margin-top:16px;">Next Round &#x2192;</button>
         </div>
     </div>
 
@@ -867,7 +880,7 @@
         <div class="overlay-card">
             <span class="overlay-emoji" id="gameOverEmoji">&#x1F3C6;</span>
             <h2 id="gameOverTitle">You Win!</h2>
-            <div class="xp-tag" id="xpEarnedDisplay" style="display:none;">+500 XP</div>
+            <div class="xp-tag" id="xpEarnedDisplay" style="display:none;">+200 XP</div>
             <p id="gameOverSub">Great signing today!</p>
             <button class="overlay-btn" onclick="window.location.reload()">Play Again</button>
             <button class="overlay-btn secondary" onclick="window.location.href='home.html'">Home</button>
@@ -1229,6 +1242,40 @@
             document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
             document.getElementById('roundResult').classList.add('visible');
 
+            // Show sign image and auto-advance after 5 seconds
+            var target = rounds[currentRound] ? rounds[currentRound].target : '';
+            var imgBox = document.getElementById('signImageBox');
+            var signImg = document.getElementById('signImage');
+            var signLabel = document.getElementById('signImageLabel');
+            var autoBar = document.getElementById('autoNextBar');
+            var autoLabel = document.getElementById('autoNextLabel');
+            var progress = document.getElementById('autoNextProgress');
+
+            // Use a dictionary/fingerspelling image source
+            var imgSrc = getSignImageUrl(target);
+            if (imgSrc) {
+                imgBox.style.display = 'block';
+                signImg.src = imgSrc;
+                signLabel.textContent = target;
+            } else {
+                imgBox.style.display = 'none';
+            }
+
+            // Auto-advance progress bar
+            autoBar.style.display = 'block';
+            autoLabel.style.display = 'block';
+            progress.style.width = '100%';
+            // Force reflow so transition starts from 100%
+            progress.getBoundingClientRect();
+            progress.style.transition = 'width 5s linear';
+            progress.style.width = '0%';
+
+            // Clear any previous timer
+            if (window.__autoNextTimer) clearTimeout(window.__autoNextTimer);
+            window.__autoNextTimer = setTimeout(function () {
+                document.getElementById('nextRoundBtn').click();
+            }, 5000);
+
             if (isHost) {
                 var hs = winnerRole === 'host' ? ((room.scores ? room.scores.host || 0 : 0) + 1) : (room.scores ? room.scores.host || 0 : 0);
                 var gs = winnerRole === 'guest' ? ((room.scores ? room.scores.guest || 0 : 0) + 1) : (room.scores ? room.scores.guest || 0 : 0);
@@ -1242,7 +1289,14 @@
         }
 
         document.getElementById('nextRoundBtn').addEventListener('click', async function () {
+            if (window.__autoNextTimer) { clearTimeout(window.__autoNextTimer); window.__autoNextTimer = null; }
             document.getElementById('roundResult').classList.remove('visible');
+            document.getElementById('signImageBox').style.display = 'none';
+            document.getElementById('autoNextBar').style.display = 'none';
+            document.getElementById('autoNextLabel').style.display = 'none';
+            var progress = document.getElementById('autoNextProgress');
+            progress.style.transition = 'none';
+            progress.style.width = '100%';
             var snap = await get(ref(db, 'rooms/' + roomCode));
             if (!snap.exists()) return;
             var room = snap.val();
@@ -1258,13 +1312,15 @@
         async function showGameOver(iWon) {
             document.getElementById('gameOverEmoji').textContent = iWon ? '🏆' : '😔';
             document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
-            document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +500 XP added.' : 'Close game! Practice more and challenge again.';
+            document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! You lost 50 XP — practice more and challenge again.';
+            if (currentUser) {
+                try {
+                    var xpChange = iWon ? 200 : -50;
+                    await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(xpChange) });
+                } catch (e) { console.error('XP update failed:', e); }
+            }
             if (iWon) {
                 document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
-                if (currentUser) {
-                    try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(500) }); }
-                    catch (e) { console.error('XP update failed:', e); }
-                }
             }
             document.getElementById('roundResult').classList.remove('visible');
             document.getElementById('gameOver').classList.add('visible');
@@ -1342,7 +1398,8 @@
                         if (isMatch && timeReady) {
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
-                                roundLocked = true; roundActive = false;
+                                // Don't set roundLocked here — let Firebase listener do it for both players
+                                roundActive = false;
                                 await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
                             }
                         } else if (!isMatch) {
@@ -1362,6 +1419,56 @@
                 requestAnimationFrame(loop);
             }
             loop();
+        }
+
+        function getSignImageUrl(target) {
+            // For letters A-Z use a reliable fingerspelling chart image per letter
+            var letterImages = {
+                'A': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/a.gif',
+                'B': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/b.gif',
+                'C': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/c.gif',
+                'D': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/d.gif',
+                'E': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/e.gif',
+                'F': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/f.gif',
+                'G': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/g.gif',
+                'H': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/h.gif',
+                'I': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/i.gif',
+                'J': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/j.gif',
+                'K': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/k.gif',
+                'L': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/l.gif',
+                'M': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/m.gif',
+                'N': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/n.gif',
+                'O': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/o.gif',
+                'P': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/p.gif',
+                'Q': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/q.gif',
+                'R': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/r.gif',
+                'S': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/s.gif',
+                'T': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/t.gif',
+                'U': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/u.gif',
+                'V': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/v.gif',
+                'W': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/w.gif',
+                'X': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/x.gif',
+                'Y': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/y.gif',
+                'Z': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/z.gif'
+            };
+            var wordImages = {
+                'Hello': 'https://www.lifeprint.com/asl101/pages-signs/h/hello.htm',
+                'Thank You': 'https://www.lifeprint.com/asl101/pages-signs/t/thankyou.htm',
+                'I Love You': 'https://www.lifeprint.com/asl101/pages-signs/i/iloveyou.htm',
+                'Yes': 'https://www.lifeprint.com/asl101/pages-signs/y/yes.htm',
+                'No': 'https://www.lifeprint.com/asl101/pages-signs/n/no.htm'
+            };
+            if (letterImages[target]) return letterImages[target];
+            // For words, use a placeholder since lifeprint pages aren't direct images
+            // Use a consistent sign language dictionary image API
+            var wordGifs = {
+                'Hello': 'https://media.giphy.com/media/xUA7aQMxeGvqmYBWXS/giphy.gif',
+                'Thank You': 'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif',
+                'I Love You': 'https://media.giphy.com/media/3o7abGQa0aRJUurpII/giphy.gif',
+                'Yes': 'https://media.giphy.com/media/xT9IgHqiLYMDsMWUxa/giphy.gif',
+                'No': 'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif'
+            };
+            return wordGifs[target] || null;
         }
 
         function buildGestures() {
