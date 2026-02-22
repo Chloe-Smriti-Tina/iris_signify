@@ -698,7 +698,55 @@
             background: var(--bg);
         }
 
-        @media (max-width: 640px) {
+        /* Countdown ring */
+        .countdown-wrap {
+            margin: 20px auto 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .countdown-ring {
+            position: relative;
+            width: 64px;
+            height: 64px;
+        }
+
+        .countdown-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .countdown-ring circle {
+            fill: none;
+            stroke: #e2e8f0;
+            stroke-width: 5;
+        }
+
+        .countdown-ring circle.prog {
+            stroke: var(--primary);
+            stroke-dasharray: 170;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .countdown-ring .cnum {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .next-lbl {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media(max-width:640px) {
             .cameras-grid {
                 grid-template-columns: 1fr;
             }
@@ -740,12 +788,11 @@
         <div class="lobby-card">
             <div class="lobby-icon">&#x26A1;</div>
             <h1>Challenge <span>Mode</span></h1>
-            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 5 — winner earns
-                +200 XP!</p>
+            <p>Race a friend in real-time. Sign the same word or letter first to win the round. Best of 10 — winner
+                earns +200 XP!</p>
             <button class="btn-primary-game" id="createRoomBtn"><i class="bi bi-plus-circle"></i> Create Room</button>
             <div class="divider">or join with a code</div>
-            <input class="room-input" id="roomCodeInput" placeholder="Enter code" maxlength="6">
-            <br><br>
+            <input class="room-input" id="roomCodeInput" placeholder="Enter code" maxlength="6"><br><br>
             <button class="btn-outline-game" id="joinRoomBtn"><i class="bi bi-box-arrow-in-right"></i> Join
                 Room</button>
             <p id="lobbyError" style="color:#ef4444;font-size:13px;margin-top:12px;display:none;"></p>
@@ -760,7 +807,7 @@
                 </div>
                 <div class="hw-step">
                     <div class="num">Step 3</div>
-                    <div class="desc">First to sign correctly wins the round. Best of 5!</div>
+                    <div class="desc">First to sign correctly wins the round. Best of 10!</div>
                 </div>
             </div>
         </div>
@@ -806,8 +853,13 @@
             </div>
             <div class="round-info">
                 <div class="r-label">Round</div>
-                <div class="r-num"><span id="roundNum">1</span> / 5</div>
+                <div class="r-num"><span id="roundNum">1</span> / 10</div>
                 <div class="round-dots" id="roundDots">
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
+                    <div class="round-dot"></div>
                     <div class="round-dot"></div>
                     <div class="round-dot"></div>
                     <div class="round-dot"></div>
@@ -823,37 +875,26 @@
         </div>
         <div class="cameras-grid">
             <div class="cam-panel" id="myCamPanel">
-                <div class="cam-top">
-                    <span class="p-name" id="myCamName">You</span>
-                    <span class="cam-status detecting" id="myCamStatus"><i class="bi bi-camera-video"></i>
-                        Scanning&#x2026;</span>
-                </div>
-                <div class="video-box">
-                    <video id="myVideo" autoplay playsinline muted></video>
-                    <canvas id="myCanvas"></canvas>
-                </div>
+                <div class="cam-top"><span class="p-name" id="myCamName">You</span><span class="cam-status detecting"
+                        id="myCamStatus"><i class="bi bi-camera-video"></i> Scanning&#x2026;</span></div>
+                <div class="video-box"><video id="myVideo" autoplay playsinline muted></video><canvas
+                        id="myCanvas"></canvas></div>
                 <div class="cam-bottom" id="myFeedback">Show your hand to the camera</div>
             </div>
             <div class="cam-panel" id="oppCamPanel">
-                <div class="cam-top">
-                    <span class="p-name" id="oppCamName">Opponent</span>
-                    <span class="cam-status" id="oppCamStatus"><i class="bi bi-wifi"></i> Connecting&#x2026;</span>
-                </div>
+                <div class="cam-top"><span class="p-name" id="oppCamName">Opponent</span><span class="cam-status"
+                        id="oppCamStatus"><i class="bi bi-wifi"></i> Connecting&#x2026;</span></div>
                 <div class="video-box">
                     <video id="oppVideo" autoplay playsinline muted style="display:none;"></video>
-                    <div class="opp-placeholder" id="oppPlaceholder">
-                        <i class="bi bi-person-video3"></i>
-                        <span id="oppPlaceholderText">Connecting&#x2026;</span>
-                    </div>
-                    <div id="rtcLog"
-                        style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.8);color:#a3e635;font-size:10px;font-family:monospace;line-height:1.4;padding:6px 8px;max-height:120px;overflow-y:auto;z-index:20;">
-                    </div>
+                    <div class="opp-placeholder" id="oppPlaceholder"><i class="bi bi-person-video3"></i><span
+                            id="oppPlaceholderText">Connecting&#x2026;</span></div>
                 </div>
                 <div class="cam-bottom" id="oppFeedback" style="color:var(--muted);">Waiting for result&#x2026;</div>
             </div>
         </div>
     </div>
 
+    <!-- Round result — no button, only Firebase-synced countdown -->
     <div class="overlay" id="roundResult">
         <div class="overlay-card" style="max-width:480px;">
             <span class="overlay-emoji" id="roundEmoji">&#x1F3C6;</span>
@@ -865,14 +906,16 @@
                 <img id="signImage" src="" alt="ASL sign"
                     style="width:180px;height:180px;object-fit:contain;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;">
             </div>
-            <div id="autoNextBar"
-                style="margin-top:16px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;display:none;">
-                <div id="autoNextProgress"
-                    style="height:100%;background:#6d8bfa;width:100%;transition:width 5s linear;"></div>
+            <div class="countdown-wrap">
+                <div class="countdown-ring">
+                    <svg width="64" height="64" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="27" />
+                        <circle class="prog" id="cdCircle" cx="32" cy="32" r="27" />
+                    </svg>
+                    <div class="cnum" id="cdNum">5</div>
+                </div>
+                <span class="next-lbl">Next round starting…</span>
             </div>
-            <p id="autoNextLabel" style="font-size:12px;color:#64748b;margin-top:8px;display:none;">Next round in 5s...
-            </p>
-            <button class="overlay-btn" id="nextRoundBtn" style="margin-top:16px;">Next Round &#x2192;</button>
         </div>
     </div>
 
@@ -904,6 +947,7 @@
             appId: "1:150947241043:web:f2fbb25737e9b7a02c7aa6",
             databaseURL: "https://signify-5ec23-default-rtdb.firebaseio.com"
         };
+
         const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
@@ -911,6 +955,8 @@
 
         const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
         const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        const ROUND_DELAY = 5000;
+        const CIRCUMFERENCE = 2 * Math.PI * 27; // ~169.6
 
         let currentUser = null;
         let roomCode = null, isHost = false, myRole = null;
@@ -918,13 +964,10 @@
         let myScore = 0, oppScore = 0;
         let roundActive = false, roundLocked = false;
         let peerConnection = null, localStream = null, webrtcReady = false;
+        let cdInterval = null;
+        let scheduledNextRoundAt = null;
 
-        const ICE_SERVERS = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        };
+        const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
         onAuthStateChanged(auth, function (u) { currentUser = u; });
 
@@ -937,17 +980,18 @@
             window.__answerSent = false;
             window.__answerReceived = false;
             window.__addedCandidates = new Set();
+            window.__handledRoundWinner = null;
+            scheduledNextRoundAt = null;
+            if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
             webrtcReady = false;
             if (localStream) { localStream.getTracks().forEach(function (t) { t.stop(); }); localStream = null; }
-            var myVid = document.getElementById('myVideo');
-            var oppVid = document.getElementById('oppVideo');
-            if (myVid) myVid.srcObject = null;
-            if (oppVid) { oppVid.srcObject = null; oppVid.style.display = 'none'; }
+            var mv = document.getElementById('myVideo');
+            var ov = document.getElementById('oppVideo');
+            if (mv) mv.srcObject = null;
+            if (ov) { ov.srcObject = null; ov.style.display = 'none'; }
             var ph = document.getElementById('oppPlaceholder');
             if (ph) { ph.style.display = 'flex'; ph.querySelector('span').textContent = 'Connecting...'; }
-            var log = document.getElementById('rtcLog');
-            if (log) log.innerHTML = '';
             currentRound = 0; myScore = 0; oppScore = 0;
             roundActive = false; roundLocked = false; rounds = [];
         }
@@ -955,11 +999,11 @@
         function genCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
 
         function generateRounds() {
-            var w = WORDS.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
-            var l = LETTERS.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 2);
-            var all = w.map(function (t) { return { type: 'word', target: t }; })
-                .concat(l.map(function (t) { return { type: 'letter', target: t }; }));
-            return all.sort(function () { return Math.random() - 0.5; });
+            var w = WORDS.slice().sort(function () { return Math.random() - 0.5; });
+            var l = ['C', 'G', 'L', 'Y', 'U'].sort(function () { return Math.random() - 0.5; });
+            return w.map(function (t) { return { type: 'word', target: t }; })
+                .concat(l.map(function (t) { return { type: 'letter', target: t }; }))
+                .sort(function () { return Math.random() - 0.5; });
         }
 
         function showScreen(id) {
@@ -967,20 +1011,7 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function showError(msg) {
-            var el = document.getElementById('lobbyError');
-            el.textContent = msg; el.style.display = 'block';
-        }
-
-        function rtcLog(msg) {
-            console.log('[WebRTC]', msg);
-            var el = document.getElementById('rtcLog');
-            if (!el) return;
-            var line = document.createElement('div');
-            line.textContent = new Date().toISOString().substr(11, 8) + ' ' + msg;
-            el.appendChild(line);
-            el.scrollTop = el.scrollHeight;
-        }
+        function showError(msg) { var el = document.getElementById('lobbyError'); el.textContent = msg; el.style.display = 'block'; }
 
         function updateScoreStyles() {
             document.getElementById('myScore').className = myScore > oppScore ? 's-val winning' : 's-val';
@@ -990,9 +1021,7 @@
         document.getElementById('copyCodeBtn').addEventListener('click', function () {
             navigator.clipboard.writeText(roomCode);
             document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-check"></i> Copied!';
-            setTimeout(function () {
-                document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-clipboard"></i> Copy code';
-            }, 2000);
+            setTimeout(function () { document.getElementById('copyCodeBtn').innerHTML = '<i class="bi bi-clipboard"></i> Copy code'; }, 2000);
         });
 
         document.getElementById('createRoomBtn').addEventListener('click', async function () {
@@ -1003,7 +1032,7 @@
             await set(ref(db, 'rooms/' + roomCode), {
                 host: { uid: currentUser.uid, name: currentUser.displayName || 'Player 1' },
                 guest: null, rounds: rounds, scores: { host: 0, guest: 0 },
-                currentRound: 0, status: 'waiting', roundWinner: null,
+                currentRound: 0, status: 'waiting', roundWinner: null, nextRoundAt: null,
                 webrtc: { offer: null, answer: null, hostCandidates: [], guestCandidates: [] }
             });
             document.getElementById('displayRoomCode').textContent = roomCode;
@@ -1022,12 +1051,8 @@
             if (room.status !== 'waiting') { showError('This game has already started.'); return; }
             if (room.guest) { showError('Room is full.'); return; }
             resetState();
-            roomCode = code; isHost = false; myRole = 'guest';
-            rounds = room.rounds;
-            await update(ref(db, 'rooms/' + roomCode), {
-                guest: { uid: currentUser.uid, name: currentUser.displayName || 'Player 2' },
-                status: 'ready'
-            });
+            roomCode = code; isHost = false; myRole = 'guest'; rounds = room.rounds;
+            await update(ref(db, 'rooms/' + roomCode), { guest: { uid: currentUser.uid, name: currentUser.displayName || 'Player 2' }, status: 'ready' });
             listenRoom();
         });
 
@@ -1068,128 +1093,141 @@
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
 
-                if (room.roundWinner && !roundLocked) {
+                // Both players react to roundWinner
+                if (room.roundWinner && room.roundWinner !== window.__handledRoundWinner) {
+                    window.__handledRoundWinner = room.roundWinner;
                     handleRoundEnd(room.roundWinner, room);
+                }
+
+                // Both players sync countdown from nextRoundAt written by host
+                if (room.nextRoundAt && room.nextRoundAt !== scheduledNextRoundAt) {
+                    scheduledNextRoundAt = room.nextRoundAt;
+                    startCountdown(room.nextRoundAt, room);
                 }
 
                 if (room.status === 'finished' && !window.__gameOver) {
                     window.__gameOver = true;
-                    setTimeout(function () { showGameOver(room.gameWinner === myRole); }, 2000);
+                    if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+                    setTimeout(function () { showGameOver(room.gameWinner === myRole); }, 1500);
                 }
 
-                if (window.__gameStarted && room.webrtc) {
-                    handleSignaling(room.webrtc);
-                }
+                if (window.__gameStarted && room.webrtc) handleSignaling(room.webrtc);
             });
         }
 
-        async function handleSignaling(webrtc) {
-            if (!peerConnection || !webrtcReady) { return; }
+        // ── Firebase-synced countdown (both players call this from nextRoundAt) ──
+        function startCountdown(nextRoundAt, room) {
+            if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+            var circle = document.getElementById('cdCircle');
+            var numEl = document.getElementById('cdNum');
 
+            function tick() {
+                var now = Date.now();
+                var remaining = Math.max(0, nextRoundAt - now);
+                var secs = Math.ceil(remaining / 1000);
+                var frac = remaining / ROUND_DELAY; // 1→0
+
+                numEl.textContent = secs;
+                circle.style.strokeDashoffset = CIRCUMFERENCE * (1 - frac);
+
+                if (remaining <= 0) {
+                    clearInterval(cdInterval); cdInterval = null;
+                    advanceRound(room);
+                }
+            }
+            // Reset ring
+            circle.style.transition = 'none';
+            circle.style.strokeDashoffset = '0';
+            numEl.textContent = '5';
+            // Force reflow then start animating
+            circle.getBoundingClientRect();
+            circle.style.transition = '';
+            tick();
+            cdInterval = setInterval(tick, 100);
+        }
+
+        function advanceRound(room) {
+            document.getElementById('roundResult').classList.remove('visible');
+            document.getElementById('signImageBox').style.display = 'none';
+
+            // Pull latest round from Firebase snapshot
+            get(ref(db, 'rooms/' + roomCode)).then(function (snap) {
+                if (!snap.exists()) return;
+                var r = snap.val();
+                currentRound = r.currentRound || 0;
+                myScore = myRole === 'host' ? (r.scores ? r.scores.host || 0 : 0) : (r.scores ? r.scores.guest || 0 : 0);
+                oppScore = myRole === 'host' ? (r.scores ? r.scores.guest || 0 : 0) : (r.scores ? r.scores.host || 0 : 0);
+                document.getElementById('myScore').textContent = myScore;
+                document.getElementById('oppScore').textContent = oppScore;
+                updateScoreStyles();
+                if (currentRound < 10 && myScore < 6 && oppScore < 6) startRound();
+            });
+        }
+
+        // ── WebRTC signaling ──────────────────────────────────────
+        async function handleSignaling(webrtc) {
+            if (!peerConnection || !webrtcReady) return;
             if (!isHost && webrtc.offer && !window.__answerSent) {
-                rtcLog('guest: got offer');
                 window.__answerSent = true;
                 try {
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.offer));
-                    var answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
-                    rtcLog('guest: uploading answer');
-                    await update(ref(db, 'rooms/' + roomCode + '/webrtc'), { answer: { type: answer.type, sdp: answer.sdp } });
-                    rtcLog('guest: answer uploaded');
-                    flushIceCandidates(webrtc);
-                } catch (e) {
-                    rtcLog('guest answer error: ' + e.message);
-                    window.__answerSent = false;
-                }
+                    var ans = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(ans);
+                    await update(ref(db, 'rooms/' + roomCode + '/webrtc'), { answer: { type: ans.type, sdp: ans.sdp } });
+                    flushIce(webrtc);
+                } catch (e) { console.error('guest answer err:', e); window.__answerSent = false; }
                 return;
             }
-
             if (isHost && webrtc.answer && !window.__answerReceived) {
-                rtcLog('host: got answer');
                 if (peerConnection.signalingState === 'have-local-offer') {
                     window.__answerReceived = true;
                     try {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(webrtc.answer));
-                        rtcLog('host: remote desc set');
-                        flushIceCandidates(webrtc);
-                    } catch (e) {
-                        rtcLog('host answer error: ' + e.message);
-                        window.__answerReceived = false;
-                    }
+                        flushIce(webrtc);
+                    } catch (e) { console.error('host answer err:', e); window.__answerReceived = false; }
                 }
                 return;
             }
-
-            if (peerConnection.remoteDescription) {
-                flushIceCandidates(webrtc);
-            }
+            if (peerConnection.remoteDescription) flushIce(webrtc);
         }
 
-        function flushIceCandidates(webrtc) {
-            var remoteCandidates = isHost ? webrtc.guestCandidates : webrtc.hostCandidates;
-            if (!remoteCandidates || !peerConnection || !peerConnection.remoteDescription) return;
+        function flushIce(webrtc) {
+            var cands = isHost ? webrtc.guestCandidates : webrtc.hostCandidates;
+            if (!cands || !peerConnection || !peerConnection.remoteDescription) return;
             if (!window.__addedCandidates) window.__addedCandidates = new Set();
-            Object.values(remoteCandidates).forEach(async function (c) {
+            Object.values(cands).forEach(async function (c) {
                 if (!window.__addedCandidates.has(c.candidate)) {
                     window.__addedCandidates.add(c.candidate);
-                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); rtcLog('ICE added'); }
-                    catch (e) { rtcLog('ICE fail: ' + e.message); }
+                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }
+                    catch (e) { console.error('ICE fail:', e); }
                 }
             });
         }
 
         async function setupWebRTC(stream) {
-            rtcLog('setup, role=' + myRole);
-            peerConnection = new RTCPeerConnection(ICE_SERVERS);
+            peerConnection = new RTCPeerConnection(ICE);
             localStream = stream;
+            stream.getTracks().forEach(function (t) { peerConnection.addTrack(t, stream); });
 
-            stream.getTracks().forEach(function (track) {
-                peerConnection.addTrack(track, stream);
-                rtcLog('added track: ' + track.kind);
-            });
-
-            peerConnection.ontrack = function (event) {
-                rtcLog('ontrack: ' + event.track.kind);
-                var oppVideo = document.getElementById('oppVideo');
-                var oppPlaceholder = document.getElementById('oppPlaceholder');
-                var remoteStream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
-                oppVideo.srcObject = remoteStream;
-                oppVideo.style.display = 'block';
-                oppVideo.style.position = 'absolute';
-                oppVideo.style.top = '0';
-                oppVideo.style.left = '0';
-                oppVideo.style.zIndex = '5';
-                oppPlaceholder.style.display = 'none';
+            peerConnection.ontrack = function (ev) {
+                var ov = document.getElementById('oppVideo');
+                var ph = document.getElementById('oppPlaceholder');
+                var rs = (ev.streams && ev.streams[0]) ? ev.streams[0] : new MediaStream([ev.track]);
+                ov.srcObject = rs; ov.style.display = 'block'; ov.style.position = 'absolute'; ov.style.top = '0'; ov.style.left = '0'; ov.style.zIndex = '5';
+                ph.style.display = 'none';
                 document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
                 document.getElementById('oppCamStatus').className = 'cam-status matched';
-                oppVideo.play().then(function () { rtcLog('opp video playing'); }).catch(function (e) { rtcLog('play err: ' + e.message); });
+                ov.play().catch(function () { });
             };
 
             var myKey = isHost ? 'hostCandidates' : 'guestCandidates';
-            peerConnection.onicecandidate = async function (event) {
-                if (event.candidate) {
-                    await push(ref(db, 'rooms/' + roomCode + '/webrtc/' + myKey), {
-                        candidate: event.candidate.candidate,
-                        sdpMLineIndex: event.candidate.sdpMLineIndex,
-                        sdpMid: event.candidate.sdpMid
-                    });
-                } else { rtcLog('ICE gathering done'); }
+            peerConnection.onicecandidate = async function (ev) {
+                if (ev.candidate) await push(ref(db, 'rooms/' + roomCode + '/webrtc/' + myKey), { candidate: ev.candidate.candidate, sdpMLineIndex: ev.candidate.sdpMLineIndex, sdpMid: ev.candidate.sdpMid });
             };
-
-            peerConnection.oniceconnectionstatechange = function () {
-                rtcLog('ICE: ' + peerConnection.iceConnectionState);
-            };
-
             peerConnection.onconnectionstatechange = function () {
                 var s = peerConnection.connectionState;
-                rtcLog('conn: ' + s);
-                if (s === 'connected') {
-                    document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live';
-                    document.getElementById('oppCamStatus').className = 'cam-status matched';
-                } else if (s === 'failed' || s === 'disconnected') {
-                    document.getElementById('oppVideo').style.display = 'none';
-                    document.getElementById('oppPlaceholder').style.display = 'flex';
-                }
+                if (s === 'connected') { document.getElementById('oppCamStatus').innerHTML = '<i class="bi bi-camera-video"></i> Live'; document.getElementById('oppCamStatus').className = 'cam-status matched'; }
+                else if (s === 'failed' || s === 'disconnected') { document.getElementById('oppVideo').style.display = 'none'; document.getElementById('oppPlaceholder').style.display = 'flex'; }
             };
 
             if (isHost) {
@@ -1197,24 +1235,19 @@
                     var offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
                     webrtcReady = true;
-                    rtcLog('host: uploading offer');
                     await update(ref(db, 'rooms/' + roomCode + '/webrtc'), { offer: { type: offer.type, sdp: offer.sdp } });
-                    rtcLog('host: offer uploaded');
-                } catch (e) { rtcLog('offer error: ' + e.message); }
+                } catch (e) { console.error('offer err:', e); }
             } else {
                 webrtcReady = true;
-                rtcLog('guest: ready');
             }
         }
 
-        function startGame(room) {
-            currentRound = room.currentRound || 0;
-            startRound();
-            startCamera();
-        }
+        function startGame(room) { currentRound = room.currentRound || 0; startRound(); startCamera(); }
 
         function startRound() {
             roundLocked = false; roundActive = true;
+            window.__handledRoundWinner = null;
+            scheduledNextRoundAt = null;
             var r = rounds[currentRound];
             document.getElementById('roundNum').textContent = currentRound + 1;
             document.getElementById('targetDisplay').textContent = r.target;
@@ -1233,103 +1266,57 @@
         function handleRoundEnd(winnerRole, room) {
             if (roundLocked) return;
             roundLocked = true; roundActive = false;
+
             var iWon = winnerRole === myRole;
             document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
             document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
-            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 5 complete';
+            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 10 complete';
             document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
             document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
             document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
+
+            var target = rounds[currentRound] ? rounds[currentRound].target : '';
+            var imgSrc = getSignImageUrl(target);
+            var imgBox = document.getElementById('signImageBox');
+            if (imgSrc) { imgBox.style.display = 'block'; document.getElementById('signImage').src = imgSrc; document.getElementById('signImageLabel').textContent = target; }
+            else { imgBox.style.display = 'none'; }
+
             document.getElementById('roundResult').classList.add('visible');
 
-            // Show sign image and auto-advance after 5 seconds
-            var target = rounds[currentRound] ? rounds[currentRound].target : '';
-            var imgBox = document.getElementById('signImageBox');
-            var signImg = document.getElementById('signImage');
-            var signLabel = document.getElementById('signImageLabel');
-            var autoBar = document.getElementById('autoNextBar');
-            var autoLabel = document.getElementById('autoNextLabel');
-            var progress = document.getElementById('autoNextProgress');
-
-            // Use a dictionary/fingerspelling image source
-            var imgSrc = getSignImageUrl(target);
-            if (imgSrc) {
-                imgBox.style.display = 'block';
-                signImg.src = imgSrc;
-                signLabel.textContent = target;
-            } else {
-                imgBox.style.display = 'none';
-            }
-
-            // Auto-advance progress bar
-            autoBar.style.display = 'block';
-            autoLabel.style.display = 'block';
-            progress.style.width = '100%';
-            // Force reflow so transition starts from 100%
-            progress.getBoundingClientRect();
-            progress.style.transition = 'width 5s linear';
-            progress.style.width = '0%';
-
-            // Clear any previous timer
-            if (window.__autoNextTimer) clearTimeout(window.__autoNextTimer);
-            window.__autoNextTimer = setTimeout(function () {
-                document.getElementById('nextRoundBtn').click();
-            }, 5000);
-
+            // HOST writes nextRoundAt so both players countdown together
             if (isHost) {
                 var hs = winnerRole === 'host' ? ((room.scores ? room.scores.host || 0 : 0) + 1) : (room.scores ? room.scores.host || 0 : 0);
                 var gs = winnerRole === 'guest' ? ((room.scores ? room.scores.guest || 0 : 0) + 1) : (room.scores ? room.scores.guest || 0 : 0);
                 var nextRound = currentRound + 1;
-                var isOver = hs >= 3 || gs >= 3 || nextRound >= 5;
-                var gameWinner = hs > gs ? 'host' : 'guest';
-                var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null };
-                if (isOver) { updateData.status = 'finished'; updateData.gameWinner = gameWinner; }
+                var isOver = hs >= 6 || gs >= 6 || nextRound >= 10;
+                var nra = isOver ? null : Date.now() + ROUND_DELAY;
+                var updateData = { 'scores/host': hs, 'scores/guest': gs, currentRound: nextRound, roundWinner: null, nextRoundAt: nra };
+                if (isOver) { updateData.status = 'finished'; updateData.gameWinner = hs > gs ? 'host' : 'guest'; }
                 update(ref(db, 'rooms/' + roomCode), updateData);
+
+                // Host starts its own countdown immediately from the same timestamp
+                if (!isOver) startCountdown(nra, room);
             }
+            // Guest countdown triggered by listenRoom reading nextRoundAt from Firebase
         }
 
-        document.getElementById('nextRoundBtn').addEventListener('click', async function () {
-            if (window.__autoNextTimer) { clearTimeout(window.__autoNextTimer); window.__autoNextTimer = null; }
-            document.getElementById('roundResult').classList.remove('visible');
-            document.getElementById('signImageBox').style.display = 'none';
-            document.getElementById('autoNextBar').style.display = 'none';
-            document.getElementById('autoNextLabel').style.display = 'none';
-            var progress = document.getElementById('autoNextProgress');
-            progress.style.transition = 'none';
-            progress.style.width = '100%';
-            var snap = await get(ref(db, 'rooms/' + roomCode));
-            if (!snap.exists()) return;
-            var room = snap.val();
-            currentRound = room.currentRound || 0;
-            myScore = myRole === 'host' ? (room.scores ? room.scores.host || 0 : 0) : (room.scores ? room.scores.guest || 0 : 0);
-            oppScore = myRole === 'host' ? (room.scores ? room.scores.guest || 0 : 0) : (room.scores ? room.scores.host || 0 : 0);
-            document.getElementById('myScore').textContent = myScore;
-            document.getElementById('oppScore').textContent = oppScore;
-            updateScoreStyles();
-            if (currentRound < 5 && myScore < 3 && oppScore < 3) startRound();
-        });
-
         async function showGameOver(iWon) {
+            if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
             document.getElementById('gameOverEmoji').textContent = iWon ? '🏆' : '😔';
             document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
-            document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! You lost 50 XP — practice more and challenge again.';
+            document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! Practice more and challenge again.';
             if (currentUser) {
-                try {
-                    var xpChange = iWon ? 200 : -50;
-                    await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(xpChange) });
-                } catch (e) { console.error('XP update failed:', e); }
+                try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(iWon ? 200 : -50) }); }
+                catch (e) { console.error('XP fail:', e); }
             }
-            if (iWon) {
-                document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
-            }
+            if (iWon) document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
             document.getElementById('roundResult').classList.remove('visible');
             document.getElementById('gameOver').classList.add('visible');
             if (typeof confetti === 'function' && iWon) confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
         }
 
-        window.__matchFrames = 0;
-        window.__wordStartTime = Date.now();
+        window.__matchFrames = 0; window.__wordStartTime = Date.now();
         var MATCH_NEEDED = 15, MIN_TIME = 2000;
 
         async function startCamera() {
@@ -1342,24 +1329,18 @@
                 var canvas = document.getElementById('myCanvas');
                 video.srcObject = stream;
                 video.addEventListener('loadeddata', function () {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
                     loadDetection(video, canvas);
                 });
                 await setupWebRTC(stream);
-            } catch (e) {
-                document.getElementById('myFeedback').textContent = 'Camera access denied';
-                console.error('Camera error:', e);
-            }
+            } catch (e) { document.getElementById('myFeedback').textContent = 'Camera access denied'; console.error(e); }
         }
 
         async function loadDetection(video, canvas) {
             function loadScript(src) {
                 return new Promise(function (res, rej) {
                     if (document.querySelector('script[src="' + src + '"]')) { res(); return; }
-                    var s = document.createElement('script');
-                    s.src = src; s.onload = res; s.onerror = rej;
-                    document.head.appendChild(s);
+                    var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
                 });
             }
             await loadScript('https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js');
@@ -1398,7 +1379,6 @@
                         if (isMatch && timeReady) {
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
-                                // Don't set roundLocked here — let Firebase listener do it for both players
                                 roundActive = false;
                                 await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
                             }
@@ -1422,95 +1402,32 @@
         }
 
         function getSignImageUrl(target) {
-            // For letters A-Z use a reliable fingerspelling chart image per letter
-            var letterImages = {
-                'A': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/a.gif',
-                'B': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/b.gif',
-                'C': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/c.gif',
-                'D': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/d.gif',
-                'E': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/e.gif',
-                'F': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/f.gif',
-                'G': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/g.gif',
-                'H': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/h.gif',
-                'I': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/i.gif',
-                'J': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/j.gif',
-                'K': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/k.gif',
-                'L': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/l.gif',
-                'M': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/m.gif',
-                'N': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/n.gif',
-                'O': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/o.gif',
-                'P': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/p.gif',
-                'Q': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/q.gif',
-                'R': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/r.gif',
-                'S': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/s.gif',
-                'T': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/t.gif',
-                'U': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/u.gif',
-                'V': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/v.gif',
-                'W': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/w.gif',
-                'X': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/x.gif',
-                'Y': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/y.gif',
-                'Z': 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/z.gif'
-            };
-            var wordImages = {
-                'Hello': 'https://www.lifeprint.com/asl101/pages-signs/h/hello.htm',
-                'Thank You': 'https://www.lifeprint.com/asl101/pages-signs/t/thankyou.htm',
-                'I Love You': 'https://www.lifeprint.com/asl101/pages-signs/i/iloveyou.htm',
-                'Yes': 'https://www.lifeprint.com/asl101/pages-signs/y/yes.htm',
-                'No': 'https://www.lifeprint.com/asl101/pages-signs/n/no.htm'
-            };
-            if (letterImages[target]) return letterImages[target];
-            // For words, use a placeholder since lifeprint pages aren't direct images
-            // Use a consistent sign language dictionary image API
-            var wordGifs = {
-                'Hello': 'https://media.giphy.com/media/xUA7aQMxeGvqmYBWXS/giphy.gif',
-                'Thank You': 'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif',
-                'I Love You': 'https://media.giphy.com/media/3o7abGQa0aRJUurpII/giphy.gif',
-                'Yes': 'https://media.giphy.com/media/xT9IgHqiLYMDsMWUxa/giphy.gif',
-                'No': 'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif'
-            };
-            return wordGifs[target] || null;
+            var li = {};
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function (l) { li[l] = 'https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/' + l.toLowerCase() + '.gif'; });
+            var wi = { 'Hello': 'images/hello.png', 'Thank You': 'images/thankyou.png', 'I Love You': 'images/iloveyou.png', 'Yes': 'images/yes.png', 'No': 'images/no.png' };
+            return wi[target] || li[target] || null;
         }
 
         function buildGestures() {
             var g = [];
-            var helloG = new fp.GestureDescription('Thank You');
-            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { helloG.addCurl(f, fp.FingerCurl.NoCurl, 1.0); });
-            helloG.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
-            helloG.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
-            helloG.addDirection(fp.Finger.Ring, fp.FingerDirection.VerticalUp, 1.0);
-            helloG.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
-            g.push(helloG);
-
-            var tyG = new fp.GestureDescription('Hello');
-            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { tyG.addCurl(f, fp.FingerCurl.NoCurl, 1.0); });
-            tyG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 1.0);
-            tyG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpRight, 1.0);
-            tyG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 1.0);
-            tyG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpRight, 1.0);
-            g.push(tyG);
-
+            var hG = new fp.GestureDescription('Thank You');
+            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { hG.addCurl(f, fp.FingerCurl.NoCurl, 1.0); });
+            hG.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); hG.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0); hG.addDirection(fp.Finger.Ring, fp.FingerDirection.VerticalUp, 1.0); hG.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
+            g.push(hG);
+            var tG = new fp.GestureDescription('Hello');
+            [fp.Finger.Thumb, fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { tG.addCurl(f, fp.FingerCurl.NoCurl, 1.0); });
+            tG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpLeft, 1.0); tG.addDirection(fp.Finger.Index, fp.FingerDirection.DiagonalUpRight, 1.0); tG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpLeft, 1.0); tG.addDirection(fp.Finger.Middle, fp.FingerDirection.DiagonalUpRight, 1.0);
+            g.push(tG);
             var ily = new fp.GestureDescription('I Love You');
-            ily.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); ily.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0);
-            ily.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl, 1.0); ily.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0);
-            ily.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
-            ily.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
-            ily.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
+            ily.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); ily.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); ily.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl, 1.0); ily.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl, 1.0); ily.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);
+            ily.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); ily.addDirection(fp.Finger.Pinky, fp.FingerDirection.VerticalUp, 1.0);
             g.push(ily);
-
             var yes = new fp.GestureDescription('Yes');
-            yes.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);
-            [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { yes.addCurl(f, fp.FingerCurl.FullCurl, 1.0); });
-            yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.VerticalUp, 1.0);
+            yes.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { yes.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); yes.addDirection(fp.Finger.Thumb, fp.FingerDirection.VerticalUp, 1.0);
             g.push(yes);
-
             var no = new fp.GestureDescription('No');
-            no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0);
-            no.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); no.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);
-            [fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { no.addCurl(f, fp.FingerCurl.FullCurl, 1.0); });
-            no.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0);
-            no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
+            no.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); no.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl, 1.0); no.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { no.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); no.addDirection(fp.Finger.Index, fp.FingerDirection.VerticalUp, 1.0); no.addDirection(fp.Finger.Middle, fp.FingerDirection.VerticalUp, 1.0);
             g.push(no);
-
             var defs = {
                 'A': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 0.8); },
                 'B': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring, fp.Finger.Pinky].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Thumb, fp.FingerCurl.FullCurl, 1.0); },
@@ -1527,9 +1444,7 @@
                 'W': function (d) { [fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(function (f) { d.addCurl(f, fp.FingerCurl.NoCurl, 1.0); d.addDirection(f, fp.FingerDirection.VerticalUp, 1.0); }); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl, 1.0); },
                 'Y': function (d) { d.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl, 1.0); d.addCurl(fp.Finger.Pinky, fp.FingerCurl.NoCurl, 1.0);[fp.Finger.Index, fp.Finger.Middle, fp.Finger.Ring].forEach(function (f) { d.addCurl(f, fp.FingerCurl.FullCurl, 1.0); }); }
             };
-            Object.keys(defs).forEach(function (name) {
-                var d = new fp.GestureDescription(name); defs[name](d); g.push(d);
-            });
+            Object.keys(defs).forEach(function (name) { var d = new fp.GestureDescription(name); defs[name](d); g.push(d); });
             return g;
         }
     </script>
