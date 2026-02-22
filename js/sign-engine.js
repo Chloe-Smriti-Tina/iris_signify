@@ -8,9 +8,9 @@ import {
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
 // ── Letter data ──
-// gesture: exact MediaPipe categoryName that counts as correct, or null
-// For null-gesture letters the bar fills only while a hand is visible.
-// The user still has to actively show their hand — idle frames don't count.
+// gesture: exact MediaPipe Task Vision Model (defined below) categoryName that counts as correct, or null
+// For null-gesture letters (that would require a 3D hand model), the bar fills only while a hand is visible.
+// The user still has to actively show their hand; idle frames don't count.
 export const LETTERS = [
     { letter:"A", gesture:"A",
       desc:"Make a fist with your thumb resting against the side of your index finger. Keep all four fingers curled tightly.",
@@ -98,9 +98,9 @@ const HOLD_FRAMES       = 40;
 const HAND_HOLD_SECS    = 3;   // seconds hand must be present for null-gesture letters
 const CONFIDENCE_THRESH = 0.75; // min confidence for a correct gesture match
 
-let fpEstimator = null;
+let fpEstimator = null; // FingerPose Estimator
 
-// Exact function from game.html for gestures 
+// Inspired by function from game.html for gestures defined 
 function buildGestures() {
     const g = [];
     const defs = {
@@ -269,7 +269,7 @@ function hideOverlay(id) {
     if (el) el.classList.remove("visible");
 }
 
-// ── Success ──────────────────────────────────────────────────
+// ── Success ────
 function showSuccess(letter) {
     if (phaseLocked) return;
     phaseLocked = true;
@@ -427,7 +427,7 @@ function gameLoop() {
         lastResults = results;
     }
 
-    // Clear canvas but draw NOTHING — skeleton removed per request
+    // Clear canvas but draw NOTHING
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // If phase is locked (success/retry panel showing), just keep the loop ticking
@@ -439,12 +439,12 @@ function gameLoop() {
     const l = LETTERS[currentIndex];
     const handPresent = lastResults != null && lastResults.landmarks?.length > 0;
 
-    // ── Gesture-based letters (A, G, S, Y, …) ───────────────
+    // ── Gesture-based letters (A, G, S, Y, …) ──
     if (l.gesture !== null) {
         let isMatch = false;
 
         if (handPresent) {
-            // 1. Try MediaPipe built-in gestures first (A, G, S, Y)
+            // MediaPipe 7 built-in gestures first 
             if (lastResults.gestures?.length > 0) {
                 const cat = lastResults.gestures[0][0].categoryName;
                 const score = lastResults.gestures[0][0].score;
@@ -453,16 +453,15 @@ function gameLoop() {
                 }
             }
 
-            // 2. If MediaPipe didn't catch it, try Fingerpose
+            // Try Fingerpose
             if (!isMatch && fpEstimator) {
-                // IMPORTANT: Map MediaPipe 0-1 coordinates to screen pixels for Fingerpose
                 const pixelLandmarks = lastResults.landmarks[0].map(lm => [
                     lm.x * canvas.width, 
                     lm.y * canvas.height, 
                     lm.z * canvas.width
                 ]);
 
-                // Run Fingerpose with a confidence threshold of 7.0
+                // Running Fingerpose with a confidence threshold of 7.0
                 const est = fpEstimator.estimate(pixelLandmarks, 7.0);
                 if (est.gestures.length > 0) {
                     const best = est.gestures.reduce((p, c) => p.score > c.score ? p : c);
@@ -484,8 +483,8 @@ function gameLoop() {
         }
     }
 
-    // ── Null-gesture letters (B, C, D, …) ───────────────────
-    // Timer ONLY advances while a hand is actually in frame.
+    // ── Null-gesture letters (for certain letters/exceptions that would require a heavy dataset & training) ────
+    // Timer only advances while a hand is actually in frame.
     else {
         if (handPresent) {
             handTimer    += delta;
