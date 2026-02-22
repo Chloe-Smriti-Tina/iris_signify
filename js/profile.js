@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCIm-UGhuGg9aNuK7nWdI2pZ6hLDFxxuis",
@@ -63,11 +63,39 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("statCurrentStreak").textContent = data.streak || 0;
   document.getElementById("statLongestStreak").textContent = data.longest_streak || 0;
 
-  // ── Badges ──
+  // ── Badge auto-assignment ──
+  // Check all badge thresholds against current stats and write any newly-earned
+  // badges before rendering the UI, so the display is always up to date.
   const allBadges = allBadgesSnap.docs.map(d => d.data());
   const earnedIds = earnedSnap.docs.map(d => d.data().id);
-
   const earnedSet = new Set(earnedIds);
+
+  const statMap = {
+    total_challenges_completed: data.total_challenges_completed || 0,
+    longest_streak:             data.longest_streak             || 0,
+    total_xp:                   data.total_xp                   || 0,
+  };
+
+  const writes = [];
+  allBadges.forEach(badge => {
+    if (earnedSet.has(badge.id)) return;           // already earned
+    if (!(badge.stat in statMap)) return;           // stat not tracked
+    if (statMap[badge.stat] >= badge.threshold) {
+      const badgeRef = doc(db, "users", user.uid, "badges", badge.id);
+      writes.push(
+        setDoc(badgeRef, { id: badge.id }, { merge: true })
+          .then(() => {
+            earnedSet.add(badge.id); // update local set so UI reflects it immediately
+            console.log(`[Signify] Badge earned: ${badge.id}`);
+          })
+      );
+    }
+  });
+
+  if (writes.length > 0) await Promise.all(writes);
+
+  // ── Badges UI ──
+  // earnedSet is now fully up to date after any new assignments above
   const earned    = allBadges.filter(b => earnedSet.has(b.id));
   const notEarned = allBadges.filter(b => !earnedSet.has(b.id));
 
@@ -93,12 +121,6 @@ onAuthStateChanged(auth, async (user) => {
     progressEl.innerHTML = `<div class="empty-msg"><span>🎉</span>You've earned every badge!</div>`;
     return;
   }
-
-  const statMap = {
-    total_challenges_completed: data.total_challenges_completed || 0,
-    longest_streak:             data.longest_streak             || 0,
-    total_xp:                   data.total_xp                   || 0,
-  };
 
   progressEl.innerHTML = notEarned.map(b => {
     const current = statMap[b.stat] ?? 0;
