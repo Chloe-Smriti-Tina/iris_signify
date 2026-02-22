@@ -190,7 +190,7 @@ function updateOverallProgress() {
 
 // ── Load ──────────────────────────────────────────────────────
 async function loadModels() {
-    enableBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading AI…';
+    enableBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading Model…';
     enableBtn.disabled = true;
     try {
         handposeModel = await handpose.load();
