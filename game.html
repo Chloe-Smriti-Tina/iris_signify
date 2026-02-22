@@ -11,7 +11,6 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-icons.css" rel="stylesheet">
     <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6d8bfa;
@@ -43,7 +42,6 @@
 
         .navbar-brand {
             color: var(--primary) !important;
-            font-family: 'Quicksand', sans-serif;
             font-weight: 700;
             font-size: 2rem;
             text-decoration: none;
@@ -769,10 +767,10 @@
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span
                     class="navbar-toggler-icon"></span></button>
-            <a href="index.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
+            <a href="home.html" class="navbar-brand mx-auto mx-lg-0">Signify</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-lg-5">
-                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="learn.html">Learn</a></li>
                     <li class="nav-item"><a class="nav-link" href="leaderboard.html">Leaderboard</a></li>
                     <li class="nav-item"><a class="nav-link active" href="game.html">Game</a></li>
@@ -921,7 +919,7 @@
             <div class="xp-tag" id="xpEarnedDisplay" style="display:none;">+200 XP</div>
             <p id="gameOverSub">Great signing today!</p>
             <button class="overlay-btn" onclick="window.location.reload()">Play Again</button>
-            <button class="overlay-btn secondary" onclick="window.location.href='index.html'">Home</button>
+            <button class="overlay-btn secondary" onclick="window.location.href='home.html'">Home</button>
         </div>
     </div>
 
@@ -948,7 +946,7 @@
         const db = getDatabase(app);
         const fs = getFirestore(app);
 
-        const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes'];
+        const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
         // Best of 5: 3 words + 2 letters = 5 rounds
         const TOTAL_ROUNDS = 5;
         const ROUND_DELAY = 5000;
@@ -962,9 +960,17 @@
         let peerConnection = null, localStream = null, webrtcReady = false;
         let cdInterval = null;
         let scheduledNextRoundAt = null;
-        let roomUnsubscribe = null;
 
-        const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+        const ICE = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                // TURN servers relay video when direct P2P is blocked (e.g. school/corporate networks)
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+            ]
+        };
 
         onAuthStateChanged(auth, function (u) { currentUser = u; });
 
@@ -978,7 +984,6 @@
             window.__gameWinner = null;
             scheduledNextRoundAt = null;
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
-            if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
             webrtcReady = false;
             if (localStream) { localStream.getTracks().forEach(function (t) { t.stop(); }); localStream = null; }
@@ -990,6 +995,7 @@
             if (ph) { ph.style.display = 'flex'; ph.querySelector('span').textContent = 'Connecting...'; }
             currentRound = 0; myScore = 0; oppScore = 0;
             roundActive = false; roundLocked = false; rounds = [];
+            scoreWritten = false; hostScore = 0; guestScore = 0; completedRounds = 0;
         }
 
         function genCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
@@ -1028,7 +1034,7 @@
             await set(ref(db, 'rooms/' + roomCode), {
                 host: { uid: currentUser.uid, name: currentUser.displayName || 'Player 1' },
                 guest: null, rounds: rounds, scores: { host: 0, guest: 0 },
-                currentRound: 0, status: 'waiting', roundWinner: null, roundTarget: null, roundDisplayNum: 0, nextRoundAt: null,
+                currentRound: 0, status: 'waiting', roundWinner: null, nextRoundAt: null,
                 webrtc: { offer: null, answer: null, hostCandidates: [], guestCandidates: [] }
             });
             document.getElementById('displayRoomCode').textContent = roomCode;
@@ -1058,7 +1064,7 @@
         });
 
         function listenRoom() {
-            roomUnsubscribe = onValue(ref(db, 'rooms/' + roomCode), function (snap) {
+            onValue(ref(db, 'rooms/' + roomCode), function (snap) {
                 if (!snap.exists()) { showScreen('lobbyScreen'); return; }
                 var room = snap.val();
 
@@ -1089,17 +1095,17 @@
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
 
-                // Handle round result.
-                // roundWinner, roundTarget and roundDisplayNum are all written together in one
-                // atomic update by the winner's game loop — no separate write to coalesce away.
-                // rwKey uses roundDisplayNum (1-5) which is unique per round and stable.
-                var rwKey = room.roundWinner ? (String(room.roundDisplayNum) + ':' + room.roundWinner) : null;
+                // Handle round result — fires for BOTH players from Firebase
+                // Use roundWinner string as unique key so we never miss or double-handle
+                var rwKey = room.roundWinner ? (room.currentRound + ':' + room.roundWinner) : null;
                 if (rwKey && window.__handledRoundKey !== rwKey) {
                     window.__handledRoundKey = rwKey;
                     var iAmWinner = room.roundWinner === myRole;
-                    // Show popup for both players — data comes entirely from the snapshot,
-                    // never from local currentRound which may already be stale.
-                    showRoundPopup(iAmWinner, room.roundDisplayNum, room.roundTarget || '');
+                    if (!window.__localRoundHandled) {
+                        window.__localRoundHandled = true;
+                        showRoundPopup(iAmWinner);
+                    }
+                    if (isHost) writeRoundToFirebase(room.roundWinner);
                 }
 
                 // Countdown synced from Firebase
@@ -1119,16 +1125,17 @@
             });
         }
 
-        // roundNum and target are passed explicitly — never reads currentRound/rounds[] globally.
-        function showRoundPopup(iWon, roundNum, target) {
+        // Show the round result popup immediately (called locally for winner, from Firebase for loser)
+        function showRoundPopup(iWon) {
             roundLocked = true; roundActive = false;
             document.getElementById('roundEmoji').textContent = iWon ? '🎉' : '😤';
             document.getElementById('roundResultTitle').textContent = iWon ? 'You got it first!' : 'Opponent was faster!';
-            document.getElementById('roundResultSub').textContent = 'Round ' + roundNum + ' of 5 complete';
+            document.getElementById('roundResultSub').textContent = 'Round ' + (currentRound + 1) + ' of 5 complete';
             document.getElementById('myCamPanel').classList.add(iWon ? 'winner' : 'loser');
             document.getElementById('oppCamPanel').classList.add(iWon ? 'loser' : 'winner');
             document.getElementById('oppFeedback').textContent = iWon ? '😤 Lost this round' : '🏆 Won this round!';
 
+            var target = rounds[currentRound] ? rounds[currentRound].target : '';
             var imgSrc = getSignImageUrl(target);
             var imgBox = document.getElementById('signImageBox');
             if (imgSrc) { imgBox.style.display = 'block'; document.getElementById('signImage').src = imgSrc; document.getElementById('signImageLabel').textContent = target; }
@@ -1137,33 +1144,33 @@
             document.getElementById('roundResult').classList.add('visible');
         }
 
-        // Computes the full Firebase update for a round result.
-        // Called by the winner's game loop — ONE atomic write contains everything
-        // both players need (roundWinner, roundTarget, roundDisplayNum, scores,
-        // currentRound, nextRoundAt) so Firebase cannot coalesce away roundWinner.
-        async function commitRoundResult(winnerRole, winTarget, winRound) {
-            var snap = await get(ref(db, 'rooms/' + roomCode));
-            if (!snap.exists()) return;
-            var r = snap.val();
-            var hs = (r.scores ? r.scores.host || 0 : 0) + (winnerRole === 'host' ? 1 : 0);
-            var gs = (r.scores ? r.scores.guest || 0 : 0) + (winnerRole === 'guest' ? 1 : 0);
-            var nextRound = winRound; // winRound is already the 0-based index of the NEXT round
-            var isOver = hs >= 3 || gs >= 3 || nextRound >= TOTAL_ROUNDS;
+        // Host tracks scores locally — never reads from Firebase to avoid stale reads
+        let scoreWritten = false;
+        let hostScore = 0, guestScore = 0, completedRounds = 0;
+
+        function writeRoundToFirebase(winnerRole) {
+            if (scoreWritten) return;
+            scoreWritten = true;
+            // Increment local authoritative scores
+            if (winnerRole === 'host') hostScore++;
+            else guestScore++;
+            completedRounds++;
+            var isOver = hostScore >= 3 || guestScore >= 3 || completedRounds >= TOTAL_ROUNDS;
+            var nra = isOver ? null : Date.now() + ROUND_DELAY;
             var updateData = {
-                roundWinner: winnerRole,
-                roundTarget: winTarget,
-                roundDisplayNum: winRound, // 1-based display number of the round just completed
-                'scores/host': hs,
-                'scores/guest': gs,
-                currentRound: nextRound,
-                nextRoundAt: isOver ? null : Date.now() + ROUND_DELAY
+                'scores/host': hostScore,
+                'scores/guest': guestScore,
+                currentRound: completedRounds,
+                roundWinner: null,
+                nextRoundAt: nra
             };
             if (isOver) {
                 updateData.status = 'finished';
-                updateData.gameWinner = hs > gs ? 'host' : (gs > hs ? 'guest' : 'draw');
+                updateData.gameWinner = hostScore > guestScore ? 'host' : (guestScore > hostScore ? 'guest' : 'draw');
             }
-            console.log('Round', winRound, '| host:', hs, 'guest:', gs, '| isOver:', isOver);
-            await update(ref(db, 'rooms/' + roomCode), updateData);
+            console.log('Round', completedRounds, '| host:', hostScore, 'guest:', guestScore, '| isOver:', isOver, '| winner:', updateData.gameWinner || 'none');
+            update(ref(db, 'rooms/' + roomCode), updateData);
+            // Countdown triggered for BOTH players via listenRoom nextRoundAt listener
         }
 
         function startCountdown(nextRoundAt) {
@@ -1279,6 +1286,7 @@
             roundLocked = false; roundActive = true;
             window.__localRoundHandled = false;
             window.__handledRoundKey = null;
+            scoreWritten = false;
             scheduledNextRoundAt = null; // reset so next round's nextRoundAt is always accepted
             var r = rounds[currentRound];
             document.getElementById('roundNum').textContent = currentRound + 1;
@@ -1375,16 +1383,12 @@
                         if (isMatch && timeReady) {
                             window.__matchFrames++;
                             if (window.__matchFrames >= MATCH_NEEDED && !roundLocked) {
-                                // Lock immediately (sync) so no second frame fires
-                                roundLocked = true;
+                                // Show popup immediately for winner, write roundWinner to Firebase
+                                // Score writing happens ONLY in listenRoom to avoid double-write
                                 roundActive = false;
-                                // Capture round info now — currentRound will be mutated by advanceRound later
-                                var winRound = currentRound + 1;   // 1-based display number
-                                var winTarget = rounds[currentRound] ? rounds[currentRound].target : '';
-                                // Single atomic Firebase write: scores + roundWinner + roundTarget + nextRoundAt
-                                // all in one update. This is the ONLY write — no second write clears roundWinner.
-                                // listenRoom on BOTH clients drives the popup from this single event.
-                                await commitRoundResult(myRole, winTarget, winRound);
+                                window.__localRoundHandled = true;
+                                showRoundPopup(true);
+                                await update(ref(db, 'rooms/' + roomCode), { roundWinner: myRole });
                             }
                         } else if (!isMatch) {
                             window.__matchFrames = Math.max(0, window.__matchFrames - 1);
