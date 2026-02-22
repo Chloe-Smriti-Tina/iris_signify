@@ -30,7 +30,6 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("notLoggedIn").style.display = "none";
   document.getElementById("profileContent").style.display = "block";
 
-  // Fetch user doc, all badges, and earned badges in parallel
   const [snap, allBadgesSnap, earnedSnap] = await Promise.all([
     getDoc(doc(db, "users", user.uid)),
     getDocs(collection(db, "badges")),
@@ -59,20 +58,64 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   // ── Stats ──
-  const allTime = data.allTime || {};
-  const currentStreak = data.currentStreak || {};
-  document.getElementById("statTime").textContent = Math.floor((allTime.totalTimeSpent || 0) / 3600);
-  document.getElementById("statChallenges").textContent = allTime.challengesCompleted || 0;
-  document.getElementById("statAccuracy").textContent = (allTime.accuracy || 0) + "%";
-  document.getElementById("statCurrentStreak").textContent = currentStreak.count || 0;
-  document.getElementById("statLongestStreak").textContent = allTime.longestStreak || 0;
+  document.getElementById("statChallenges").textContent = data.total_challenges_completed || 0;
+  document.getElementById("statXP").textContent = data.total_xp || 0;
+  document.getElementById("statCurrentStreak").textContent = data.streak || 0;
+  document.getElementById("statLongestStreak").textContent = data.longest_streak || 0;
 
   // ── Badges ──
   const allBadges = allBadgesSnap.docs.map(d => d.data());
   const earnedIds = earnedSnap.docs.map(d => d.data().id);
-  document.getElementById("statNumBadges").textContent = earnedIds.length;
 
-  if (window.renderBadgePanels) {
-    window.renderBadgePanels(allBadges, earnedIds, allTime);
+  const earnedSet = new Set(earnedIds);
+  const earned    = allBadges.filter(b => earnedSet.has(b.id));
+  const notEarned = allBadges.filter(b => !earnedSet.has(b.id));
+
+  // Earned panel
+  const earnedEl = document.getElementById('earnedBadgesList');
+  document.getElementById('earnedBadgeCount').textContent = earned.length ? `(${earned.length})` : '';
+
+  earnedEl.innerHTML = earned.length === 0
+    ? `<div class="empty-msg"><span>🏅</span>No badges yet — complete challenges to unlock your first!</div>`
+    : earned.map(b => `
+        <div class="earned-badge-item">
+          <div class="earned-badge-icon">${b.icon}</div>
+          <div class="earned-badge-info">
+            <p class="earned-badge-name">${b.name}</p>
+            <p class="earned-badge-desc">${b.description}</p>
+          </div>
+        </div>`).join('');
+
+  // Progress panel
+  const progressEl = document.getElementById('badgeProgressList');
+
+  if (notEarned.length === 0) {
+    progressEl.innerHTML = `<div class="empty-msg"><span>🎉</span>You've earned every badge!</div>`;
+    return;
   }
+
+  const statMap = {
+    total_challenges_completed: data.total_challenges_completed || 0,
+    longest_streak:             data.longest_streak             || 0,
+    total_xp:                   data.total_xp                   || 0,
+  };
+
+  progressEl.innerHTML = notEarned.map(b => {
+    const current = statMap[b.stat] ?? 0;
+    const pct     = Math.min(100, Math.round((current / b.threshold) * 100));
+    return `
+      <div class="progress-badge-item">
+        <div class="progress-badge-header">
+          <div class="progress-badge-icon">${b.icon}</div>
+          <div class="progress-badge-label">
+            <p class="progress-badge-name">${b.name}</p>
+            <p class="progress-badge-desc">${b.description}</p>
+          </div>
+          <span class="progress-badge-pct">${current} / ${b.threshold}</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
 });
