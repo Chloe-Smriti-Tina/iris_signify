@@ -971,7 +971,8 @@
             window.__matchFrames = 0; window.__wordStartTime = Date.now();
             window.__answerSent = false; window.__answerReceived = false;
             window.__addedCandidates = new Set();
-            window.__localRoundHandled = false; // NEW: tracks if we already showed popup locally
+            window.__localRoundHandled = false;
+            window.__handledForRound = -1; // tracks which round we handled
             scheduledNextRoundAt = null;
             if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
             if (peerConnection) { peerConnection.close(); peerConnection = null; }
@@ -1084,23 +1085,19 @@
                 document.getElementById('oppScore').textContent = oppScore;
                 updateScoreStyles();
 
-                // KEY FIX: Only show popup from Firebase for the OPPONENT (loser).
-                // The winner already showed it locally immediately.
-                // Both players respond to roundWinner, but winner skips if already handled locally.
-                if (room.roundWinner && !roundLocked) {
+                // KEY FIX: Track by round number, not just a boolean flag.
+                // This prevents stale flags from blocking rounds 2+.
+                if (room.roundWinner && window.__handledForRound !== currentRound) {
                     var iAmWinner = room.roundWinner === myRole;
-                    // If I won, I already showed popup locally — just lock and let host write scores
                     if (iAmWinner && window.__localRoundHandled) {
-                        // Already handled — do nothing, host writes scores via handleRoundEnd
-                    } else if (!iAmWinner && !window.__localRoundHandled) {
-                        // I lost — show popup immediately from Firebase notification
-                        window.__localRoundHandled = true;
-                        showRoundPopup(false, room);
+                        // Winner already showed popup locally — host just needs to write scores
+                        window.__handledForRound = currentRound;
                         if (isHost) writeRoundToFirebase(room.roundWinner, room);
-                    } else if (iAmWinner && !window.__localRoundHandled) {
-                        // Rare: Firebase came before local detection fired (shouldn't happen but safety net)
+                    } else if (!window.__localRoundHandled) {
+                        // Loser sees popup from Firebase, OR rare safety net for winner
+                        window.__handledForRound = currentRound;
                         window.__localRoundHandled = true;
-                        showRoundPopup(true, room);
+                        showRoundPopup(iAmWinner, room);
                         if (isHost) writeRoundToFirebase(room.roundWinner, room);
                     }
                 }
@@ -1265,6 +1262,7 @@
         function startRound() {
             roundLocked = false; roundActive = true;
             window.__localRoundHandled = false; // reset for new round
+            window.__handledForRound = -1;
             scheduledNextRoundAt = null;
             var r = rounds[currentRound];
             document.getElementById('roundNum').textContent = currentRound + 1;
@@ -1287,7 +1285,7 @@
             document.getElementById('gameOverTitle').textContent = iWon ? 'You Win!' : 'You Lost';
             document.getElementById('gameOverSub').textContent = iWon ? 'Incredible signing! +200 XP earned.' : 'Close game! Practice more and challenge again.';
             if (currentUser) {
-                try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(iWon ? 200 : 0) }); }
+                try { await updateDoc(doc(fs, 'users', currentUser.uid), { total_xp: increment(iWon ? 200 : -50) }); }
                 catch (e) { console.error('XP fail:', e); }
             }
             if (iWon) document.getElementById('xpEarnedDisplay').style.display = 'inline-block';
