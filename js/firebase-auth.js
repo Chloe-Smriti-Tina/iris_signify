@@ -227,9 +227,9 @@ window.switchTab = function (tab) {
   const isSignIn = tab === "signin";
   document.getElementById("formSignIn").style.display = isSignIn ? "block" : "none";
   document.getElementById("formSignUp").style.display = isSignIn ? "none" : "block";
-  document.getElementById("tabSignIn").style.color = isSignIn ? "#fff" : "#aaa";
+  document.getElementById("tabSignIn").style.color = isSignIn ? "#535da1" : "#aaa";
   document.getElementById("tabSignIn").style.borderBottom = isSignIn ? "2px solid #535da1" : "2px solid transparent";
-  document.getElementById("tabSignUp").style.color = isSignIn ? "#aaa" : "#fff";
+  document.getElementById("tabSignUp").style.color = isSignIn ? "#aaa" : "#535da1";
   document.getElementById("tabSignUp").style.borderBottom = isSignIn ? "2px solid transparent" : "2px solid #535da1";
 };
 
