@@ -305,9 +305,9 @@
         const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const nextLetter = alpha[Math.min(alpha.indexOf(letter) + 1, 25)];
         await updateDoc(doc(db, "users", currentUser.uid), {
-          xp: increment(50),
-          "allTime.challengesCompleted": increment(1),
-          "allTime.totalTimeSpent": increment(secs),
+          total_xp: increment(50),
+          total_challenges_completed : increment(1),
+          total_time_spent: increment(secs),
           [`alphabet.${letter}`]: true,
           nextLetter,
           lastSeen: serverTimestamp()

@@ -113,10 +113,11 @@ let sessionXP     = 0;
 let totalAttempts = 0;
 let totalHits     = 0;
 let isRetryMode   = false; // true when practising again after XP already earned
+let xpEarnedSet = new Set(); // letters XP was awarded for THIS session
 
 // DOM refs
 let video, canvas, ctx, camBtn, camOverlay,
-    holdBar, holdLabel, detLbl, confLbl;
+    holdBar, holdLabel;
 
 // ── DOM ────
 function grabDom() {
@@ -127,8 +128,6 @@ function grabDom() {
     camOverlay = document.getElementById("camOverlay");
     holdBar    = document.getElementById("holdBar");
     holdLabel  = document.getElementById("holdLabel");
-    detLbl     = document.getElementById("detectedLbl");
-    confLbl    = document.getElementById("confLbl");
 }
 
 // ── Render letter ────
@@ -247,8 +246,9 @@ function showSuccess(letter) {
     if (phaseLocked) return;
     phaseLocked = true;
 
-    const alreadyDone = completedSet.has(letter);
+    const alreadyDone = xpEarnedSet.has(letter);
     if (!alreadyDone) {
+        xpEarnedSet.add(letter);
         completedSet.add(letter);
         sessionXP += XP_PER_LETTER;
     }
@@ -407,17 +407,6 @@ function gameLoop() {
 
     const l           = LETTERS[currentIndex];
     const handPresent = results?.landmarks?.length > 0;
-    let   detectedCat = "—";
-    let   detectedConf = "—";
-
-    if (handPresent && results.gestures?.length > 0) {
-        detectedCat  = results.gestures[0][0].categoryName;
-        detectedConf = Math.round(results.gestures[0][0].score * 100) + "%";
-        totalAttempts++;
-    }
-
-    if (detLbl)  detLbl.textContent  = detectedCat;
-    if (confLbl) confLbl.textContent = detectedConf;
 
     // ── Gesture-based letters (A, G, S, Y, …) ───────────────
     if (l.gesture !== null) {
