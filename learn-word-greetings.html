@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-icons.css" rel="stylesheet">
-    <link href="css/templatemo-first-portfolio-style.css" rel="stylesheet">
     <style>
         :root {
             --primary: #6d8bfa;
@@ -117,7 +116,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Word list in sidebar */
         .word-list {
             display: flex;
             flex-direction: column;
@@ -555,9 +553,7 @@
                 <div class="mini-stat"><span class="val" id="sb-done">0/5</span><span class="lbl">Words</span></div>
             </div>
             <div class="sidebar-label" style="margin-top:8px;">Stage 1 Words</div>
-            <div class="word-list" id="wordList">
-                <!-- populated by JS -->
-            </div>
+            <div class="word-list" id="wordList"></div>
         </aside>
 
         <main class="main-content">
@@ -571,13 +567,24 @@
                 </div>
             </div>
 
-            <div class="word-hero-card">
-                <div class="stage-badge"><i class="bi bi-hand-index-thumb"></i> Stage 1 · Everyday Words</div>
-                <h2>Sign the word <span class="word-highlight" id="wordHighlight">"Hello"</span></h2>
-                <p class="desc" id="wordDesc">Raise your open hand, all five fingers pointing straight up like a salute.
-                </p>
-                <div class="tip-chip" id="wordTip"><i class="bi bi-lightbulb"></i> Hold the sign steady for a moment to
-                    confirm it</div>
+            <div class="word-hero-card"
+                style="display:grid; grid-template-columns:140px 1fr; gap:28px; align-items:center;">
+                <div class="asl-image-box"
+                    style="background:var(--bg);border:2px solid var(--border);border-radius:14px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;">
+                    <img id="wordImage" src="images/hello.png" alt="ASL reference"
+                        style="width:100%;height:100%;object-fit:contain;padding:6px;">
+                    <div id="wordImgFallback"
+                        style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:4rem;font-weight:900;color:var(--primary);">
+                    </div>
+                </div>
+                <div>
+                    <div class="stage-badge"><i class="bi bi-hand-index-thumb"></i> Stage 1 · Everyday Words</div>
+                    <h2>Sign the word <span class="word-highlight" id="wordHighlight">"Hello"</span></h2>
+                    <p class="desc" id="wordDesc">Raise your open hand, all five fingers pointing straight up like a
+                        salute.</p>
+                    <div class="tip-chip" id="wordTip"><i class="bi bi-lightbulb"></i> Hold the sign steady for a moment
+                        to confirm it</div>
+                </div>
             </div>
 
             <div class="content-grid">
@@ -638,6 +645,58 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
 
+    <!-- ── Firebase: save word progress ── -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, increment, updateDoc }
+            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const app = initializeApp({
+            apiKey: "AIzaSyCIm-UGhuGg9aNuK7nWdI2pZ6hLDFxxuis",
+            authDomain: "signify-5ec23.firebaseapp.com",
+            projectId: "signify-5ec23",
+            storageBucket: "signify-5ec23.firebasestorage.app",
+            messagingSenderId: "150947241043",
+            appId: "1:150947241043:web:f2fbb25737e9b7a02c7aa6"
+        });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, user => { currentUser = user; });
+
+        // Called by word-engine.js when a word is completed
+        window.onWordComplete = async (word, xpEarned) => {
+            if (!currentUser) return;
+            const uid = currentUser.uid;
+
+            // Check if already learned — skip XP if so
+            const wordSnap = await getDoc(doc(db, "users", uid, "words", word));
+            const alreadyLearned = wordSnap.exists() && wordSnap.data().learned === true;
+
+            // Mark word as learned
+            await setDoc(doc(db, "users", uid, "words", word), { learned: true }, { merge: true });
+
+            if (!alreadyLearned) {
+                // Only award XP the first time
+                await updateDoc(doc(db, "users", uid), {
+                    total_xp: increment(xpEarned),
+                    total_challenges_completed: increment(1),
+                });
+            }
+
+            // Check if all 5 words are now learned → unlock Stage 2
+            const wordsSnap = await getDocs(collection(db, "users", uid, "words"));
+            const allDone = wordsSnap.docs.every(d => d.data().learned === true);
+            if (allDone) {
+                await updateDoc(doc(db, "users", uid), { stage1_complete: true });
+                console.log('[Firebase] Stage 1 complete! Stage 2 unlocked.');
+            }
+        };
+    </script>
+
     <script src="https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js"></script>
     <script src="https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js"></script>
     <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js"></script>
@@ -646,6 +705,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
     <script src="js/word-engine.js"></script>
+    <script type="module" src="js/firebase-auth.js"></script>
 
 </body>
 

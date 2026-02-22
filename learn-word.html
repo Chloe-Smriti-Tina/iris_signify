@@ -344,12 +344,13 @@
             </a>
         </div>
 
-        <!-- Stage 2 — Eating & Ordering (LOCKED) -->
+        <!-- Stage 2 — Eating & Ordering (LOCKED until stage1_complete) -->
         <div class="stage-row">
-            <div class="stage-node locked">🍽️</div>
-            <div class="stage-card locked">
-                <div class="locked-badge"><i class="bi bi-lock-fill"></i> Complete Stage 1 to unlock</div>
-                <div class="stage-num">Stage 2 <span class="soon-tag">Coming Soon</span></div>
+            <div class="stage-node locked" id="stage2-node">🍽️</div>
+            <div class="stage-card locked" id="stage2-card">
+                <div class="locked-badge" id="stage2-badge"><i class="bi bi-lock-fill"></i> Complete Stage 1 to unlock
+                </div>
+                <div class="stage-num">Stage 2 <span class="soon-tag" id="stage2-soon">Coming Soon</span></div>
                 <div class="stage-title">Eating & Ordering</div>
                 <div class="stage-desc">Order food, ask for help, and navigate everyday situations with confidence.
                 </div>
@@ -362,7 +363,7 @@
                 </div>
                 <div class="stage-footer">
                     <span class="stage-meta">5 words · ~10 min · +150 XP each</span>
-                    <span class="stage-cta locked-cta"><i class="bi bi-lock-fill"></i> Locked</span>
+                    <span class="stage-cta locked-cta" id="stage2-cta"><i class="bi bi-lock-fill"></i> Locked</span>
                 </div>
             </div>
         </div>
@@ -415,6 +416,62 @@
 
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+
+    <!-- Firebase: unlock Stage 2 if stage1_complete -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const app = initializeApp({
+            apiKey: "AIzaSyCIm-UGhuGg9aNuK7nWdI2pZ6hLDFxxuis",
+            authDomain: "signify-5ec23.firebaseapp.com",
+            projectId: "signify-5ec23",
+            storageBucket: "signify-5ec23.firebasestorage.app",
+            messagingSenderId: "150947241043",
+            appId: "1:150947241043:web:f2fbb25737e9b7a02c7aa6"
+        });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async user => {
+            if (!user) return;
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (!snap.exists()) return;
+            if (snap.data().stage1_complete === true) unlockStage2();
+        });
+
+        function unlockStage2() {
+            const card = document.getElementById('stage2-card');
+            const node = document.getElementById('stage2-node');
+            const badge = document.getElementById('stage2-badge');
+            const cta = document.getElementById('stage2-cta');
+            const soon = document.getElementById('stage2-soon');
+
+            // Swap div → a so it's clickable
+            const a = document.createElement('a');
+            a.href = 'learn-word-eating.html';
+            a.className = 'stage-card unlocked';
+            a.id = 'stage2-card';
+            a.innerHTML = card.innerHTML;
+            card.replaceWith(a);
+
+            // Hide locked badge + soon tag
+            document.getElementById('stage2-badge').style.display = 'none';
+            document.getElementById('stage2-soon').style.display = 'none';
+
+            // Unlock node
+            node.classList.replace('locked', 'unlocked');
+
+            // Swap CTA
+            const newCta = document.getElementById('stage2-cta');
+            newCta.classList.remove('locked-cta');
+            newCta.innerHTML = 'Start <i class="bi bi-arrow-right"></i>';
+        }
+    </script>
+
+    <script type="module" src="js/firebase-auth.js"></script>
+
 </body>
 
 </html>

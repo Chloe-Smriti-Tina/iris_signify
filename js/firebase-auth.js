@@ -43,6 +43,16 @@ function buildAlphabetDocs() {
   }, {});
 }
 
+// ── Build default words subcollection entries ─────────────────
+
+function buildWordDocs() {
+  const words = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
+  return words.reduce((acc, word) => {
+    acc[word] = { learned: false };
+    return acc;
+  }, {});
+}
+
 // ── Create user document on sign-up ─────────────────────────
 
 async function createUserDocument(uid, email, displayName) {
@@ -57,13 +67,19 @@ async function createUserDocument(uid, email, displayName) {
     total_xp: 0,
     total_challenges_completed: 0,
     nextLetter: "A",
-    next_word_learn: "Hello",
+    stage1_complete: false,
   });
 
   // Alphabet subcollection — one document per letter
   const alphabetData = buildAlphabetDocs();
   for (const [letter, data] of Object.entries(alphabetData)) {
     await setDoc(doc(db, "users", uid, "alphabet", letter), data);
+  }
+
+  // Words subcollection — one document per word
+  const wordData = buildWordDocs();
+  for (const [word, data] of Object.entries(wordData)) {
+    await setDoc(doc(db, "users", uid, "words", word), data);
   }
 }
 

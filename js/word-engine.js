@@ -91,6 +91,20 @@ const WORD_XP = {
     'Yes': 100,
     'No': 100,
 };
+const WORD_IMAGES = {
+    'Hello': 'images/hello.png',
+    'Thank You': 'images/thankyou.png',
+    'I Love You': 'images/iloveyou.png',
+    'Yes': 'images/yes.png',
+    'No': 'images/no.png',
+};
+const WORD_IMAGES = {
+    'Hello': 'images/hello.png',
+    'Thank You': 'images/thankyou.png',
+    'I Love You': 'images/iloveyou.png',
+    'Yes': 'images/yes.png',
+    'No': 'images/no.png',
+};
 const WORDS = ['Hello', 'Thank You', 'I Love You', 'Yes', 'No'];
 const MATCH_NEEDED = 15;
 
@@ -110,6 +124,20 @@ const progressCount = document.getElementById('progressCount');
 const wordHighlight = document.getElementById('wordHighlight');
 const wordDesc = document.getElementById('wordDesc');
 const wordTip = document.getElementById('wordTip');
+const wordImage = document.getElementById('wordImage');
+const wordImgFallback = document.getElementById('wordImgFallback');
+
+function updateWordImage(word) {
+    const src = WORD_IMAGES[word];
+    if (wordImage) {
+        wordImage.src = src || '';
+        wordImage.style.display = src ? 'block' : 'none';
+    }
+    if (wordImgFallback) {
+        wordImgFallback.textContent = word[0];
+        wordImgFallback.style.display = src ? 'none' : 'flex';
+    }
+}
 
 // Sidebar
 const sbXp = document.getElementById('sb-xp');
@@ -137,13 +165,13 @@ let wordsCompleted = 0;
 // ── Build sidebar word list ───────────────────────────────────
 function buildWordList() {
     wordListEl.innerHTML = '';
-    const emojis = ['👋', '🙏', '❤️', '👍', '✌️'];
+    const images = ['images/hello.png', 'images/thankyou.png', 'images/iloveyou.png', 'images/yes.png', 'images/no.png'];
     WORDS.forEach((word, i) => {
         const div = document.createElement('div');
         div.className = 'word-item' + (i === currentWordIdx ? ' active' : i < currentWordIdx ? ' done' : '');
         div.id = `wi-${i}`;
         div.innerHTML = `
-            <div class="wi-icon">${emojis[i]}</div>
+            <div class="wi-icon"><img src="${images[i]}" style="width:20px;height:20px;object-fit:contain;"></div>
             <span>${word}</span>
             <i class="bi bi-check-circle-fill wi-check"></i>
         `;
@@ -168,7 +196,7 @@ function updateOverallProgress() {
 
 // ── Load ──────────────────────────────────────────────────────
 async function loadModels() {
-    enableBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading Model…';
+    enableBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading AI…';
     enableBtn.disabled = true;
     try {
         handposeModel = await handpose.load();
@@ -297,7 +325,6 @@ function advanceWord() {
     streaming = false;
     matchFrames = 0;
 
-    // Update XP + completed count
     const xpEarned = WORD_XP[currentWord] || 100;
     totalXP += xpEarned;
     wordsCompleted++;
@@ -305,43 +332,69 @@ function advanceWord() {
     updateOverallProgress();
     updateWordList();
 
+    // Save to Firebase (skips if already learned)
+    if (typeof window.onWordComplete === 'function') {
+        window.onWordComplete(currentWord, xpEarned);
+    }
+
     const isLast = currentWordIdx >= WORDS.length - 1;
 
-    // Show success overlay
-    successTitle.textContent = `Nice work! "${currentWord}" ✓`;
-    document.querySelector('.success-card .xp-tag').textContent = `+${xpEarned} XP`;
-    successSub.textContent = isLast
-        ? '🎉 You\'ve completed all Stage 1 words!'
-        : `Up next: "${WORDS[currentWordIdx + 1]}"`;
-    nextWordBtn.textContent = isLast ? 'Finish Stage →' : 'Next Word →';
-    successOverlay.classList.add('visible');
-
-    // Confetti!
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+    if (isLast) {
+        if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+        showStageComplete();
+    } else {
+        successTitle.textContent = `Nice work! "${currentWord}" ✓`;
+        document.querySelector('.success-card .xp-tag').textContent = `+${xpEarned} XP`;
+        successSub.textContent = `Up next: "${WORDS[currentWordIdx + 1]}"`;
+        nextWordBtn.textContent = 'Next Word →';
+        successOverlay.classList.add('visible');
+        if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
     }
+}
+
+// ── Stage completion popup ────────────────────────────────────
+function showStageComplete() {
+    const images = ['images/hello.png', 'images/thankyou.png', 'images/iloveyou.png', 'images/yes.png', 'images/no.png'];
+    const wordReview = WORDS.map((w, i) =>
+        `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+            <img src="${images[i]}" style="width:40px;height:40px;object-fit:contain;border-radius:6px;">
+            <span style="font-weight:700;color:#0f172a;">${w}</span>
+            <span style="margin-left:auto;color:#22c55e;font-weight:700;">✓ +${WORD_XP[w]} XP</span>
+        </div>`
+    ).join('');
+
+    const popup = document.createElement('div');
+    popup.id = 'stageCompleteOverlay';
+    popup.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);z-index:1000;display:flex;justify-content:center;align-items:center;';
+    popup.innerHTML = `
+        <div style="background:#fff;border-radius:24px;padding:40px;max-width:460px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.2);">
+            <span style="font-size:3.5rem;display:block;margin-bottom:12px;">🎉</span>
+            <h2 style="font-size:1.8rem;font-weight:900;color:#0f172a;margin-bottom:6px;">Stage 1 Complete!</h2>
+            <p style="color:#64748b;margin-bottom:20px;">You learned all 5 everyday words. Here's your recap:</p>
+            <div style="text-align:left;margin-bottom:20px;">${wordReview}</div>
+            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:14px 20px;margin-bottom:24px;">
+                <p style="margin:0;font-weight:700;color:#16a34a;font-size:1rem;">🔓 Stage 2 Unlocked — Eating & Ordering!</p>
+            </div>
+            <button id="stageCompleteBtn" style="width:100%;padding:14px;background:#6d8bfa;border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Go to Word Stages →</button>
+        </div>`;
+    document.body.appendChild(popup);
+    document.getElementById('stageCompleteBtn').addEventListener('click', () => {
+        window.location.href = 'learn-word.html';
+    });
 }
 
 // ── Next word button ──────────────────────────────────────────
 nextWordBtn.addEventListener('click', () => {
     successOverlay.classList.remove('visible');
 
-    const isLast = currentWordIdx >= WORDS.length - 1;
-    if (isLast) {
-        // All done — redirect to stages page
-        window.location.href = 'learn-word.html';
-        return;
-    }
-
     currentWordIdx++;
     currentWord = WORDS[currentWordIdx];
 
-    // Update hero card
     wordHighlight.textContent = `"${currentWord}"`;
     wordDesc.textContent = WORD_INSTRUCTIONS[currentWord];
     wordTip.innerHTML = `<i class="bi bi-lightbulb"></i> ${WORD_TIPS[currentWord]}`;
+    updateWordImage(currentWord);
 
-    // Reset hold bar
     progressBar.style.width = '0%';
     progressBar.className = 'hold-fill';
     holdLabel.textContent = 'Make the sign!';
@@ -349,10 +402,10 @@ nextWordBtn.addEventListener('click', () => {
     confidenceEl.textContent = '—';
 
     updateWordList();
-
     streaming = true;
     detectLoop();
 });
+
 
 // ── Button ────────────────────────────────────────────────────
 enableBtn.addEventListener('click', async () => {
@@ -365,4 +418,5 @@ enableBtn.addEventListener('click', async () => {
 // ── Init ──────────────────────────────────────────────────────
 buildWordList();
 updateOverallProgress();
+updateWordImage(WORDS[0]);
 loadModels();
